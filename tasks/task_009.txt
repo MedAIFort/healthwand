@@ -1,49 +1,49 @@
 # Task ID: 9
-# Title: Implement extensibility for custom detection pipelines
+# Title: Create compliance reporting module
 # Status: pending
-# Dependencies: 3, 8
+# Dependencies: 5, 6, 7
 # Priority: low
-# Description: Create a plugin system that allows users to define and integrate custom detection methods
+# Description: Develop a reporting system for HIPAA/GDPR compliance audits
 # Details:
-Design a plugin architecture for custom detectors. Implement trait definitions for detector plugins. Create a plugin registry and loading mechanism. Add configuration options for enabling/disabling plugins. Implement example plugins for common use cases. Document the plugin API for third-party developers. Ensure backward compatibility with existing configuration files.
+Design a structured report format for compliance documentation. Implement audit logging of all detection and redaction activities. Create exportable reports in PDF and CSV formats. Add timestamp and user tracking for all operations. Implement report aggregation across multiple scans. Create visualization of PHI detection patterns and hotspots. Support for custom compliance templates based on different regulations (HIPAA, GDPR, etc.).
 
 # Test Strategy:
-Develop test plugins to verify the extensibility system. Validate that plugins can be enabled/disabled via configuration. Test plugin loading from external files.
+Verify report accuracy against known PHI in test data. Test report generation with large datasets. Validate compliance with sample audit requirements.
 
 # Subtasks:
-## 1. Define detector plugin trait interfaces [pending]
+## 1. Implement comprehensive audit logging system [pending]
 ### Dependencies: None
-### Description: Create the core trait definitions that all detector plugins must implement to be compatible with the system
+### Description: Create a robust logging mechanism that captures all detection and redaction activities with timestamps and user tracking
 ### Details:
-Define a `DetectorPlugin` trait with required methods like `detect()`, `name()`, `version()`, and `configure()`. Include associated types and structures for detection results and configuration options. Ensure the trait is well-documented with examples. Consider error handling, performance characteristics, and thread safety requirements. The trait should be flexible enough to accommodate various detection approaches while maintaining a consistent interface.
+Develop a centralized logging service that intercepts and records all PHI detection and redaction operations. Each log entry should include: timestamp, user ID, action type (detection/redaction), data source, PHI type identified, action result, and system metadata. Implement proper indexing for efficient querying and ensure logs are tamper-proof. Use a structured format (JSON) for log storage to facilitate later reporting.
 
-## 2. Implement plugin registry and discovery mechanism [pending]
+## 2. Design structured compliance report formats [pending]
 ### Dependencies: 9.1
-### Description: Create a central registry that can discover, load, and manage detector plugins
+### Description: Create standardized report templates for different compliance regulations (HIPAA, GDPR, etc.)
 ### Details:
-Develop a `PluginRegistry` that maintains a collection of available plugins. Implement dynamic loading capabilities using dynamic libraries (.dll/.so files) or a simpler approach with static registration. Add methods for plugin registration, discovery, and retrieval. Include a plugin validation mechanism to ensure plugins meet the required interface. Implement a caching strategy to avoid repeated loading. Consider thread safety for concurrent access to the registry.
+Design a flexible report schema that can accommodate different regulatory requirements. Create base templates for HIPAA and GDPR compliance, with configurable sections for summary statistics, detailed findings, remediation status, and attestation information. Implement a template engine that allows for custom template creation. Each template should define required data points, validation rules, and presentation format. Store templates in a database with versioning support.
 
-## 3. Add configuration system for plugins [pending]
+## 3. Develop report generation engine [pending]
 ### Dependencies: 9.1, 9.2
-### Description: Extend the existing configuration system to support enabling, disabling, and configuring plugins
+### Description: Build the core functionality to generate compliance reports from audit logs based on selected templates
 ### Details:
-Modify the configuration file format to include a `plugins` section with enable/disable flags and plugin-specific configuration. Implement configuration parsing and validation for plugin settings. Create a mechanism to pass configuration to plugins during initialization. Ensure backward compatibility by making plugin configurations optional. Add documentation for the new configuration options. Include validation to prevent configuration errors.
+Implement a report generation service that queries the audit logs, processes the data according to template specifications, and produces structured report objects. Include functionality for filtering by date range, user, data source, and compliance type. Implement data aggregation functions to summarize detection patterns across multiple scans. Ensure the engine handles large datasets efficiently through pagination and background processing for extensive reports.
 
-## 4. Integrate plugins with the detection pipeline [pending]
-### Dependencies: 9.2, 9.3
-### Description: Modify the main detection pipeline to utilize registered plugins during detection operations
+## 4. Create export functionality for PDF and CSV formats [pending]
+### Dependencies: 9.3
+### Description: Implement export capabilities to generate downloadable reports in PDF and CSV formats
 ### Details:
-Update the detection pipeline to query the plugin registry for available detectors. Implement logic to run detection through both built-in and plugin-based detectors. Add prioritization mechanism to control the order of detector execution. Implement result aggregation from multiple detectors. Add performance monitoring for plugin execution. Ensure error handling so that plugin failures don't crash the entire pipeline.
+Develop export adapters for PDF and CSV output formats. For PDF exports, use a PDF generation library to create professional-looking reports with proper formatting, headers/footers, pagination, and the ability to embed charts. For CSV exports, implement proper data structuring and escaping. Both export types should include metadata headers with report generation information. Implement a queuing system for handling large export requests asynchronously.
 
-## 5. Develop example detector plugins [pending]
-### Dependencies: 9.1, 9.4
-### Description: Create several example plugins that demonstrate different detection approaches and plugin capabilities
+## 5. Implement data visualization for PHI detection patterns [pending]
+### Dependencies: 9.3
+### Description: Create interactive visualizations showing PHI detection patterns and compliance hotspots
 ### Details:
-Implement at least three example plugins: a simple pattern-based detector, a machine learning-based detector, and a network-based detector. Each example should demonstrate proper implementation of the plugin trait, configuration handling, and effective detection techniques. Include comprehensive comments explaining implementation decisions. Structure the examples as separate modules that can be used as templates by third-party developers. Ensure the examples cover common use cases.
+Develop data visualization components that illustrate PHI detection patterns and compliance issues. Include heat maps showing concentration of PHI across data sources, trend charts showing detection rates over time, and breakdown charts by PHI type and severity. Implement interactive features allowing users to drill down into specific areas of concern. Ensure visualizations are embeddable in reports and accessible through the reporting dashboard. Use a JavaScript visualization library that supports both interactive web views and static exports for PDF reports.
 
-## 6. Create comprehensive plugin development documentation [pending]
-### Dependencies: 9.1, 9.2, 9.3, 9.4, 9.5
-### Description: Write detailed documentation for third-party developers on how to create and integrate custom detector plugins
+## 6. Build report aggregation and management interface [pending]
+### Dependencies: 9.3, 9.4, 9.5
+### Description: Create a user interface for managing, viewing, and aggregating compliance reports across multiple scans
 ### Details:
-Produce a plugin development guide covering: plugin interface requirements, lifecycle management, configuration handling, best practices, and deployment instructions. Include step-by-step tutorials for creating basic plugins. Document the plugin discovery process and requirements for plugin distribution. Add API reference documentation with examples. Create troubleshooting guides for common issues. Include performance considerations and security guidelines. Provide templates and starter code that developers can use as a foundation.
+Develop a comprehensive reporting dashboard that allows users to view, search, filter, and aggregate reports. Implement functionality to combine data from multiple scans into consolidated reports. Include features for scheduling recurring reports, setting up automated exports, and distributing reports to stakeholders. Add administrative controls for managing report access permissions and retention policies. Implement a notification system to alert users about new reports or compliance issues requiring attention.
 

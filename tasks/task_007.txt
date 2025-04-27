@@ -1,49 +1,49 @@
 # Task ID: 7
-# Title: Build RESTful API server with Actix Web
+# Title: Develop FastAPI/Uvicorn API server
 # Status: pending
-# Dependencies: 3
+# Dependencies: 4
 # Priority: medium
-# Description: Implement an API server that provides PHI detection capabilities via HTTP endpoints
+# Description: Create a REST API server for real-time PHI detection and redaction
 # Details:
-Set up Actix Web framework with basic server configuration. Create RESTful endpoints for PHI detection in text. Implement request/response models for the API. Add authentication mechanism (API keys). Implement rate limiting for API requests. Create Swagger/OpenAPI documentation. Reuse the core detection logic from the CLI implementation. Add health check and metrics endpoints.
+Set up a FastAPI project with proper structure. Design RESTful endpoints for PHI detection and redaction. Implement request validation and error handling. Create Swagger/OpenAPI documentation. Implement authentication and rate limiting. Design asynchronous processing for large files. Create Docker deployment configuration. Implement health checks and monitoring endpoints. Support both synchronous and asynchronous processing modes.
 
 # Test Strategy:
-Write integration tests for API endpoints. Test authentication and rate limiting. Perform load testing to ensure server stability under high traffic.
+Write API tests using pytest. Test performance under load. Verify correct handling of concurrent requests. Test authentication and authorization mechanisms.
 
 # Subtasks:
-## 1. Set up Actix Web server with basic configuration [pending]
+## 1. Set up FastAPI project structure with basic configuration [pending]
 ### Dependencies: None
-### Description: Initialize the Actix Web framework with basic server configuration including routing, middleware structure, and error handling
+### Description: Create the initial FastAPI project structure with proper organization of routes, models, and services
 ### Details:
-Create a new Rust project with Actix Web dependencies. Implement the server configuration with appropriate logging, CORS settings, and JSON serialization/deserialization support. Set up the basic application structure with modular components. Configure the server to run on a configurable port with proper shutdown handling. Implement global error handling middleware that returns appropriate HTTP status codes and error messages.
+Create a project structure with directories for routes, models, services, and utilities. Set up the main.py file with FastAPI initialization. Configure CORS, logging, and basic error handling. Create a configuration system using environment variables. Set up dependency injection framework. Implement basic health check endpoint. Create initial requirements.txt with necessary dependencies.
 
-## 2. Integrate PHI detection core logic [pending]
+## 2. Design and implement core PHI detection/redaction endpoints [pending]
 ### Dependencies: 7.1
-### Description: Adapt and integrate the existing PHI detection logic from the CLI implementation into the API server
+### Description: Create the primary REST endpoints for PHI detection and redaction functionality
 ### Details:
-Import the core PHI detection modules from the CLI implementation. Create service abstractions that wrap the detection logic for use in API endpoints. Ensure the detection logic is properly initialized at server startup. Implement appropriate error handling for the detection logic. Consider performance optimizations for the server context, such as pooling resources or caching detection patterns.
+Implement POST /api/v1/detect endpoint for PHI detection in text. Create POST /api/v1/redact endpoint for PHI redaction in text. Design request/response Pydantic models for validation. Implement proper error handling with custom exception classes. Create service layer to separate business logic from route handlers. Add unit tests for endpoint functionality. Document endpoints with appropriate FastAPI annotations.
 
-## 3. Implement RESTful API endpoints with request/response models [pending]
-### Dependencies: 7.1, 7.2
-### Description: Design and implement the API endpoints with proper request validation and response formatting
+## 3. Implement authentication and security features [pending]
+### Dependencies: 7.2
+### Description: Add authentication, authorization, and rate limiting to protect API endpoints
 ### Details:
-Define request and response data models using serde for serialization. Implement the main PHI detection endpoint that accepts text input and returns detection results. Add input validation for all endpoints. Create additional utility endpoints as needed (e.g., for getting supported PHI types). Ensure all endpoints follow RESTful principles with appropriate HTTP methods and status codes. Implement pagination for endpoints that might return large result sets.
+Implement API key authentication using FastAPI security dependencies. Create middleware for rate limiting based on client IP or API key. Add request logging for security auditing. Implement role-based access control for different endpoint permissions. Create user/API key management endpoints. Add input sanitization to prevent injection attacks. Configure HTTPS/TLS settings. Implement proper security headers.
 
-## 4. Add authentication and rate limiting [pending]
-### Dependencies: 7.1, 7.3
-### Description: Implement API key authentication and rate limiting middleware for API security
+## 4. Develop asynchronous processing capabilities [pending]
+### Dependencies: 7.2
+### Description: Create asynchronous processing flow for handling large documents and files
 ### Details:
-Create an API key authentication middleware that validates requests against configured keys. Implement storage for API keys (in-memory for development, database or external service for production). Add rate limiting middleware that restricts requests based on client IP and/or API key. Configure different rate limits for different endpoints or client tiers. Implement appropriate HTTP responses for authentication and rate limiting errors (401, 429). Add logging for security events.
+Implement background task processing using FastAPI background tasks. Create POST /api/v1/process/async endpoint for submitting async jobs. Implement GET /api/v1/process/status/{job_id} for checking job status. Design job queue system with Redis or similar technology. Create worker processes for handling async jobs. Implement file upload capabilities for processing documents. Add job result storage and retrieval mechanism. Create job cancellation endpoint.
 
-## 5. Create health check and metrics endpoints [pending]
-### Dependencies: 7.1
-### Description: Implement operational endpoints for monitoring server health and performance
+## 5. Create comprehensive API documentation [pending]
+### Dependencies: 7.2, 7.3, 7.4
+### Description: Generate detailed API documentation with examples and usage instructions
 ### Details:
-Create a /health endpoint that reports on system status and dependencies. Implement a /metrics endpoint that exposes performance metrics (request counts, latencies, error rates). Add instrumentation throughout the application code to collect metrics. Consider integration with monitoring systems like Prometheus. Implement deeper health checks that verify the PHI detection system is functioning correctly. Add version information to the health endpoint.
+Configure Swagger/OpenAPI documentation with detailed descriptions. Add example requests and responses for all endpoints. Create custom documentation pages for complex workflows. Add authentication documentation with examples. Document error codes and handling. Create Markdown documentation for API usage. Add code samples in multiple languages. Implement ReDoc alternative documentation view.
 
-## 6. Generate Swagger/OpenAPI documentation [pending]
-### Dependencies: 7.3, 7.4, 7.5
-### Description: Create comprehensive API documentation using OpenAPI specification
+## 6. Implement deployment configuration and monitoring [pending]
+### Dependencies: 7.3, 7.4
+### Description: Create Docker deployment setup and monitoring endpoints for production use
 ### Details:
-Integrate a Swagger/OpenAPI documentation generator with Actix Web (e.g., utoipa). Document all endpoints, request/response models, authentication requirements, and error responses. Include example requests and responses. Add descriptions for all fields and endpoints. Configure the Swagger UI for interactive API exploration. Ensure documentation is automatically updated when the API changes. Add a documentation endpoint that serves the OpenAPI specification and UI.
+Create Dockerfile for containerized deployment. Implement docker-compose.yml for local development. Add Kubernetes deployment manifests if needed. Create comprehensive health check endpoints with dependency status. Implement metrics endpoints for Prometheus integration. Add logging configuration for production. Create environment-specific configuration files. Implement graceful shutdown handling. Add load testing scripts to verify performance.
 

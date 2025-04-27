@@ -1,43 +1,43 @@
 # Task ID: 5
-# Title: Implement PHI redaction and anonymization
+# Title: Implement structured data scanning (JSON, CSV)
 # Status: pending
-# Dependencies: 3
+# Dependencies: 4
 # Priority: medium
-# Description: Add capabilities to redact or anonymize detected PHI in files
+# Description: Extend the CLI to scan structured data formats like JSON and CSV for PHI
 # Details:
-Implement redaction strategies (replacement with asterisks, removal, etc.). Create anonymization logic that replaces PHI with realistic but fake data. Add in-place file modification option with backup creation. Implement different redaction modes based on PHI type. Add command-line options to control redaction behavior. Ensure atomic file operations to prevent data corruption.
+Implement parsers for JSON and CSV formats. Create path-based scanning for JSON documents (e.g., using JSONPath). Develop column-aware scanning for CSV files. Add configuration options for specifying which fields/columns to scan or ignore. Implement smart detection of FHIR resources and fields. Support scanning of nested structures. Preserve structure in redacted output files.
 
 # Test Strategy:
-Test redaction on sample files and verify PHI is properly masked. Validate file backup functionality. Check that anonymized data maintains the format of the original PHI.
+Test with sample healthcare data in JSON and CSV formats. Verify correct handling of nested structures. Test with malformed input files to ensure robust error handling.
 
 # Subtasks:
-## 1. Design and implement core redaction strategies [pending]
+## 1. Implement basic JSON and CSV parsers [pending]
 ### Dependencies: None
-### Description: Create the fundamental redaction methods that will be applied to detected PHI
+### Description: Create parsers for JSON and CSV formats that can load files and provide access to their content for scanning
 ### Details:
-Implement a RedactionStrategy interface/abstract class with methods for redacting text. Create concrete implementations for common strategies: (1) AsteriskRedaction - replace characters with asterisks while preserving length, (2) RemovalRedaction - completely remove the PHI, (3) PlaceholderRedaction - replace with a generic placeholder like [REDACTED]. Each strategy should take PHI text and return the redacted version. Include unit tests to verify each strategy works correctly with different PHI types.
+Implement parser classes for JSON and CSV files using standard libraries (e.g., Python's json and csv modules). The parsers should handle file loading, basic validation, and provide a consistent interface for accessing the parsed data. Include error handling for malformed files and large file support through streaming/chunking where appropriate. The implementation should return the parsed data in a format that can be easily traversed for PHI scanning in subsequent steps.
 
-## 2. Develop PHI anonymization engine [pending]
+## 2. Develop path-based scanning for JSON documents [pending]
 ### Dependencies: 5.1
-### Description: Create a system to replace PHI with realistic but fake data while maintaining data consistency
+### Description: Create a mechanism to scan JSON documents using path expressions to target specific fields
 ### Details:
-Implement an AnonymizationEngine class that generates realistic fake data for different PHI types (names, addresses, phone numbers, etc.). Use libraries like Faker if available. Ensure consistency so the same PHI value is always replaced with the same fake value within a document. Create a mapping store to track replacements. Implement PHI type detection to apply appropriate anonymization (e.g., dates replaced with fake dates, not names). Add configuration options for anonymization behavior. Include comprehensive unit tests.
+Implement JSONPath or similar path-based query functionality to navigate JSON structures. Create a scanner that can traverse JSON documents and apply PHI detection to specific paths. The implementation should support wildcards and recursive descent to handle varying document structures. Include functionality to extract values at specified paths for PHI scanning while maintaining references to their original locations in the document structure.
 
-## 3. Implement safe file modification with backup system [pending]
+## 3. Implement column-aware scanning for CSV files [pending]
 ### Dependencies: 5.1
-### Description: Create a system for safely modifying files with PHI while preserving the original content
+### Description: Create a scanner that understands CSV column structure and can selectively scan specific columns
 ### Details:
-Develop a FileProcessor class that handles reading, modifying, and writing files. Implement a backup system that creates a copy of the original file before modification (with configurable backup location). Use atomic file operations (write to temporary file, then rename) to prevent data corruption if the process is interrupted. Add recovery mechanisms to restore from backup if an error occurs. Implement progress tracking for large files. Include extensive error handling and logging. Write unit and integration tests to verify file operations work correctly and safely.
+Extend the CSV parser to be column-aware, allowing scanning to target specific columns by name or index. Implement handling for CSV files both with and without headers. Create configuration options to specify which columns should be scanned or ignored. The scanner should process each row while maintaining column context, allowing for targeted PHI detection and redaction that preserves the tabular structure of the data.
 
-## 4. Create PHI-type specific redaction mode selector [pending]
-### Dependencies: 5.1, 5.2
-### Description: Implement a system to apply different redaction strategies based on PHI type and context
+## 4. Add configuration options for field/column selection and FHIR detection [pending]
+### Dependencies: 5.2, 5.3
+### Description: Implement configuration mechanisms to specify which fields or columns to scan and add smart detection for FHIR resources
 ### Details:
-Develop a RedactionModeSelector that determines the appropriate redaction strategy based on PHI type, sensitivity, and context. Implement configuration options to specify default strategies for each PHI type (e.g., names use anonymization, medical record numbers use asterisk redaction). Create a rule-based system to handle special cases and exceptions. Integrate with the existing PHI detection system to receive type information. Include a fallback strategy for unknown PHI types. Add unit tests to verify the selector chooses appropriate strategies for different scenarios.
+Create a configuration system that allows users to specify inclusion/exclusion patterns for JSON paths and CSV columns. Implement FHIR resource detection to automatically identify common PHI-containing fields in FHIR resources (like Patient, Practitioner, etc.). The configuration should support both command-line arguments and configuration files. Include validation logic to ensure configurations are valid and provide helpful error messages for misconfiguration.
 
-## 5. Add command-line interface and configuration options [pending]
-### Dependencies: 5.1, 5.2, 5.3, 5.4
-### Description: Implement user-facing controls for the redaction and anonymization system
+## 5. Implement structure-preserving redaction for JSON and CSV [pending]
+### Dependencies: 5.2, 5.3, 5.4
+### Description: Create functionality to redact PHI while preserving the original structure of JSON and CSV files
 ### Details:
-Extend the command-line interface to include options for controlling redaction behavior: --redaction-mode (redact/anonymize/both), --backup-dir (path for backups), --strategy-map (JSON mapping PHI types to strategies), --in-place (boolean for modifying original files), --dry-run (preview changes without modifying files). Implement configuration file support to store default settings. Add detailed help documentation for each option. Create validation for user inputs. Implement reporting of redaction statistics (counts by PHI type, files modified, etc.). Test the CLI with various option combinations to ensure correct behavior.
+Develop redaction mechanisms that replace PHI with appropriate placeholders while maintaining the original JSON or CSV structure. For JSON, ensure nested structures are preserved after redaction. For CSV, maintain column alignment and row structure. Implement options for different redaction styles (e.g., complete removal, replacement with fixed strings, or replacement with type-appropriate placeholders). Add functionality to write the redacted data back to files in the original format with preserved structure.
 

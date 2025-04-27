@@ -2,609 +2,613 @@
   "tasks": [
     {
       "id": 1,
-      "title": "Set up Rust project structure and CLI foundation",
-      "description": "Initialize the Rust project with necessary dependencies and create the basic CLI structure for HealthWand",
+      "title": "Set up Rust CLI foundation with basic PHI detection",
+      "description": "Create the core Rust CLI application with basic pattern matching for common PHI types (SSNs, Medical IDs, etc.)",
       "status": "pending",
       "dependencies": [],
       "priority": "high",
-      "details": "Create a new Rust project using cargo. Set up the project structure with modules for CLI, analyzer, and configuration. Add dependencies for CLI argument parsing (clap), YAML parsing (serde_yaml), and JSON output (serde_json). Implement basic CLI entry point with command-line argument parsing for input files/directories and output format options. Create a simple help menu and version information.",
-      "testStrategy": "Write unit tests for CLI argument parsing. Manually test the CLI with --help and --version flags to ensure proper output.",
+      "details": "Initialize a new Rust project with Cargo. Implement command-line argument parsing using clap or structopt. Create pattern matchers for basic PHI types (SSNs, Medical IDs, ICD-10 codes) using regex. Implement file traversal to scan text files. Design a simple JSON output format for detection results. Include basic redaction functionality that replaces detected PHI with placeholders (e.g., 'XXX-XX-XXXX' for SSNs). Ensure proper error handling and logging.",
+      "testStrategy": "Write unit tests for each pattern matcher. Create integration tests with sample files containing mock PHI data. Measure performance on large files to establish baseline metrics.",
       "subtasks": [
         {
           "id": 1,
-          "title": "Initialize Rust project with cargo and add dependencies",
-          "description": "Create a new Rust project for HealthWand using cargo and add the required dependencies for CLI parsing, YAML processing, and JSON output.",
+          "title": "Initialize Rust project and implement CLI argument parsing",
+          "description": "Set up the initial Rust project structure and implement command-line argument parsing",
           "status": "pending",
           "dependencies": [],
-          "details": "Run `cargo new healthwand --bin` to create a new binary project. Update Cargo.toml to add dependencies: clap (with features 'derive') for CLI argument parsing, serde and serde_yaml for YAML configuration handling, and serde_json for JSON output formatting. Also add appropriate version constraints for each dependency. Initialize git repository if not automatically done by cargo."
+          "details": "Create a new Rust project using `cargo new phi-detector --bin`. Set up the project structure with appropriate modules. Implement CLI argument parsing using clap (v3+) with the following options: input file/directory path, output format options, redaction toggle, and verbosity level. Create a configuration struct to hold parsed arguments. Write unit tests for argument parsing. Update Cargo.toml with necessary dependencies including clap with derive features."
         },
         {
           "id": 2,
-          "title": "Design and implement module structure",
-          "description": "Create the foundational module structure for the project, setting up the main components that will be developed further.",
+          "title": "Implement file traversal and reading functionality",
+          "description": "Create modules to traverse directories and read file contents for scanning",
           "status": "pending",
           "dependencies": [
             1
           ],
-          "details": "Create the following module structure: 1) src/main.rs - Entry point that calls the CLI module, 2) src/cli/mod.rs - CLI handling logic, 3) src/analyzer/mod.rs - Stub for future analysis functionality, 4) src/config/mod.rs - Configuration handling. Each module should have appropriate public interfaces and documentation comments. Ensure proper visibility modifiers (pub, pub(crate)) for module items."
+          "details": "Create a file handling module that can: recursively traverse directories if specified, filter for text-based files (.txt, .md, .csv, etc.), read file contents efficiently (using buffered reading for large files), and handle file system errors gracefully. Implement a FileSource trait/interface that can be extended later for different input sources. Add proper error types and propagation. Write unit tests for file traversal and reading functionality using test fixtures."
         },
         {
           "id": 3,
-          "title": "Implement CLI argument parsing with clap",
-          "description": "Create the command-line interface structure using clap to handle various input options and commands.",
+          "title": "Develop regex patterns for basic PHI detection",
+          "description": "Create a pattern matching module with regex definitions for common PHI types",
           "status": "pending",
           "dependencies": [
-            2
+            1
           ],
-          "details": "In the cli module, use clap's derive feature to define a struct representing CLI arguments. Include options for: input files/directories (--input, -i), output format (--format, -f) with choices like 'json', 'yaml', 'text', verbosity level (--verbose, -v), and any other basic options. Implement a function that parses command line arguments and returns the populated struct. Document each option with helpful descriptions that will appear in the help text."
+          "details": "Create a dedicated module for PHI pattern definitions. Implement regex patterns for: SSNs (format: XXX-XX-XXXX), Medical Record Numbers (various formats), ICD-10 codes (letter followed by 2 digits, optional decimal and more digits), and basic date of birth patterns. Use the regex crate with compiled regex patterns for performance. Create a PHIType enum to categorize different types of detected PHI. Implement unit tests for each pattern with both matching and non-matching examples."
         },
         {
           "id": 4,
-          "title": "Create help menu and version information",
-          "description": "Enhance the CLI with comprehensive help documentation and version information.",
+          "title": "Implement PHI scanning and detection engine",
+          "description": "Create the core scanning logic that applies regex patterns to file contents",
           "status": "pending",
           "dependencies": [
+            2,
             3
           ],
-          "details": "Configure clap to display detailed help information for all commands and options. Add examples of common usage patterns to the help text. Implement version information that includes the current version from Cargo.toml. Create a custom help formatter that organizes options into logical groups. Test the help menu by running the application with --help and -h flags."
+          "details": "Develop a Scanner struct that takes file content and applies all PHI detection patterns. For each match, record the match text, position, PHI type, and confidence level. Implement context extraction to capture surrounding text for verification. Create a Detection struct to hold match details. Optimize for performance by using appropriate regex options and processing strategies. Add unit and integration tests with sample text containing various PHI patterns."
         },
         {
           "id": 5,
-          "title": "Implement basic CLI execution flow",
-          "description": "Connect the CLI argument parsing to a basic execution flow that will serve as the foundation for future functionality.",
+          "title": "Implement redaction functionality",
+          "description": "Create a module to redact or mask detected PHI in the original text",
           "status": "pending",
           "dependencies": [
-            3,
             4
           ],
-          "details": "In main.rs, implement the program flow: 1) Parse CLI arguments, 2) Validate inputs, 3) Set up logging based on verbosity, 4) Create placeholder for calling the analyzer (to be implemented later), 5) Add basic output formatting based on the selected format option. Include appropriate error handling for invalid inputs. The program should successfully run and exit with appropriate status codes, even though the analyzer functionality will be implemented in future tasks."
+          "details": "Implement a Redactor struct that takes Detection objects and original text to produce redacted output. Create different redaction strategies: full replacement (e.g., 'XXX-XX-XXXX' for SSNs), partial masking (e.g., showing only last 4 digits), and placeholder substitution (e.g., '[REDACTED-SSN]'). Ensure redaction preserves text layout and length where appropriate. Handle overlapping matches correctly. Add configuration options to control redaction behavior. Write tests to verify redaction correctness with various PHI types."
+        },
+        {
+          "id": 6,
+          "title": "Implement results output formatting and logging",
+          "description": "Create output formatting for detection results and add proper error handling and logging",
+          "status": "pending",
+          "dependencies": [
+            4,
+            5
+          ],
+          "details": "Design and implement a JSON output format for detection results including file path, PHI type, location, and context. Add an optional redacted content field in the output. Implement pretty-printing for console output. Add structured logging using the log crate with different verbosity levels. Implement proper error handling throughout the application with custom error types and helpful error messages. Create a results summary with statistics. Write integration tests that verify the entire pipeline from input to output. Add documentation for the output format."
         }
       ]
     },
     {
       "id": 2,
-      "title": "Implement YAML configuration loading",
-      "description": "Create the configuration system that loads and validates user-defined PHI detection patterns from YAML files",
+      "title": "Implement YAML configuration system",
+      "description": "Create a YAML-based configuration system for defining custom PHI patterns and detection rules",
       "status": "pending",
       "dependencies": [
         1
       ],
       "priority": "high",
-      "details": "Design and implement the configuration data structures to represent PHI patterns. Create a configuration loader that reads YAML files and deserializes them into the configuration model. Implement validation logic to ensure configuration correctness. Include default patterns for common PHI types (SSNs, medical IDs, etc.). Add support for custom pattern definitions with regex patterns, descriptions, and severity levels.",
-      "testStrategy": "Write unit tests with sample YAML configurations. Test error handling with malformed YAML files. Verify default patterns are loaded correctly when no config is provided.",
+      "details": "Design a YAML schema for defining PHI patterns, including regex patterns, context rules, and redaction templates. Implement YAML parsing in Rust using serde. Create a configuration loader that validates and processes the YAML files. Support hierarchical configuration with defaults and overrides. Include documentation templates and examples for common PHI types. Implement hot-reloading of configuration files for development workflows.",
+      "testStrategy": "Create test cases with various configuration scenarios. Validate that custom patterns are correctly loaded and applied. Test error handling for malformed configurations.",
       "subtasks": [
         {
           "id": 1,
-          "title": "Define configuration data structures",
-          "description": "Create the core data models to represent PHI detection patterns and configuration settings",
+          "title": "Design YAML schema for PHI patterns",
+          "description": "Create a comprehensive YAML schema that defines the structure for PHI pattern configurations",
           "status": "pending",
           "dependencies": [],
-          "details": "Implement classes/structs to represent: 1) PHI pattern with properties for regex pattern, description, severity level, and category; 2) Configuration container class to hold collections of patterns; 3) Enums for severity levels and pattern categories. Include proper documentation and type hints. These models should be designed to map directly to the expected YAML structure while providing a clean API for the rest of the application."
+          "details": "Design a schema that includes: (1) Pattern definitions with regex support, (2) Context rules for determining when patterns apply, (3) Confidence scoring mechanisms, (4) Redaction templates and strategies, (5) Metadata fields for pattern documentation. Create JSON Schema validation rules to ensure configuration correctness. Include examples for common PHI types like names, addresses, medical record numbers, etc. The schema should be extensible for future pattern types while maintaining backward compatibility."
         },
         {
           "id": 2,
-          "title": "Implement YAML parser and deserializer",
-          "description": "Create functionality to read YAML files and convert them to configuration objects",
+          "title": "Implement YAML parsing with serde",
+          "description": "Develop Rust code to parse and deserialize YAML configuration files using serde",
           "status": "pending",
           "dependencies": [
             1
           ],
-          "details": "Implement a parser that: 1) Reads YAML files from a specified path; 2) Handles basic YAML parsing errors; 3) Deserializes the YAML content into the configuration data structures created in subtask 1. Use a standard YAML library appropriate for your language. Include error handling for file not found, permission issues, and malformed YAML. The parser should return either valid configuration objects or meaningful error messages."
+          "details": "Create Rust structs that mirror the YAML schema design. Implement serde derive macros for serialization/deserialization. Add custom validators for complex fields like regex patterns. Implement error handling with descriptive messages for configuration issues. Create unit tests with sample configurations to verify parsing correctness. Ensure performance optimization for large configuration files by using appropriate serde features. Document the mapping between YAML fields and Rust structs."
         },
         {
           "id": 3,
-          "title": "Add configuration validation logic",
-          "description": "Implement validation to ensure loaded configurations meet all requirements",
+          "title": "Build hierarchical configuration system",
+          "description": "Create a configuration management system that supports defaults, overrides, and inheritance",
           "status": "pending",
           "dependencies": [
-            1,
             2
           ],
-          "details": "Create a validation system that checks: 1) Required fields are present; 2) Regex patterns are valid and compile correctly; 3) Severity levels are within allowed values; 4) No duplicate pattern identifiers exist; 5) References between configuration elements are valid. Implement a validation result object that collects all validation errors rather than failing on the first error. Add unit tests to verify validation logic works correctly for both valid and invalid configurations."
+          "details": "Implement a configuration loader that merges multiple YAML files in a defined precedence order. Support default configurations that can be overridden by environment-specific settings. Create a mechanism for pattern inheritance where specific patterns can extend base patterns. Implement configuration validation to ensure merged configurations remain valid. Add support for environment variable substitution within configuration files. Create helper methods to access nested configuration properties with proper error handling. Document the configuration resolution process for users."
         },
         {
           "id": 4,
-          "title": "Create default PHI pattern library",
-          "description": "Implement a set of default patterns for common PHI types",
+          "title": "Implement hot-reloading for configuration files",
+          "description": "Add capability to detect and reload configuration changes without application restart",
           "status": "pending",
           "dependencies": [
-            1
+            3
           ],
-          "details": "Create a library of default patterns covering: 1) Social Security Numbers (various formats); 2) Medical record numbers; 3) Phone numbers; 4) Email addresses; 5) Names and addresses; 6) Dates of birth; 7) Other common healthcare identifiers. Each pattern should include a well-tested regex, clear description, appropriate severity level, and category. Package these as either a default YAML file or programmatically created default configuration that can be used when no custom configuration is provided."
+          "details": "Implement a file watcher that monitors configuration files for changes. Create a thread-safe mechanism to reload configurations without disrupting ongoing operations. Add validation to ensure only valid configurations are applied. Implement a notification system to alert components when configurations change. Add configuration versioning to track changes. Create a configuration diff utility to log what changed between reloads. Implement graceful fallback to previous configuration if loading fails. Add metrics to track reload frequency and performance impact."
         },
         {
           "id": 5,
-          "title": "Implement configuration manager with merge capabilities",
-          "description": "Create a central configuration manager that handles loading, validation, and merging configurations",
+          "title": "Create documentation and examples",
+          "description": "Develop comprehensive documentation and example configurations for the YAML system",
           "status": "pending",
           "dependencies": [
+            1,
             2,
             3,
             4
           ],
-          "details": "Implement a configuration manager class that: 1) Loads configurations from multiple sources (default patterns + user-defined patterns); 2) Validates all configurations using the validation logic; 3) Merges configurations with proper precedence rules (user patterns override defaults when duplicates exist); 4) Provides a clean API for the rest of the application to access validated patterns; 5) Includes proper error handling and logging. Add functionality to reload configurations at runtime and notify dependent components when configuration changes."
+          "details": "Create markdown documentation explaining the configuration system architecture. Write a user guide with step-by-step instructions for creating custom PHI patterns. Develop annotated example configurations for common PHI types (names, addresses, phone numbers, medical IDs, etc.). Create a troubleshooting guide for common configuration errors. Document best practices for organizing configuration files. Create a validation tool that users can run to check their configurations. Include performance considerations and optimization tips. Develop integration examples showing how the configuration system connects with the pattern matching engine."
         }
       ]
     },
     {
       "id": 3,
-      "title": "Develop regex-based PHI detection engine",
-      "description": "Build the core detection engine that uses regex patterns to identify PHI in text and code files",
+      "title": "Develop Python NLP module for context-aware validation",
+      "description": "Create a Python module that uses NLP to validate potential PHI matches and reduce false positives",
       "status": "pending",
       "dependencies": [
-        2
+        1
       ],
       "priority": "high",
-      "details": "Implement a PHI analyzer module that applies regex patterns from the configuration to input text. Create data structures to represent PHI findings (type, value, location, confidence). Develop file traversal logic to scan directories recursively. Add filtering capabilities to exclude certain file types or directories. Implement multi-threading for performance optimization when scanning large codebases. Include context capture to store a snippet of text around the detected PHI.",
-      "testStrategy": "Create a test suite with sample files containing various PHI patterns. Measure detection accuracy and performance. Test with large files to ensure memory efficiency.",
+      "details": "Set up a Python project with proper packaging. Implement NLP-based validation using libraries like spaCy or Hugging Face Transformers. Create named entity recognition (NER) models for healthcare-specific entities. Implement context analysis to distinguish between actual PHI and similar patterns. Design a simple API for the Rust CLI to communicate with the Python module. Include pre-trained models for common healthcare terminology. Optimize for performance to minimize impact on scanning speed.",
+      "testStrategy": "Create a test suite with true and false positive examples. Measure precision and recall metrics. Test with various medical texts to ensure domain-specific accuracy.",
       "subtasks": [
         {
           "id": 1,
-          "title": "Implement PHI finding data structures",
-          "description": "Create the core data structures to represent PHI findings and detection results",
+          "title": "Set up Python project structure with packaging",
+          "description": "Create a properly structured Python package for the NLP validation module with appropriate dependencies and integration points for Rust",
           "status": "pending",
           "dependencies": [],
-          "details": "Design and implement classes/structs to represent: 1) PHIFinding with properties for type, value, location (file path, line number, character position), confidence score, and surrounding context; 2) DetectionResult to aggregate findings from a single file or scan session; 3) Include serialization methods for these structures to support reporting. These data structures will be the foundation for the entire detection engine."
+          "details": "Create a Python package named 'phi_nlp_validator' with proper directory structure. Set up pyproject.toml and setup.py with dependencies (spaCy, transformers, numpy, etc.). Create module entry points. Implement a basic API class that will later be exposed to Rust. Set up testing framework with pytest. Document the API interface that will be used by the Rust CLI."
         },
         {
           "id": 2,
-          "title": "Develop regex pattern manager",
-          "description": "Create a component to load, validate, and manage regex patterns from configuration",
+          "title": "Implement base NLP pipeline with healthcare models",
+          "description": "Set up the core NLP pipeline using spaCy or Transformers with pre-trained models suitable for healthcare text",
           "status": "pending",
-          "dependencies": [],
-          "details": "Implement a PatternManager class that: 1) Loads regex patterns from configuration files; 2) Validates patterns for correctness; 3) Organizes patterns by PHI category (e.g., names, SSNs, emails); 4) Provides an efficient interface to retrieve applicable patterns; 5) Supports pattern metadata like confidence thresholds and description. Include unit tests to verify pattern loading and validation works correctly."
+          "dependencies": [
+            1
+          ],
+          "details": "Evaluate and select appropriate pre-trained models (consider BioBERT, ClinicalBERT, or Med7). Implement model loading and caching for performance. Create a pipeline class that handles text preprocessing, tokenization, and basic entity recognition. Include healthcare terminology dictionaries. Implement model download/initialization on first use. Add configuration options for model selection and pipeline customization."
         },
         {
           "id": 3,
-          "title": "Build core text analysis engine",
-          "description": "Implement the main regex-based scanning logic to detect PHI in text content",
+          "title": "Develop healthcare-specific NER capabilities",
+          "description": "Implement or fine-tune Named Entity Recognition models specifically for healthcare PHI detection",
           "status": "pending",
           "dependencies": [
-            1,
             2
           ],
-          "details": "Create a PHIAnalyzer class that: 1) Takes text input and applies configured regex patterns; 2) Uses the PatternManager to get relevant patterns; 3) Creates PHIFinding objects for each match; 4) Captures surrounding context for each finding; 5) Calculates confidence scores based on pattern metadata and match characteristics; 6) Returns a DetectionResult with all findings. Optimize for performance when processing large text files."
+          "details": "Identify key PHI entity types (names, dates, medical record numbers, etc.). Implement rule-based recognizers for structured PHI (e.g., SSNs, phone numbers). Fine-tune NER models on healthcare data if available, or implement ensemble approach combining multiple models. Create entity categorization system that aligns with PHI categories. Add confidence scoring for each entity detection. Implement serialization/deserialization of detected entities."
         },
         {
           "id": 4,
-          "title": "Implement file system traversal",
-          "description": "Develop logic to recursively scan directories and process files",
+          "title": "Implement context analysis for false positive reduction",
+          "description": "Create contextual analysis capabilities to distinguish between actual PHI and similar non-PHI patterns",
           "status": "pending",
-          "dependencies": [],
-          "details": "Create a FileScanner component that: 1) Recursively traverses directory structures; 2) Implements configurable filtering to exclude directories or file types; 3) Handles different file encodings correctly; 4) Manages file access errors gracefully; 5) Provides progress reporting for long-running scans. Include support for gitignore-style pattern matching for exclusions and ability to resume interrupted scans."
+          "dependencies": [
+            3
+          ],
+          "details": "Implement contextual window analysis around potential PHI entities. Create heuristics for common false positive patterns in healthcare text. Use dependency parsing to understand relationships between entities. Implement semantic analysis to identify medical contexts vs. personal information contexts. Create a scoring system that combines entity confidence with contextual indicators. Add configurable thresholds for validation decisions."
         },
         {
           "id": 5,
-          "title": "Add multi-threading support",
-          "description": "Enhance the scanning engine with parallel processing capabilities",
+          "title": "Develop Python-Rust FFI interface",
+          "description": "Create a Foreign Function Interface (FFI) that allows the Rust CLI to efficiently communicate with the Python module",
           "status": "pending",
           "dependencies": [
-            3,
             4
           ],
-          "details": "Implement a ThreadPoolExecutor or similar mechanism to: 1) Process multiple files concurrently; 2) Manage a configurable thread pool size; 3) Handle thread synchronization for result aggregation; 4) Implement proper error handling for worker threads; 5) Add progress tracking across threads; 6) Ensure resources are properly managed. Include performance benchmarking to determine optimal thread count based on system capabilities."
+          "details": "Research optimal Python-Rust integration approaches (PyO3, cffi, etc.). Implement serialization/deserialization of data between Rust and Python. Create a simple API with clear entry points for validation requests. Implement error handling and status reporting across language boundary. Add logging and diagnostics. Create examples of how to call the Python module from Rust. Consider performance implications of crossing the language boundary."
         },
         {
           "id": 6,
-          "title": "Integrate components and add configuration options",
-          "description": "Connect all components and implement comprehensive configuration capabilities",
+          "title": "Optimize performance and finalize integration",
+          "description": "Optimize the NLP module for speed and memory usage, and ensure seamless integration with the main application",
           "status": "pending",
           "dependencies": [
-            1,
-            2,
-            3,
-            4,
             5
           ],
-          "details": "Create a PHIDetectionEngine class that: 1) Integrates all components (PHIAnalyzer, PatternManager, FileScanner, threading); 2) Provides a simple API for scanning files or directories; 3) Implements configuration options for all aspects (regex patterns, file exclusions, thread count, confidence thresholds, etc.); 4) Includes detailed logging of the scanning process; 5) Produces comprehensive scan reports; 6) Handles edge cases like very large files or deeply nested directories. Add integration tests to verify the complete system works correctly."
+          "details": "Profile the module to identify performance bottlenecks. Implement batch processing for multiple validation requests. Add caching mechanisms for frequent patterns. Optimize model loading and inference times. Implement parallel processing where appropriate. Create comprehensive tests with realistic healthcare data. Document performance characteristics and tuning options. Finalize the API and ensure backward compatibility. Create usage examples and integration documentation."
         }
       ]
     },
     {
       "id": 4,
-      "title": "Create JSON reporting system",
-      "description": "Implement a reporting system that outputs detection results in JSON format for auditing and integration",
+      "title": "Integrate Rust CLI with Python NLP module",
+      "description": "Connect the Rust CLI with the Python NLP module to enable context-aware PHI detection",
       "status": "pending",
       "dependencies": [
+        2,
         3
       ],
-      "priority": "medium",
-      "details": "Design JSON schema for PHI findings reports. Implement report generation logic that converts internal PHI findings to JSON format. Add summary statistics (total files scanned, findings by type, etc.). Include file path, line number, and context information in reports. Add options for different verbosity levels in reports. Implement report writing to file or stdout based on user preference.",
-      "testStrategy": "Verify JSON output against schema. Test report generation with various detection scenarios. Validate that all required fields are present in the output.",
+      "priority": "high",
+      "details": "Implement PyO3 or similar Rust-Python binding. Create a communication protocol between Rust and Python components. Design a caching mechanism to improve performance for repeated validations. Implement fallback mechanisms for when NLP validation is unavailable. Add configuration options to control NLP usage. Ensure proper error handling for Python exceptions. Create a unified logging system across both components.",
+      "testStrategy": "Test end-to-end PHI detection with both components. Measure performance impact of NLP integration. Test error handling and recovery scenarios.",
       "subtasks": [
         {
           "id": 1,
-          "title": "Design JSON schema for PHI findings",
-          "description": "Create a comprehensive JSON schema that defines the structure for PHI detection reports",
+          "title": "Implement PyO3 binding for Python NLP module",
+          "description": "Set up PyO3 in the Rust CLI project and create the initial binding to load and interact with the Python NLP module",
           "status": "pending",
           "dependencies": [],
-          "details": "Define a JSON schema that includes: 1) Top-level metadata (timestamp, scan configuration, summary statistics), 2) File-level information (path, size, scan status), 3) Finding structure (type of PHI, confidence score, line number, column position, context snippet), 4) Summary section (counts by PHI type, total files scanned, etc.). Document the schema with examples and ensure it's extensible for future enhancements. Consider including schema version field for backward compatibility."
+          "details": "Add PyO3 dependency to Cargo.toml. Create a Rust module for Python integration. Implement functions to initialize the Python interpreter, import the NLP module, and expose basic NLP functions to Rust. Write tests to verify the Python module can be loaded and basic functions can be called. Handle Python exceptions and convert them to appropriate Rust errors."
         },
         {
           "id": 2,
-          "title": "Implement core JSON conversion logic",
-          "description": "Create the core functionality to convert internal PHI findings data structures to JSON format",
+          "title": "Design and implement communication protocol",
+          "description": "Create a well-defined interface for data exchange between Rust and Python components",
           "status": "pending",
           "dependencies": [
             1
           ],
-          "details": "Develop a ReportGenerator class that takes the internal PHI findings data and converts it to the JSON structure defined in the schema. Implement methods to: 1) Convert individual PHI findings to JSON objects, 2) Group findings by file, 3) Add file metadata, 4) Generate the complete report structure. Use appropriate serialization libraries and ensure proper handling of special characters and encoding. Include unit tests that verify the conversion logic produces valid JSON according to the schema."
+          "details": "Define data structures for requests and responses. Implement serialization/deserialization of these structures between Rust and Python. Create a protocol for batching requests to minimize overhead. Implement timeout mechanisms for Python calls. Add metrics collection for performance monitoring. Document the protocol interface for future reference."
         },
         {
           "id": 3,
-          "title": "Add summary statistics generation",
-          "description": "Implement logic to calculate and include summary statistics in the JSON reports",
+          "title": "Implement caching mechanism for NLP results",
+          "description": "Create a caching system to store and retrieve previous NLP validation results",
           "status": "pending",
           "dependencies": [
             2
           ],
-          "details": "Extend the ReportGenerator to calculate statistics including: 1) Total files scanned, 2) Number of files with findings, 3) Total findings count, 4) Findings breakdown by PHI type, 5) Confidence score distribution. Create helper methods to efficiently compute these statistics from the raw findings data. Ensure statistics are properly formatted and included in the JSON output. Add unit tests to verify statistics calculations are accurate."
+          "details": "Design a cache data structure with configurable size limits. Implement cache key generation based on input text and context. Add time-based expiration for cached entries. Create methods for cache lookup, insertion, and invalidation. Implement statistics tracking for cache hits/misses. Add configuration options to control cache behavior. Write tests to verify cache effectiveness."
         },
         {
           "id": 4,
-          "title": "Implement verbosity level configuration",
-          "description": "Add support for different levels of detail in the JSON reports based on user preferences",
+          "title": "Implement fallback mechanisms and error handling",
+          "description": "Create robust fallback strategies for when NLP validation is unavailable or fails",
           "status": "pending",
           "dependencies": [
-            2,
-            3
+            2
           ],
-          "details": "Create an enum for verbosity levels (e.g., MINIMAL, STANDARD, DETAILED, DEBUG). Modify the ReportGenerator to accept a verbosity parameter and adjust output accordingly: 1) MINIMAL - only summary statistics and counts, 2) STANDARD - includes file paths and finding types, 3) DETAILED - adds line numbers and context snippets, 4) DEBUG - includes all available information. Implement filtering logic to include/exclude fields based on verbosity. Update documentation to explain the different verbosity options and their use cases."
+          "details": "Implement health checks for the Python NLP module. Create a fallback strategy using simpler rule-based detection when NLP is unavailable. Add circuit breaker pattern to prevent repeated failures. Implement comprehensive error handling for all Python exceptions. Add retry mechanisms with exponential backoff for transient failures. Create a configuration system to control fallback behavior. Write tests for various failure scenarios."
         },
         {
           "id": 5,
-          "title": "Add flexible output destination options",
-          "description": "Implement functionality to write reports to files or stdout based on user preference",
+          "title": "Create unified logging and configuration system",
+          "description": "Implement a consistent logging approach across Rust and Python components with configurable options",
           "status": "pending",
           "dependencies": [
+            1,
             4
           ],
-          "details": "Create an OutputHandler class that can direct JSON output to different destinations: 1) File output with configurable path, 2) Standard output (console), 3) Both simultaneously. Add pretty-printing option for human-readable output with proper indentation. Implement proper error handling for file I/O operations. Add compression option for large reports. Include a configuration object that allows users to specify output preferences. Update the CLI interface to expose these options to users. Add integration tests that verify end-to-end report generation and output."
+          "details": "Create a logging bridge between Rust and Python logging systems. Implement log level synchronization between components. Add structured logging with consistent fields across languages. Create configuration options to control NLP usage, logging verbosity, and performance parameters. Implement configuration reloading without restart. Add telemetry for monitoring integration performance. Document all configuration options and their effects."
         }
       ]
     },
     {
       "id": 5,
-      "title": "Implement PHI redaction and anonymization",
-      "description": "Add capabilities to redact or anonymize detected PHI in files",
-      "status": "pending",
-      "dependencies": [
-        3
-      ],
-      "priority": "medium",
-      "details": "Implement redaction strategies (replacement with asterisks, removal, etc.). Create anonymization logic that replaces PHI with realistic but fake data. Add in-place file modification option with backup creation. Implement different redaction modes based on PHI type. Add command-line options to control redaction behavior. Ensure atomic file operations to prevent data corruption.",
-      "testStrategy": "Test redaction on sample files and verify PHI is properly masked. Validate file backup functionality. Check that anonymized data maintains the format of the original PHI.",
-      "subtasks": [
-        {
-          "id": 1,
-          "title": "Design and implement core redaction strategies",
-          "description": "Create the fundamental redaction methods that will be applied to detected PHI",
-          "status": "pending",
-          "dependencies": [],
-          "details": "Implement a RedactionStrategy interface/abstract class with methods for redacting text. Create concrete implementations for common strategies: (1) AsteriskRedaction - replace characters with asterisks while preserving length, (2) RemovalRedaction - completely remove the PHI, (3) PlaceholderRedaction - replace with a generic placeholder like [REDACTED]. Each strategy should take PHI text and return the redacted version. Include unit tests to verify each strategy works correctly with different PHI types."
-        },
-        {
-          "id": 2,
-          "title": "Develop PHI anonymization engine",
-          "description": "Create a system to replace PHI with realistic but fake data while maintaining data consistency",
-          "status": "pending",
-          "dependencies": [
-            1
-          ],
-          "details": "Implement an AnonymizationEngine class that generates realistic fake data for different PHI types (names, addresses, phone numbers, etc.). Use libraries like Faker if available. Ensure consistency so the same PHI value is always replaced with the same fake value within a document. Create a mapping store to track replacements. Implement PHI type detection to apply appropriate anonymization (e.g., dates replaced with fake dates, not names). Add configuration options for anonymization behavior. Include comprehensive unit tests."
-        },
-        {
-          "id": 3,
-          "title": "Implement safe file modification with backup system",
-          "description": "Create a system for safely modifying files with PHI while preserving the original content",
-          "status": "pending",
-          "dependencies": [
-            1
-          ],
-          "details": "Develop a FileProcessor class that handles reading, modifying, and writing files. Implement a backup system that creates a copy of the original file before modification (with configurable backup location). Use atomic file operations (write to temporary file, then rename) to prevent data corruption if the process is interrupted. Add recovery mechanisms to restore from backup if an error occurs. Implement progress tracking for large files. Include extensive error handling and logging. Write unit and integration tests to verify file operations work correctly and safely."
-        },
-        {
-          "id": 4,
-          "title": "Create PHI-type specific redaction mode selector",
-          "description": "Implement a system to apply different redaction strategies based on PHI type and context",
-          "status": "pending",
-          "dependencies": [
-            1,
-            2
-          ],
-          "details": "Develop a RedactionModeSelector that determines the appropriate redaction strategy based on PHI type, sensitivity, and context. Implement configuration options to specify default strategies for each PHI type (e.g., names use anonymization, medical record numbers use asterisk redaction). Create a rule-based system to handle special cases and exceptions. Integrate with the existing PHI detection system to receive type information. Include a fallback strategy for unknown PHI types. Add unit tests to verify the selector chooses appropriate strategies for different scenarios."
-        },
-        {
-          "id": 5,
-          "title": "Add command-line interface and configuration options",
-          "description": "Implement user-facing controls for the redaction and anonymization system",
-          "status": "pending",
-          "dependencies": [
-            1,
-            2,
-            3,
-            4
-          ],
-          "details": "Extend the command-line interface to include options for controlling redaction behavior: --redaction-mode (redact/anonymize/both), --backup-dir (path for backups), --strategy-map (JSON mapping PHI types to strategies), --in-place (boolean for modifying original files), --dry-run (preview changes without modifying files). Implement configuration file support to store default settings. Add detailed help documentation for each option. Create validation for user inputs. Implement reporting of redaction statistics (counts by PHI type, files modified, etc.). Test the CLI with various option combinations to ensure correct behavior."
-        }
-      ]
-    },
-    {
-      "id": 6,
-      "title": "Develop GitHub Action integration",
-      "description": "Create a GitHub Action that integrates HealthWand into CI/CD pipelines",
+      "title": "Implement structured data scanning (JSON, CSV)",
+      "description": "Extend the CLI to scan structured data formats like JSON and CSV for PHI",
       "status": "pending",
       "dependencies": [
         4
       ],
       "priority": "medium",
-      "details": "Create GitHub Action definition in YAML format. Implement action.yml with inputs for configuration options. Set up Docker container for the action. Create entrypoint script that runs the CLI tool. Add logic to fail CI/CD pipelines when PHI is detected. Implement customizable threshold settings for pipeline failures. Add support for commenting on PRs with findings summary.",
-      "testStrategy": "Test the GitHub Action in a sample repository. Verify it correctly identifies PHI in pull requests. Confirm that build failures occur when PHI is detected above the threshold.",
+      "details": "Implement parsers for JSON and CSV formats. Create path-based scanning for JSON documents (e.g., using JSONPath). Develop column-aware scanning for CSV files. Add configuration options for specifying which fields/columns to scan or ignore. Implement smart detection of FHIR resources and fields. Support scanning of nested structures. Preserve structure in redacted output files.",
+      "testStrategy": "Test with sample healthcare data in JSON and CSV formats. Verify correct handling of nested structures. Test with malformed input files to ensure robust error handling.",
       "subtasks": [
         {
           "id": 1,
-          "title": "Create GitHub Action definition files",
-          "description": "Set up the basic structure for the GitHub Action with configuration options",
+          "title": "Implement basic JSON and CSV parsers",
+          "description": "Create parsers for JSON and CSV formats that can load files and provide access to their content for scanning",
           "status": "pending",
           "dependencies": [],
-          "details": "Create the action.yml file with proper metadata, branding, and input parameters. Define inputs for configuration options like threshold settings, output format, and PR comment options. Include descriptions for each input parameter. Set up the Docker container reference in the action definition. This subtask establishes the interface for the GitHub Action."
+          "details": "Implement parser classes for JSON and CSV files using standard libraries (e.g., Python's json and csv modules). The parsers should handle file loading, basic validation, and provide a consistent interface for accessing the parsed data. Include error handling for malformed files and large file support through streaming/chunking where appropriate. The implementation should return the parsed data in a format that can be easily traversed for PHI scanning in subsequent steps."
         },
         {
           "id": 2,
-          "title": "Implement Docker container for the action",
-          "description": "Create a Docker container that will run the HealthWand CLI tool",
+          "title": "Develop path-based scanning for JSON documents",
+          "description": "Create a mechanism to scan JSON documents using path expressions to target specific fields",
           "status": "pending",
           "dependencies": [
             1
           ],
-          "details": "Create a Dockerfile that installs necessary dependencies and the HealthWand CLI tool. Configure the container environment to handle GitHub Action inputs and outputs. Optimize the container size for faster CI/CD runs. Set up proper entrypoint configuration. Test the Docker build process to ensure it creates a working container."
+          "details": "Implement JSONPath or similar path-based query functionality to navigate JSON structures. Create a scanner that can traverse JSON documents and apply PHI detection to specific paths. The implementation should support wildcards and recursive descent to handle varying document structures. Include functionality to extract values at specified paths for PHI scanning while maintaining references to their original locations in the document structure."
         },
         {
           "id": 3,
-          "title": "Develop entrypoint script with failure logic",
-          "description": "Create the main script that runs the CLI and implements pipeline failure conditions",
+          "title": "Implement column-aware scanning for CSV files",
+          "description": "Create a scanner that understands CSV column structure and can selectively scan specific columns",
+          "status": "pending",
+          "dependencies": [
+            1
+          ],
+          "details": "Extend the CSV parser to be column-aware, allowing scanning to target specific columns by name or index. Implement handling for CSV files both with and without headers. Create configuration options to specify which columns should be scanned or ignored. The scanner should process each row while maintaining column context, allowing for targeted PHI detection and redaction that preserves the tabular structure of the data."
+        },
+        {
+          "id": 4,
+          "title": "Add configuration options for field/column selection and FHIR detection",
+          "description": "Implement configuration mechanisms to specify which fields or columns to scan and add smart detection for FHIR resources",
+          "status": "pending",
+          "dependencies": [
+            2,
+            3
+          ],
+          "details": "Create a configuration system that allows users to specify inclusion/exclusion patterns for JSON paths and CSV columns. Implement FHIR resource detection to automatically identify common PHI-containing fields in FHIR resources (like Patient, Practitioner, etc.). The configuration should support both command-line arguments and configuration files. Include validation logic to ensure configurations are valid and provide helpful error messages for misconfiguration."
+        },
+        {
+          "id": 5,
+          "title": "Implement structure-preserving redaction for JSON and CSV",
+          "description": "Create functionality to redact PHI while preserving the original structure of JSON and CSV files",
+          "status": "pending",
+          "dependencies": [
+            2,
+            3,
+            4
+          ],
+          "details": "Develop redaction mechanisms that replace PHI with appropriate placeholders while maintaining the original JSON or CSV structure. For JSON, ensure nested structures are preserved after redaction. For CSV, maintain column alignment and row structure. Implement options for different redaction styles (e.g., complete removal, replacement with fixed strings, or replacement with type-appropriate placeholders). Add functionality to write the redacted data back to files in the original format with preserved structure."
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Create GitHub Actions integration",
+      "description": "Develop a GitHub Action that integrates HealthWand into CI/CD pipelines",
+      "status": "pending",
+      "dependencies": [
+        4
+      ],
+      "priority": "medium",
+      "details": "Create a GitHub Action definition file (action.yml). Implement Docker-based execution environment with all dependencies. Design input parameters for configuring the action. Create output formats compatible with GitHub Actions. Implement PR comment functionality for reporting findings. Add support for ignoring specific files or directories. Create documentation and examples for common workflows. Include options for failing builds on PHI detection.",
+      "testStrategy": "Test the action in a sample repository with mock PHI data. Verify correct reporting in PR comments and build logs. Test different configuration options and failure modes.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Create GitHub Action definition and Docker environment",
+          "description": "Define the GitHub Action structure and set up the Docker execution environment with all required dependencies",
+          "status": "pending",
+          "dependencies": [],
+          "details": "Create the action.yml file that defines the action name, description, inputs, outputs, and Docker-based execution. Set up a Dockerfile that installs all necessary dependencies for HealthWand. Ensure the Docker image is optimized for CI/CD environments (minimal size, fast startup). Configure the entrypoint script to handle the GitHub Actions workflow context."
+        },
+        {
+          "id": 2,
+          "title": "Implement configurable input parameters and file filtering",
+          "description": "Design and implement the input parameters for the GitHub Action, including file filtering capabilities",
+          "status": "pending",
+          "dependencies": [
+            1
+          ],
+          "details": "Define input parameters in action.yml such as scan_paths, exclude_patterns, severity_threshold, and fail_on_detection. Implement the logic to process these parameters in the action's execution flow. Add support for ignoring specific files or directories using glob patterns. Create validation for input parameters to provide helpful error messages for misconfiguration."
+        },
+        {
+          "id": 3,
+          "title": "Develop output formatting and PR comment functionality",
+          "description": "Create standardized output formats and implement the ability to post findings as PR comments",
           "status": "pending",
           "dependencies": [
             2
           ],
-          "details": "Implement an entrypoint.sh script that processes GitHub Action inputs. Add logic to run the HealthWand CLI with appropriate parameters. Implement customizable threshold settings that determine when to fail the CI/CD pipeline based on PHI detection severity or count. Set up proper exit codes to signal success or failure to GitHub Actions. Include detailed logging for debugging purposes."
+          "details": "Format scan results in a GitHub Actions compatible way (using ::set-output). Implement PR comment functionality using the GitHub API (via actions/github-script or directly). Design a clear, readable format for the PR comments that highlights findings effectively. Include severity levels and file locations in the output. Implement the logic to determine when a build should fail based on the fail_on_detection parameter and detected PHI."
         },
         {
           "id": 4,
-          "title": "Add PR comment functionality",
-          "description": "Implement the ability to comment on PRs with a summary of findings",
+          "title": "Create documentation and example workflows",
+          "description": "Develop comprehensive documentation and example workflows for common use cases",
           "status": "pending",
           "dependencies": [
             3
           ],
-          "details": "Use the GitHub API to post comments on pull requests when PHI is detected. Format the findings in a clear, readable way in the PR comment. Include severity levels, file locations, and remediation suggestions. Add support for customizing the comment format and content based on action inputs. Implement logic to update existing comments rather than creating multiple comments on subsequent runs."
+          "details": "Create a detailed README.md with usage instructions, parameter descriptions, and examples. Develop example workflow files (.github/workflows/examples/) for common scenarios: scanning PRs, scheduled scans, and manual triggers. Document best practices for integrating HealthWand into different types of repositories. Include troubleshooting guidance and advanced configuration options. Create visual examples of PR comments and other outputs to help users understand what to expect."
         }
       ]
     },
     {
       "id": 7,
-      "title": "Build RESTful API server with Actix Web",
-      "description": "Implement an API server that provides PHI detection capabilities via HTTP endpoints",
+      "title": "Develop FastAPI/Uvicorn API server",
+      "description": "Create a REST API server for real-time PHI detection and redaction",
       "status": "pending",
       "dependencies": [
-        3
+        4
       ],
       "priority": "medium",
-      "details": "Set up Actix Web framework with basic server configuration. Create RESTful endpoints for PHI detection in text. Implement request/response models for the API. Add authentication mechanism (API keys). Implement rate limiting for API requests. Create Swagger/OpenAPI documentation. Reuse the core detection logic from the CLI implementation. Add health check and metrics endpoints.",
-      "testStrategy": "Write integration tests for API endpoints. Test authentication and rate limiting. Perform load testing to ensure server stability under high traffic.",
+      "details": "Set up a FastAPI project with proper structure. Design RESTful endpoints for PHI detection and redaction. Implement request validation and error handling. Create Swagger/OpenAPI documentation. Implement authentication and rate limiting. Design asynchronous processing for large files. Create Docker deployment configuration. Implement health checks and monitoring endpoints. Support both synchronous and asynchronous processing modes.",
+      "testStrategy": "Write API tests using pytest. Test performance under load. Verify correct handling of concurrent requests. Test authentication and authorization mechanisms.",
       "subtasks": [
         {
           "id": 1,
-          "title": "Set up Actix Web server with basic configuration",
-          "description": "Initialize the Actix Web framework with basic server configuration including routing, middleware structure, and error handling",
+          "title": "Set up FastAPI project structure with basic configuration",
+          "description": "Create the initial FastAPI project structure with proper organization of routes, models, and services",
           "status": "pending",
           "dependencies": [],
-          "details": "Create a new Rust project with Actix Web dependencies. Implement the server configuration with appropriate logging, CORS settings, and JSON serialization/deserialization support. Set up the basic application structure with modular components. Configure the server to run on a configurable port with proper shutdown handling. Implement global error handling middleware that returns appropriate HTTP status codes and error messages."
+          "details": "Create a project structure with directories for routes, models, services, and utilities. Set up the main.py file with FastAPI initialization. Configure CORS, logging, and basic error handling. Create a configuration system using environment variables. Set up dependency injection framework. Implement basic health check endpoint. Create initial requirements.txt with necessary dependencies."
         },
         {
           "id": 2,
-          "title": "Integrate PHI detection core logic",
-          "description": "Adapt and integrate the existing PHI detection logic from the CLI implementation into the API server",
+          "title": "Design and implement core PHI detection/redaction endpoints",
+          "description": "Create the primary REST endpoints for PHI detection and redaction functionality",
           "status": "pending",
           "dependencies": [
             1
           ],
-          "details": "Import the core PHI detection modules from the CLI implementation. Create service abstractions that wrap the detection logic for use in API endpoints. Ensure the detection logic is properly initialized at server startup. Implement appropriate error handling for the detection logic. Consider performance optimizations for the server context, such as pooling resources or caching detection patterns."
+          "details": "Implement POST /api/v1/detect endpoint for PHI detection in text. Create POST /api/v1/redact endpoint for PHI redaction in text. Design request/response Pydantic models for validation. Implement proper error handling with custom exception classes. Create service layer to separate business logic from route handlers. Add unit tests for endpoint functionality. Document endpoints with appropriate FastAPI annotations."
         },
         {
           "id": 3,
-          "title": "Implement RESTful API endpoints with request/response models",
-          "description": "Design and implement the API endpoints with proper request validation and response formatting",
+          "title": "Implement authentication and security features",
+          "description": "Add authentication, authorization, and rate limiting to protect API endpoints",
           "status": "pending",
           "dependencies": [
-            1,
             2
           ],
-          "details": "Define request and response data models using serde for serialization. Implement the main PHI detection endpoint that accepts text input and returns detection results. Add input validation for all endpoints. Create additional utility endpoints as needed (e.g., for getting supported PHI types). Ensure all endpoints follow RESTful principles with appropriate HTTP methods and status codes. Implement pagination for endpoints that might return large result sets."
+          "details": "Implement API key authentication using FastAPI security dependencies. Create middleware for rate limiting based on client IP or API key. Add request logging for security auditing. Implement role-based access control for different endpoint permissions. Create user/API key management endpoints. Add input sanitization to prevent injection attacks. Configure HTTPS/TLS settings. Implement proper security headers."
         },
         {
           "id": 4,
-          "title": "Add authentication and rate limiting",
-          "description": "Implement API key authentication and rate limiting middleware for API security",
+          "title": "Develop asynchronous processing capabilities",
+          "description": "Create asynchronous processing flow for handling large documents and files",
           "status": "pending",
           "dependencies": [
-            1,
-            3
+            2
           ],
-          "details": "Create an API key authentication middleware that validates requests against configured keys. Implement storage for API keys (in-memory for development, database or external service for production). Add rate limiting middleware that restricts requests based on client IP and/or API key. Configure different rate limits for different endpoints or client tiers. Implement appropriate HTTP responses for authentication and rate limiting errors (401, 429). Add logging for security events."
+          "details": "Implement background task processing using FastAPI background tasks. Create POST /api/v1/process/async endpoint for submitting async jobs. Implement GET /api/v1/process/status/{job_id} for checking job status. Design job queue system with Redis or similar technology. Create worker processes for handling async jobs. Implement file upload capabilities for processing documents. Add job result storage and retrieval mechanism. Create job cancellation endpoint."
         },
         {
           "id": 5,
-          "title": "Create health check and metrics endpoints",
-          "description": "Implement operational endpoints for monitoring server health and performance",
+          "title": "Create comprehensive API documentation",
+          "description": "Generate detailed API documentation with examples and usage instructions",
           "status": "pending",
           "dependencies": [
-            1
+            2,
+            3,
+            4
           ],
-          "details": "Create a /health endpoint that reports on system status and dependencies. Implement a /metrics endpoint that exposes performance metrics (request counts, latencies, error rates). Add instrumentation throughout the application code to collect metrics. Consider integration with monitoring systems like Prometheus. Implement deeper health checks that verify the PHI detection system is functioning correctly. Add version information to the health endpoint."
+          "details": "Configure Swagger/OpenAPI documentation with detailed descriptions. Add example requests and responses for all endpoints. Create custom documentation pages for complex workflows. Add authentication documentation with examples. Document error codes and handling. Create Markdown documentation for API usage. Add code samples in multiple languages. Implement ReDoc alternative documentation view."
         },
         {
           "id": 6,
-          "title": "Generate Swagger/OpenAPI documentation",
-          "description": "Create comprehensive API documentation using OpenAPI specification",
+          "title": "Implement deployment configuration and monitoring",
+          "description": "Create Docker deployment setup and monitoring endpoints for production use",
           "status": "pending",
           "dependencies": [
             3,
-            4,
-            5
+            4
           ],
-          "details": "Integrate a Swagger/OpenAPI documentation generator with Actix Web (e.g., utoipa). Document all endpoints, request/response models, authentication requirements, and error responses. Include example requests and responses. Add descriptions for all fields and endpoints. Configure the Swagger UI for interactive API exploration. Ensure documentation is automatically updated when the API changes. Add a documentation endpoint that serves the OpenAPI specification and UI."
+          "details": "Create Dockerfile for containerized deployment. Implement docker-compose.yml for local development. Add Kubernetes deployment manifests if needed. Create comprehensive health check endpoints with dependency status. Implement metrics endpoints for Prometheus integration. Add logging configuration for production. Create environment-specific configuration files. Implement graceful shutdown handling. Add load testing scripts to verify performance."
         }
       ]
     },
     {
       "id": 8,
-      "title": "Add basic NLP context-aware detection",
-      "description": "Enhance detection accuracy by implementing context-aware NLP techniques to reduce false positives",
+      "title": "Implement OCR for image processing",
+      "description": "Add capability to detect PHI in images using OCR technology",
       "status": "pending",
       "dependencies": [
-        3
+        4
       ],
       "priority": "low",
-      "details": "Integrate a lightweight NLP library for context analysis. Implement named entity recognition for medical terms and personal information. Add confidence scoring based on surrounding context. Create rules for common false positive scenarios. Implement context window analysis to determine if a regex match is likely PHI. Add configuration options to enable/disable NLP features. Ensure NLP components are optional dependencies to keep the core tool lightweight.",
-      "testStrategy": "Compare detection accuracy with and without NLP. Test with edge cases known to produce false positives with regex-only detection. Measure performance impact of NLP processing.",
+      "details": "Integrate with Tesseract or similar OCR library. Implement image preprocessing to improve OCR accuracy. Support common medical image formats (DICOM, etc.). Create configuration options for OCR sensitivity and accuracy. Implement region-of-interest scanning for targeted processing. Add support for redacting images by blurring or masking detected PHI. Optimize for performance with large images or batches.",
+      "testStrategy": "Test with sample medical images containing PHI. Measure OCR accuracy on different image qualities. Test performance with large image sets.",
       "subtasks": [
         {
           "id": 1,
-          "title": "Integrate lightweight NLP library as optional dependency",
-          "description": "Set up a lightweight NLP library integration with proper dependency management to ensure it remains optional",
+          "title": "Integrate OCR library and implement basic image processing",
+          "description": "Set up Tesseract or similar OCR library and create basic image preprocessing pipeline",
           "status": "pending",
           "dependencies": [],
-          "details": "Research and select an appropriate lightweight NLP library (e.g., spaCy with small models, NLTK). Implement as an optional dependency using conditional imports. Create an abstraction layer that allows the core functionality to work without NLP features. Add configuration options in settings to enable/disable NLP features. Document installation instructions for users who want the enhanced NLP capabilities."
+          "details": "Add Tesseract OCR as a dependency to the project. Create a service class that handles basic OCR operations. Implement image preprocessing functions including grayscale conversion, noise reduction, thresholding, and contrast enhancement to improve OCR accuracy. Create unit tests to verify OCR functionality with sample images. The preprocessing pipeline should be modular to allow for different preprocessing steps based on image type."
         },
         {
           "id": 2,
-          "title": "Implement named entity recognition for sensitive information",
-          "description": "Add capability to identify medical terms and personal information using NLP-based named entity recognition",
+          "title": "Add support for medical image formats",
+          "description": "Extend the OCR service to handle DICOM and other medical image formats",
           "status": "pending",
           "dependencies": [
             1
           ],
-          "details": "Extend the detection system to use the NLP library's named entity recognition capabilities. Focus on medical terms (diseases, medications, procedures) and personal information (names, locations, organizations). Create custom entity patterns for domain-specific PHI that standard NLP models might miss. Implement a fallback mechanism when NLP features are disabled. Test with various medical texts to ensure proper recognition of sensitive entities."
+          "details": "Integrate with DICOM processing libraries (like dcm4che) to extract image data from DICOM files. Create format detection logic to automatically identify image formats. Implement appropriate preprocessing for each supported format. Add conversion utilities to transform medical formats into standard formats that can be processed by the OCR engine. Include metadata extraction from medical formats to provide context for PHI detection. Test with a variety of medical image samples."
         },
         {
           "id": 3,
-          "title": "Develop context window analysis for regex matches",
-          "description": "Create a system to analyze text surrounding potential PHI matches to determine if they are likely to be actual PHI",
+          "title": "Implement PHI detection in OCR results",
+          "description": "Create pattern matching and NLP capabilities to identify PHI in OCR-processed text",
           "status": "pending",
           "dependencies": [
-            1,
-            2
+            1
           ],
-          "details": "Implement a configurable context window (N words/tokens before and after) around regex matches. Extract and analyze surrounding text using NLP techniques to determine if the context suggests PHI or non-PHI usage. Create a scoring mechanism based on contextual clues (e.g., presence of medical terminology, personal identifiers, or common false positive indicators). Integrate with existing regex detection to provide additional validation of potential matches."
+          "details": "Develop pattern matching algorithms for common PHI types (names, dates, IDs, addresses, etc.). Implement NLP techniques to improve detection accuracy, especially for context-dependent PHI. Create confidence scoring for detected PHI. Add dictionary-based approaches for medical terminology to reduce false positives. Implement region tracking to map detected PHI back to image coordinates. Create a configuration system for adjusting sensitivity thresholds and detection rules."
         },
         {
           "id": 4,
-          "title": "Create confidence scoring system based on context",
-          "description": "Implement a scoring mechanism that rates the confidence of PHI detection based on contextual analysis",
+          "title": "Implement region-of-interest scanning and PHI redaction",
+          "description": "Add capability to scan specific image regions and redact detected PHI",
           "status": "pending",
           "dependencies": [
+            2,
             3
           ],
-          "details": "Design and implement a confidence scoring algorithm that combines regex match strength with contextual analysis. Define thresholds for high, medium, and low confidence detections. Allow for configuration of confidence thresholds in settings. Extend the detection results to include confidence scores. Update the reporting mechanism to display confidence levels for each detection. Implement filtering options based on confidence scores."
+          "details": "Create an API for defining regions of interest within images. Implement selective scanning of defined regions to improve performance. Develop redaction methods including blurring, masking, and replacement of detected PHI in images. Ensure redaction preserves image quality outside of PHI areas. Add options for different redaction styles (black box, pixelation, text replacement). Implement preview functionality to review redactions before finalizing. Create audit logging for redaction operations."
         },
         {
           "id": 5,
-          "title": "Implement rules for common false positive scenarios",
-          "description": "Create a rule-based system to identify and filter out common false positive patterns based on contextual information",
+          "title": "Optimize performance and add configuration options",
+          "description": "Improve processing speed for large images and batches, and finalize configuration system",
           "status": "pending",
           "dependencies": [
-            3,
             4
           ],
-          "details": "Identify common false positive scenarios through analysis of detection results. Create a rule engine that can evaluate contextual patterns to exclude false positives. Implement specific rules for medical terminology that might be confused with PHI. Add rules for common formats that might trigger regex patterns but aren't PHI in context. Make rules configurable and extensible so users can add custom rules. Test extensively with real-world data to validate false positive reduction while maintaining high sensitivity for actual PHI."
+          "details": "Implement multithreading for parallel processing of images or image regions. Add caching mechanisms to avoid redundant processing. Create batch processing capabilities with progress tracking. Optimize memory usage for large images. Finalize the configuration system with options for OCR engine parameters, sensitivity levels, processing priorities (speed vs. accuracy), and output formats. Add performance monitoring and reporting. Create comprehensive documentation for the OCR system including configuration options and performance tuning guidelines."
         }
       ]
     },
     {
       "id": 9,
-      "title": "Implement extensibility for custom detection pipelines",
-      "description": "Create a plugin system that allows users to define and integrate custom detection methods",
+      "title": "Create compliance reporting module",
+      "description": "Develop a reporting system for HIPAA/GDPR compliance audits",
       "status": "pending",
       "dependencies": [
-        3,
-        8
+        5,
+        6,
+        7
       ],
       "priority": "low",
-      "details": "Design a plugin architecture for custom detectors. Implement trait definitions for detector plugins. Create a plugin registry and loading mechanism. Add configuration options for enabling/disabling plugins. Implement example plugins for common use cases. Document the plugin API for third-party developers. Ensure backward compatibility with existing configuration files.",
-      "testStrategy": "Develop test plugins to verify the extensibility system. Validate that plugins can be enabled/disabled via configuration. Test plugin loading from external files.",
+      "details": "Design a structured report format for compliance documentation. Implement audit logging of all detection and redaction activities. Create exportable reports in PDF and CSV formats. Add timestamp and user tracking for all operations. Implement report aggregation across multiple scans. Create visualization of PHI detection patterns and hotspots. Support for custom compliance templates based on different regulations (HIPAA, GDPR, etc.).",
+      "testStrategy": "Verify report accuracy against known PHI in test data. Test report generation with large datasets. Validate compliance with sample audit requirements.",
       "subtasks": [
         {
           "id": 1,
-          "title": "Define detector plugin trait interfaces",
-          "description": "Create the core trait definitions that all detector plugins must implement to be compatible with the system",
+          "title": "Implement comprehensive audit logging system",
+          "description": "Create a robust logging mechanism that captures all detection and redaction activities with timestamps and user tracking",
           "status": "pending",
           "dependencies": [],
-          "details": "Define a `DetectorPlugin` trait with required methods like `detect()`, `name()`, `version()`, and `configure()`. Include associated types and structures for detection results and configuration options. Ensure the trait is well-documented with examples. Consider error handling, performance characteristics, and thread safety requirements. The trait should be flexible enough to accommodate various detection approaches while maintaining a consistent interface."
+          "details": "Develop a centralized logging service that intercepts and records all PHI detection and redaction operations. Each log entry should include: timestamp, user ID, action type (detection/redaction), data source, PHI type identified, action result, and system metadata. Implement proper indexing for efficient querying and ensure logs are tamper-proof. Use a structured format (JSON) for log storage to facilitate later reporting."
         },
         {
           "id": 2,
-          "title": "Implement plugin registry and discovery mechanism",
-          "description": "Create a central registry that can discover, load, and manage detector plugins",
+          "title": "Design structured compliance report formats",
+          "description": "Create standardized report templates for different compliance regulations (HIPAA, GDPR, etc.)",
           "status": "pending",
           "dependencies": [
             1
           ],
-          "details": "Develop a `PluginRegistry` that maintains a collection of available plugins. Implement dynamic loading capabilities using dynamic libraries (.dll/.so files) or a simpler approach with static registration. Add methods for plugin registration, discovery, and retrieval. Include a plugin validation mechanism to ensure plugins meet the required interface. Implement a caching strategy to avoid repeated loading. Consider thread safety for concurrent access to the registry."
+          "details": "Design a flexible report schema that can accommodate different regulatory requirements. Create base templates for HIPAA and GDPR compliance, with configurable sections for summary statistics, detailed findings, remediation status, and attestation information. Implement a template engine that allows for custom template creation. Each template should define required data points, validation rules, and presentation format. Store templates in a database with versioning support."
         },
         {
           "id": 3,
-          "title": "Add configuration system for plugins",
-          "description": "Extend the existing configuration system to support enabling, disabling, and configuring plugins",
+          "title": "Develop report generation engine",
+          "description": "Build the core functionality to generate compliance reports from audit logs based on selected templates",
           "status": "pending",
           "dependencies": [
             1,
             2
           ],
-          "details": "Modify the configuration file format to include a `plugins` section with enable/disable flags and plugin-specific configuration. Implement configuration parsing and validation for plugin settings. Create a mechanism to pass configuration to plugins during initialization. Ensure backward compatibility by making plugin configurations optional. Add documentation for the new configuration options. Include validation to prevent configuration errors."
+          "details": "Implement a report generation service that queries the audit logs, processes the data according to template specifications, and produces structured report objects. Include functionality for filtering by date range, user, data source, and compliance type. Implement data aggregation functions to summarize detection patterns across multiple scans. Ensure the engine handles large datasets efficiently through pagination and background processing for extensive reports."
         },
         {
           "id": 4,
-          "title": "Integrate plugins with the detection pipeline",
-          "description": "Modify the main detection pipeline to utilize registered plugins during detection operations",
+          "title": "Create export functionality for PDF and CSV formats",
+          "description": "Implement export capabilities to generate downloadable reports in PDF and CSV formats",
           "status": "pending",
           "dependencies": [
-            2,
             3
           ],
-          "details": "Update the detection pipeline to query the plugin registry for available detectors. Implement logic to run detection through both built-in and plugin-based detectors. Add prioritization mechanism to control the order of detector execution. Implement result aggregation from multiple detectors. Add performance monitoring for plugin execution. Ensure error handling so that plugin failures don't crash the entire pipeline."
+          "details": "Develop export adapters for PDF and CSV output formats. For PDF exports, use a PDF generation library to create professional-looking reports with proper formatting, headers/footers, pagination, and the ability to embed charts. For CSV exports, implement proper data structuring and escaping. Both export types should include metadata headers with report generation information. Implement a queuing system for handling large export requests asynchronously."
         },
         {
           "id": 5,
-          "title": "Develop example detector plugins",
-          "description": "Create several example plugins that demonstrate different detection approaches and plugin capabilities",
+          "title": "Implement data visualization for PHI detection patterns",
+          "description": "Create interactive visualizations showing PHI detection patterns and compliance hotspots",
           "status": "pending",
           "dependencies": [
-            1,
-            4
+            3
           ],
-          "details": "Implement at least three example plugins: a simple pattern-based detector, a machine learning-based detector, and a network-based detector. Each example should demonstrate proper implementation of the plugin trait, configuration handling, and effective detection techniques. Include comprehensive comments explaining implementation decisions. Structure the examples as separate modules that can be used as templates by third-party developers. Ensure the examples cover common use cases."
+          "details": "Develop data visualization components that illustrate PHI detection patterns and compliance issues. Include heat maps showing concentration of PHI across data sources, trend charts showing detection rates over time, and breakdown charts by PHI type and severity. Implement interactive features allowing users to drill down into specific areas of concern. Ensure visualizations are embeddable in reports and accessible through the reporting dashboard. Use a JavaScript visualization library that supports both interactive web views and static exports for PDF reports."
         },
         {
           "id": 6,
-          "title": "Create comprehensive plugin development documentation",
-          "description": "Write detailed documentation for third-party developers on how to create and integrate custom detector plugins",
+          "title": "Build report aggregation and management interface",
+          "description": "Create a user interface for managing, viewing, and aggregating compliance reports across multiple scans",
           "status": "pending",
           "dependencies": [
-            1,
-            2,
             3,
             4,
             5
           ],
-          "details": "Produce a plugin development guide covering: plugin interface requirements, lifecycle management, configuration handling, best practices, and deployment instructions. Include step-by-step tutorials for creating basic plugins. Document the plugin discovery process and requirements for plugin distribution. Add API reference documentation with examples. Create troubleshooting guides for common issues. Include performance considerations and security guidelines. Provide templates and starter code that developers can use as a foundation."
+          "details": "Develop a comprehensive reporting dashboard that allows users to view, search, filter, and aggregate reports. Implement functionality to combine data from multiple scans into consolidated reports. Include features for scheduling recurring reports, setting up automated exports, and distributing reports to stakeholders. Add administrative controls for managing report access permissions and retention policies. Implement a notification system to alert users about new reports or compliance issues requiring attention."
         }
       ]
     },
     {
       "id": 10,
-      "title": "Create comprehensive documentation and examples",
-      "description": "Develop user documentation, API references, and usage examples to facilitate adoption",
+      "title": "Implement comprehensive documentation and examples",
+      "description": "Create detailed documentation, tutorials, and examples for all HealthWand components",
       "status": "pending",
       "dependencies": [
         1,
@@ -618,82 +622,58 @@
         9
       ],
       "priority": "medium",
-      "details": "Write README with project overview and quick start guide. Create detailed documentation for CLI usage and options. Document configuration file format with examples. Provide API documentation with request/response examples. Create GitHub Action usage guide. Add examples for common use cases (scanning codebases, integrating with CI/CD). Document extension points and plugin development. Include compliance references (HIPAA, GDPR, HITRUST). Set up documentation website using mdBook or similar tool.",
-      "testStrategy": "Review documentation for accuracy and completeness. Test examples to ensure they work as documented. Gather feedback from potential users on documentation clarity.",
+      "details": "Create comprehensive README with installation and usage instructions. Develop detailed API documentation for all components. Create tutorials for common use cases (CI/CD integration, API usage, custom pattern definition). Provide example configurations for different healthcare scenarios. Create troubleshooting guides and FAQs. Document performance optimization strategies. Include security best practices. Create contribution guidelines for open-source contributors.",
+      "testStrategy": "Review documentation for clarity and completeness. Test examples to ensure they work as documented. Gather feedback from potential users on documentation usability.",
       "subtasks": [
         {
           "id": 1,
-          "title": "Create project README with overview and quick start guide",
-          "description": "Develop a comprehensive README.md file that introduces the project and provides quick start instructions",
+          "title": "Create project README and installation guide",
+          "description": "Develop the main project README with clear installation instructions, basic usage examples, and project overview",
           "status": "pending",
           "dependencies": [],
-          "details": "Create a README.md with sections for: project overview, features, installation instructions, basic usage examples, license information, and contribution guidelines. Include badges for build status, version, and license. The quick start guide should enable users to install and run basic commands within 5 minutes."
+          "details": "Create a well-structured README.md that includes: project introduction and purpose, badges for build status/coverage, installation instructions for different environments, quick start guide, basic usage examples, license information, and links to more detailed documentation. Include step-by-step installation instructions for different platforms (Linux, macOS, Windows) and deployment options (local, Docker, cloud)."
         },
         {
           "id": 2,
-          "title": "Document CLI usage and configuration file format",
-          "description": "Create detailed documentation for all CLI commands, options, and configuration file structure",
+          "title": "Develop API documentation for all components",
+          "description": "Create comprehensive API documentation for all HealthWand components with clear examples",
           "status": "pending",
           "dependencies": [
             1
           ],
-          "details": "Create a CLI.md document that lists all available commands with syntax, options, flags, and examples. For the configuration file, document the schema, required and optional fields, default values, and validation rules. Include at least 3 complete configuration examples for different use cases. Use tables for command options and JSON/YAML examples for configuration."
+          "details": "Use a documentation generator (like Sphinx, JSDoc, or similar) to document all public APIs. For each component, document: function signatures, parameter descriptions, return values, exceptions/errors, usage examples, and version compatibility. Organize documentation by component categories (e.g., validators, parsers, integrations). Include diagrams showing component relationships. Set up automated documentation generation in the build process to ensure docs stay current with code changes."
         },
         {
           "id": 3,
-          "title": "Develop API documentation with request/response examples",
-          "description": "Create comprehensive API reference documentation with example requests and responses",
-          "status": "pending",
-          "dependencies": [
-            1
-          ],
-          "details": "Document each API endpoint with HTTP method, URL, request parameters, headers, authentication requirements, response codes, and response schema. Include curl examples for each endpoint and sample responses in JSON format. Group endpoints logically by resource or functionality. Include error handling information and rate limiting details if applicable."
-        },
-        {
-          "id": 4,
-          "title": "Create GitHub Action usage guide and CI/CD integration examples",
-          "description": "Document how to use the tool as a GitHub Action and integrate with various CI/CD pipelines",
+          "title": "Create tutorials and use case examples",
+          "description": "Develop detailed tutorials for common use cases and example configurations for different healthcare scenarios",
           "status": "pending",
           "dependencies": [
             2
           ],
-          "details": "Create a GitHub-Actions.md guide with step-by-step instructions for setting up the GitHub Action. Include example workflow YAML files for different scenarios. For CI/CD integration, provide examples for GitHub Actions, GitLab CI, Jenkins, and CircleCI. Include configuration snippets and explanations of environment variables and secrets management."
+          "details": "Create at least 5 detailed tutorials covering: CI/CD integration, API usage patterns, custom pattern definition, integration with EHR systems, and data validation workflows. For each tutorial, include step-by-step instructions, code snippets, and expected outcomes. Develop example configurations for different healthcare scenarios (hospital systems, research institutions, insurance providers, etc.). Package examples as downloadable starter templates. Include screenshots and diagrams where appropriate."
+        },
+        {
+          "id": 4,
+          "title": "Develop troubleshooting guides and FAQs",
+          "description": "Create comprehensive troubleshooting documentation and frequently asked questions with solutions",
+          "status": "pending",
+          "dependencies": [
+            2,
+            3
+          ],
+          "details": "Compile common issues encountered during development and usage. Create a structured troubleshooting guide organized by component and error type. Include error messages, possible causes, and step-by-step resolution steps. Develop an FAQ section addressing common questions about configuration, performance, security, and integration. Add a decision tree for problem diagnosis. Document performance optimization strategies for different deployment scenarios. Include monitoring and logging best practices."
         },
         {
           "id": 5,
-          "title": "Document extension points and plugin development",
-          "description": "Create developer documentation for extending the tool and building plugins",
-          "status": "pending",
-          "dependencies": [
-            3
-          ],
-          "details": "Create a Developers.md guide that documents the architecture, extension points, and plugin system. Include class diagrams, interface definitions, and the plugin lifecycle. Provide a step-by-step tutorial for creating a simple plugin with code examples. Document the plugin API, events, and hooks. Include information on testing plugins and contribution guidelines."
-        },
-        {
-          "id": 6,
-          "title": "Create compliance reference documentation",
-          "description": "Document how the tool helps with compliance for HIPAA, GDPR, HITRUST, and other frameworks",
-          "status": "pending",
-          "dependencies": [
-            2,
-            3
-          ],
-          "details": "Create a Compliance.md document that explains how the tool maps to specific requirements in HIPAA, GDPR, and HITRUST. Include tables showing requirement IDs, descriptions, and how the tool addresses each one. Provide configuration examples specifically tailored for compliance scanning. Include disclaimer about not guaranteeing compliance and recommendation to consult legal experts."
-        },
-        {
-          "id": 7,
-          "title": "Set up documentation website with navigation and search",
-          "description": "Implement a documentation website using mdBook or similar tool with proper organization",
+          "title": "Document security best practices and contribution guidelines",
+          "description": "Create security documentation and guidelines for open-source contributors",
           "status": "pending",
           "dependencies": [
             1,
-            2,
-            3,
-            4,
-            5,
-            6
+            2
           ],
-          "details": "Select and set up a documentation tool (mdBook recommended). Organize all documentation into a logical structure with chapters and sections. Implement navigation, table of contents, and search functionality. Ensure mobile-friendly design. Set up automated deployment of the documentation site when documentation files change. Include syntax highlighting for code examples and a dark/light mode toggle."
+          "details": "Document security best practices specific to healthcare data processing: data encryption, access control, audit logging, compliance considerations (HIPAA, GDPR, etc.). Create a CONTRIBUTING.md file with: code of conduct, development setup instructions, coding standards, pull request process, and issue reporting guidelines. Include documentation on the review process, testing requirements, and documentation standards for contributions. Add templates for bug reports, feature requests, and pull requests. Document the project's governance model and decision-making process."
         }
       ]
     }
@@ -702,6 +682,6 @@
     "projectName": "HealthWand Implementation",
     "totalTasks": 10,
     "sourceFile": "scripts/PRD.txt",
-    "generatedAt": "2023-11-08"
+    "generatedAt": "2023-11-09"
   }
 }

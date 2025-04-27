@@ -1,43 +1,43 @@
 # Task ID: 8
-# Title: Add basic NLP context-aware detection
+# Title: Implement OCR for image processing
 # Status: pending
-# Dependencies: 3
+# Dependencies: 4
 # Priority: low
-# Description: Enhance detection accuracy by implementing context-aware NLP techniques to reduce false positives
+# Description: Add capability to detect PHI in images using OCR technology
 # Details:
-Integrate a lightweight NLP library for context analysis. Implement named entity recognition for medical terms and personal information. Add confidence scoring based on surrounding context. Create rules for common false positive scenarios. Implement context window analysis to determine if a regex match is likely PHI. Add configuration options to enable/disable NLP features. Ensure NLP components are optional dependencies to keep the core tool lightweight.
+Integrate with Tesseract or similar OCR library. Implement image preprocessing to improve OCR accuracy. Support common medical image formats (DICOM, etc.). Create configuration options for OCR sensitivity and accuracy. Implement region-of-interest scanning for targeted processing. Add support for redacting images by blurring or masking detected PHI. Optimize for performance with large images or batches.
 
 # Test Strategy:
-Compare detection accuracy with and without NLP. Test with edge cases known to produce false positives with regex-only detection. Measure performance impact of NLP processing.
+Test with sample medical images containing PHI. Measure OCR accuracy on different image qualities. Test performance with large image sets.
 
 # Subtasks:
-## 1. Integrate lightweight NLP library as optional dependency [pending]
+## 1. Integrate OCR library and implement basic image processing [pending]
 ### Dependencies: None
-### Description: Set up a lightweight NLP library integration with proper dependency management to ensure it remains optional
+### Description: Set up Tesseract or similar OCR library and create basic image preprocessing pipeline
 ### Details:
-Research and select an appropriate lightweight NLP library (e.g., spaCy with small models, NLTK). Implement as an optional dependency using conditional imports. Create an abstraction layer that allows the core functionality to work without NLP features. Add configuration options in settings to enable/disable NLP features. Document installation instructions for users who want the enhanced NLP capabilities.
+Add Tesseract OCR as a dependency to the project. Create a service class that handles basic OCR operations. Implement image preprocessing functions including grayscale conversion, noise reduction, thresholding, and contrast enhancement to improve OCR accuracy. Create unit tests to verify OCR functionality with sample images. The preprocessing pipeline should be modular to allow for different preprocessing steps based on image type.
 
-## 2. Implement named entity recognition for sensitive information [pending]
+## 2. Add support for medical image formats [pending]
 ### Dependencies: 8.1
-### Description: Add capability to identify medical terms and personal information using NLP-based named entity recognition
+### Description: Extend the OCR service to handle DICOM and other medical image formats
 ### Details:
-Extend the detection system to use the NLP library's named entity recognition capabilities. Focus on medical terms (diseases, medications, procedures) and personal information (names, locations, organizations). Create custom entity patterns for domain-specific PHI that standard NLP models might miss. Implement a fallback mechanism when NLP features are disabled. Test with various medical texts to ensure proper recognition of sensitive entities.
+Integrate with DICOM processing libraries (like dcm4che) to extract image data from DICOM files. Create format detection logic to automatically identify image formats. Implement appropriate preprocessing for each supported format. Add conversion utilities to transform medical formats into standard formats that can be processed by the OCR engine. Include metadata extraction from medical formats to provide context for PHI detection. Test with a variety of medical image samples.
 
-## 3. Develop context window analysis for regex matches [pending]
-### Dependencies: 8.1, 8.2
-### Description: Create a system to analyze text surrounding potential PHI matches to determine if they are likely to be actual PHI
+## 3. Implement PHI detection in OCR results [pending]
+### Dependencies: 8.1
+### Description: Create pattern matching and NLP capabilities to identify PHI in OCR-processed text
 ### Details:
-Implement a configurable context window (N words/tokens before and after) around regex matches. Extract and analyze surrounding text using NLP techniques to determine if the context suggests PHI or non-PHI usage. Create a scoring mechanism based on contextual clues (e.g., presence of medical terminology, personal identifiers, or common false positive indicators). Integrate with existing regex detection to provide additional validation of potential matches.
+Develop pattern matching algorithms for common PHI types (names, dates, IDs, addresses, etc.). Implement NLP techniques to improve detection accuracy, especially for context-dependent PHI. Create confidence scoring for detected PHI. Add dictionary-based approaches for medical terminology to reduce false positives. Implement region tracking to map detected PHI back to image coordinates. Create a configuration system for adjusting sensitivity thresholds and detection rules.
 
-## 4. Create confidence scoring system based on context [pending]
-### Dependencies: 8.3
-### Description: Implement a scoring mechanism that rates the confidence of PHI detection based on contextual analysis
+## 4. Implement region-of-interest scanning and PHI redaction [pending]
+### Dependencies: 8.2, 8.3
+### Description: Add capability to scan specific image regions and redact detected PHI
 ### Details:
-Design and implement a confidence scoring algorithm that combines regex match strength with contextual analysis. Define thresholds for high, medium, and low confidence detections. Allow for configuration of confidence thresholds in settings. Extend the detection results to include confidence scores. Update the reporting mechanism to display confidence levels for each detection. Implement filtering options based on confidence scores.
+Create an API for defining regions of interest within images. Implement selective scanning of defined regions to improve performance. Develop redaction methods including blurring, masking, and replacement of detected PHI in images. Ensure redaction preserves image quality outside of PHI areas. Add options for different redaction styles (black box, pixelation, text replacement). Implement preview functionality to review redactions before finalizing. Create audit logging for redaction operations.
 
-## 5. Implement rules for common false positive scenarios [pending]
-### Dependencies: 8.3, 8.4
-### Description: Create a rule-based system to identify and filter out common false positive patterns based on contextual information
+## 5. Optimize performance and add configuration options [pending]
+### Dependencies: 8.4
+### Description: Improve processing speed for large images and batches, and finalize configuration system
 ### Details:
-Identify common false positive scenarios through analysis of detection results. Create a rule engine that can evaluate contextual patterns to exclude false positives. Implement specific rules for medical terminology that might be confused with PHI. Add rules for common formats that might trigger regex patterns but aren't PHI in context. Make rules configurable and extensible so users can add custom rules. Test extensively with real-world data to validate false positive reduction while maintaining high sensitivity for actual PHI.
+Implement multithreading for parallel processing of images or image regions. Add caching mechanisms to avoid redundant processing. Create batch processing capabilities with progress tracking. Optimize memory usage for large images. Finalize the configuration system with options for OCR engine parameters, sensitivity levels, processing priorities (speed vs. accuracy), and output formats. Add performance monitoring and reporting. Create comprehensive documentation for the OCR system including configuration options and performance tuning guidelines.
 

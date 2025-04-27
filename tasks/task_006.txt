@@ -1,37 +1,37 @@
 # Task ID: 6
-# Title: Develop GitHub Action integration
+# Title: Create GitHub Actions integration
 # Status: pending
 # Dependencies: 4
 # Priority: medium
-# Description: Create a GitHub Action that integrates HealthWand into CI/CD pipelines
+# Description: Develop a GitHub Action that integrates HealthWand into CI/CD pipelines
 # Details:
-Create GitHub Action definition in YAML format. Implement action.yml with inputs for configuration options. Set up Docker container for the action. Create entrypoint script that runs the CLI tool. Add logic to fail CI/CD pipelines when PHI is detected. Implement customizable threshold settings for pipeline failures. Add support for commenting on PRs with findings summary.
+Create a GitHub Action definition file (action.yml). Implement Docker-based execution environment with all dependencies. Design input parameters for configuring the action. Create output formats compatible with GitHub Actions. Implement PR comment functionality for reporting findings. Add support for ignoring specific files or directories. Create documentation and examples for common workflows. Include options for failing builds on PHI detection.
 
 # Test Strategy:
-Test the GitHub Action in a sample repository. Verify it correctly identifies PHI in pull requests. Confirm that build failures occur when PHI is detected above the threshold.
+Test the action in a sample repository with mock PHI data. Verify correct reporting in PR comments and build logs. Test different configuration options and failure modes.
 
 # Subtasks:
-## 1. Create GitHub Action definition files [pending]
+## 1. Create GitHub Action definition and Docker environment [pending]
 ### Dependencies: None
-### Description: Set up the basic structure for the GitHub Action with configuration options
+### Description: Define the GitHub Action structure and set up the Docker execution environment with all required dependencies
 ### Details:
-Create the action.yml file with proper metadata, branding, and input parameters. Define inputs for configuration options like threshold settings, output format, and PR comment options. Include descriptions for each input parameter. Set up the Docker container reference in the action definition. This subtask establishes the interface for the GitHub Action.
+Create the action.yml file that defines the action name, description, inputs, outputs, and Docker-based execution. Set up a Dockerfile that installs all necessary dependencies for HealthWand. Ensure the Docker image is optimized for CI/CD environments (minimal size, fast startup). Configure the entrypoint script to handle the GitHub Actions workflow context.
 
-## 2. Implement Docker container for the action [pending]
+## 2. Implement configurable input parameters and file filtering [pending]
 ### Dependencies: 6.1
-### Description: Create a Docker container that will run the HealthWand CLI tool
+### Description: Design and implement the input parameters for the GitHub Action, including file filtering capabilities
 ### Details:
-Create a Dockerfile that installs necessary dependencies and the HealthWand CLI tool. Configure the container environment to handle GitHub Action inputs and outputs. Optimize the container size for faster CI/CD runs. Set up proper entrypoint configuration. Test the Docker build process to ensure it creates a working container.
+Define input parameters in action.yml such as scan_paths, exclude_patterns, severity_threshold, and fail_on_detection. Implement the logic to process these parameters in the action's execution flow. Add support for ignoring specific files or directories using glob patterns. Create validation for input parameters to provide helpful error messages for misconfiguration.
 
-## 3. Develop entrypoint script with failure logic [pending]
+## 3. Develop output formatting and PR comment functionality [pending]
 ### Dependencies: 6.2
-### Description: Create the main script that runs the CLI and implements pipeline failure conditions
+### Description: Create standardized output formats and implement the ability to post findings as PR comments
 ### Details:
-Implement an entrypoint.sh script that processes GitHub Action inputs. Add logic to run the HealthWand CLI with appropriate parameters. Implement customizable threshold settings that determine when to fail the CI/CD pipeline based on PHI detection severity or count. Set up proper exit codes to signal success or failure to GitHub Actions. Include detailed logging for debugging purposes.
+Format scan results in a GitHub Actions compatible way (using ::set-output). Implement PR comment functionality using the GitHub API (via actions/github-script or directly). Design a clear, readable format for the PR comments that highlights findings effectively. Include severity levels and file locations in the output. Implement the logic to determine when a build should fail based on the fail_on_detection parameter and detected PHI.
 
-## 4. Add PR comment functionality [pending]
+## 4. Create documentation and example workflows [pending]
 ### Dependencies: 6.3
-### Description: Implement the ability to comment on PRs with a summary of findings
+### Description: Develop comprehensive documentation and example workflows for common use cases
 ### Details:
-Use the GitHub API to post comments on pull requests when PHI is detected. Format the findings in a clear, readable way in the PR comment. Include severity levels, file locations, and remediation suggestions. Add support for customizing the comment format and content based on action inputs. Implement logic to update existing comments rather than creating multiple comments on subsequent runs.
+Create a detailed README.md with usage instructions, parameter descriptions, and examples. Develop example workflow files (.github/workflows/examples/) for common scenarios: scanning PRs, scheduled scans, and manual triggers. Document best practices for integrating HealthWand into different types of repositories. Include troubleshooting guidance and advanced configuration options. Create visual examples of PR comments and other outputs to help users understand what to expect.
 

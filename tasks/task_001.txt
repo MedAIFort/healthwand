@@ -1,43 +1,49 @@
 # Task ID: 1
-# Title: Set up Rust project structure and CLI foundation
+# Title: Set up Rust CLI foundation with basic PHI detection
 # Status: pending
 # Dependencies: None
 # Priority: high
-# Description: Initialize the Rust project with necessary dependencies and create the basic CLI structure for HealthWand
+# Description: Create the core Rust CLI application with basic pattern matching for common PHI types (SSNs, Medical IDs, etc.)
 # Details:
-Create a new Rust project using cargo. Set up the project structure with modules for CLI, analyzer, and configuration. Add dependencies for CLI argument parsing (clap), YAML parsing (serde_yaml), and JSON output (serde_json). Implement basic CLI entry point with command-line argument parsing for input files/directories and output format options. Create a simple help menu and version information.
+Initialize a new Rust project with Cargo. Implement command-line argument parsing using clap or structopt. Create pattern matchers for basic PHI types (SSNs, Medical IDs, ICD-10 codes) using regex. Implement file traversal to scan text files. Design a simple JSON output format for detection results. Include basic redaction functionality that replaces detected PHI with placeholders (e.g., 'XXX-XX-XXXX' for SSNs). Ensure proper error handling and logging.
 
 # Test Strategy:
-Write unit tests for CLI argument parsing. Manually test the CLI with --help and --version flags to ensure proper output.
+Write unit tests for each pattern matcher. Create integration tests with sample files containing mock PHI data. Measure performance on large files to establish baseline metrics.
 
 # Subtasks:
-## 1. Initialize Rust project with cargo and add dependencies [pending]
+## 1. Initialize Rust project and implement CLI argument parsing [pending]
 ### Dependencies: None
-### Description: Create a new Rust project for HealthWand using cargo and add the required dependencies for CLI parsing, YAML processing, and JSON output.
+### Description: Set up the initial Rust project structure and implement command-line argument parsing
 ### Details:
-Run `cargo new healthwand --bin` to create a new binary project. Update Cargo.toml to add dependencies: clap (with features 'derive') for CLI argument parsing, serde and serde_yaml for YAML configuration handling, and serde_json for JSON output formatting. Also add appropriate version constraints for each dependency. Initialize git repository if not automatically done by cargo.
+Create a new Rust project using `cargo new phi-detector --bin`. Set up the project structure with appropriate modules. Implement CLI argument parsing using clap (v3+) with the following options: input file/directory path, output format options, redaction toggle, and verbosity level. Create a configuration struct to hold parsed arguments. Write unit tests for argument parsing. Update Cargo.toml with necessary dependencies including clap with derive features.
 
-## 2. Design and implement module structure [pending]
+## 2. Implement file traversal and reading functionality [pending]
 ### Dependencies: 1.1
-### Description: Create the foundational module structure for the project, setting up the main components that will be developed further.
+### Description: Create modules to traverse directories and read file contents for scanning
 ### Details:
-Create the following module structure: 1) src/main.rs - Entry point that calls the CLI module, 2) src/cli/mod.rs - CLI handling logic, 3) src/analyzer/mod.rs - Stub for future analysis functionality, 4) src/config/mod.rs - Configuration handling. Each module should have appropriate public interfaces and documentation comments. Ensure proper visibility modifiers (pub, pub(crate)) for module items.
+Create a file handling module that can: recursively traverse directories if specified, filter for text-based files (.txt, .md, .csv, etc.), read file contents efficiently (using buffered reading for large files), and handle file system errors gracefully. Implement a FileSource trait/interface that can be extended later for different input sources. Add proper error types and propagation. Write unit tests for file traversal and reading functionality using test fixtures.
 
-## 3. Implement CLI argument parsing with clap [pending]
-### Dependencies: 1.2
-### Description: Create the command-line interface structure using clap to handle various input options and commands.
+## 3. Develop regex patterns for basic PHI detection [pending]
+### Dependencies: 1.1
+### Description: Create a pattern matching module with regex definitions for common PHI types
 ### Details:
-In the cli module, use clap's derive feature to define a struct representing CLI arguments. Include options for: input files/directories (--input, -i), output format (--format, -f) with choices like 'json', 'yaml', 'text', verbosity level (--verbose, -v), and any other basic options. Implement a function that parses command line arguments and returns the populated struct. Document each option with helpful descriptions that will appear in the help text.
+Create a dedicated module for PHI pattern definitions. Implement regex patterns for: SSNs (format: XXX-XX-XXXX), Medical Record Numbers (various formats), ICD-10 codes (letter followed by 2 digits, optional decimal and more digits), and basic date of birth patterns. Use the regex crate with compiled regex patterns for performance. Create a PHIType enum to categorize different types of detected PHI. Implement unit tests for each pattern with both matching and non-matching examples.
 
-## 4. Create help menu and version information [pending]
-### Dependencies: 1.3
-### Description: Enhance the CLI with comprehensive help documentation and version information.
+## 4. Implement PHI scanning and detection engine [pending]
+### Dependencies: 1.2, 1.3
+### Description: Create the core scanning logic that applies regex patterns to file contents
 ### Details:
-Configure clap to display detailed help information for all commands and options. Add examples of common usage patterns to the help text. Implement version information that includes the current version from Cargo.toml. Create a custom help formatter that organizes options into logical groups. Test the help menu by running the application with --help and -h flags.
+Develop a Scanner struct that takes file content and applies all PHI detection patterns. For each match, record the match text, position, PHI type, and confidence level. Implement context extraction to capture surrounding text for verification. Create a Detection struct to hold match details. Optimize for performance by using appropriate regex options and processing strategies. Add unit and integration tests with sample text containing various PHI patterns.
 
-## 5. Implement basic CLI execution flow [pending]
-### Dependencies: 1.3, 1.4
-### Description: Connect the CLI argument parsing to a basic execution flow that will serve as the foundation for future functionality.
+## 5. Implement redaction functionality [pending]
+### Dependencies: 1.4
+### Description: Create a module to redact or mask detected PHI in the original text
 ### Details:
-In main.rs, implement the program flow: 1) Parse CLI arguments, 2) Validate inputs, 3) Set up logging based on verbosity, 4) Create placeholder for calling the analyzer (to be implemented later), 5) Add basic output formatting based on the selected format option. Include appropriate error handling for invalid inputs. The program should successfully run and exit with appropriate status codes, even though the analyzer functionality will be implemented in future tasks.
+Implement a Redactor struct that takes Detection objects and original text to produce redacted output. Create different redaction strategies: full replacement (e.g., 'XXX-XX-XXXX' for SSNs), partial masking (e.g., showing only last 4 digits), and placeholder substitution (e.g., '[REDACTED-SSN]'). Ensure redaction preserves text layout and length where appropriate. Handle overlapping matches correctly. Add configuration options to control redaction behavior. Write tests to verify redaction correctness with various PHI types.
+
+## 6. Implement results output formatting and logging [pending]
+### Dependencies: 1.4, 1.5
+### Description: Create output formatting for detection results and add proper error handling and logging
+### Details:
+Design and implement a JSON output format for detection results including file path, PHI type, location, and context. Add an optional redacted content field in the output. Implement pretty-printing for console output. Add structured logging using the log crate with different verbosity levels. Implement proper error handling throughout the application with custom error types and helpful error messages. Create a results summary with statistics. Write integration tests that verify the entire pipeline from input to output. Add documentation for the output format.
 

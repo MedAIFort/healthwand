@@ -1,55 +1,43 @@
 # Task ID: 10
-# Title: Create comprehensive documentation and examples
+# Title: Implement comprehensive documentation and examples
 # Status: pending
 # Dependencies: 1, 2, 3, 4, 5, 6, 7, 8, 9
 # Priority: medium
-# Description: Develop user documentation, API references, and usage examples to facilitate adoption
+# Description: Create detailed documentation, tutorials, and examples for all HealthWand components
 # Details:
-Write README with project overview and quick start guide. Create detailed documentation for CLI usage and options. Document configuration file format with examples. Provide API documentation with request/response examples. Create GitHub Action usage guide. Add examples for common use cases (scanning codebases, integrating with CI/CD). Document extension points and plugin development. Include compliance references (HIPAA, GDPR, HITRUST). Set up documentation website using mdBook or similar tool.
+Create comprehensive README with installation and usage instructions. Develop detailed API documentation for all components. Create tutorials for common use cases (CI/CD integration, API usage, custom pattern definition). Provide example configurations for different healthcare scenarios. Create troubleshooting guides and FAQs. Document performance optimization strategies. Include security best practices. Create contribution guidelines for open-source contributors.
 
 # Test Strategy:
-Review documentation for accuracy and completeness. Test examples to ensure they work as documented. Gather feedback from potential users on documentation clarity.
+Review documentation for clarity and completeness. Test examples to ensure they work as documented. Gather feedback from potential users on documentation usability.
 
 # Subtasks:
-## 1. Create project README with overview and quick start guide [pending]
+## 1. Create project README and installation guide [pending]
 ### Dependencies: None
-### Description: Develop a comprehensive README.md file that introduces the project and provides quick start instructions
+### Description: Develop the main project README with clear installation instructions, basic usage examples, and project overview
 ### Details:
-Create a README.md with sections for: project overview, features, installation instructions, basic usage examples, license information, and contribution guidelines. Include badges for build status, version, and license. The quick start guide should enable users to install and run basic commands within 5 minutes.
+Create a well-structured README.md that includes: project introduction and purpose, badges for build status/coverage, installation instructions for different environments, quick start guide, basic usage examples, license information, and links to more detailed documentation. Include step-by-step installation instructions for different platforms (Linux, macOS, Windows) and deployment options (local, Docker, cloud).
 
-## 2. Document CLI usage and configuration file format [pending]
+## 2. Develop API documentation for all components [pending]
 ### Dependencies: 10.1
-### Description: Create detailed documentation for all CLI commands, options, and configuration file structure
+### Description: Create comprehensive API documentation for all HealthWand components with clear examples
 ### Details:
-Create a CLI.md document that lists all available commands with syntax, options, flags, and examples. For the configuration file, document the schema, required and optional fields, default values, and validation rules. Include at least 3 complete configuration examples for different use cases. Use tables for command options and JSON/YAML examples for configuration.
+Use a documentation generator (like Sphinx, JSDoc, or similar) to document all public APIs. For each component, document: function signatures, parameter descriptions, return values, exceptions/errors, usage examples, and version compatibility. Organize documentation by component categories (e.g., validators, parsers, integrations). Include diagrams showing component relationships. Set up automated documentation generation in the build process to ensure docs stay current with code changes.
 
-## 3. Develop API documentation with request/response examples [pending]
-### Dependencies: 10.1
-### Description: Create comprehensive API reference documentation with example requests and responses
-### Details:
-Document each API endpoint with HTTP method, URL, request parameters, headers, authentication requirements, response codes, and response schema. Include curl examples for each endpoint and sample responses in JSON format. Group endpoints logically by resource or functionality. Include error handling information and rate limiting details if applicable.
-
-## 4. Create GitHub Action usage guide and CI/CD integration examples [pending]
+## 3. Create tutorials and use case examples [pending]
 ### Dependencies: 10.2
-### Description: Document how to use the tool as a GitHub Action and integrate with various CI/CD pipelines
+### Description: Develop detailed tutorials for common use cases and example configurations for different healthcare scenarios
 ### Details:
-Create a GitHub-Actions.md guide with step-by-step instructions for setting up the GitHub Action. Include example workflow YAML files for different scenarios. For CI/CD integration, provide examples for GitHub Actions, GitLab CI, Jenkins, and CircleCI. Include configuration snippets and explanations of environment variables and secrets management.
+Create at least 5 detailed tutorials covering: CI/CD integration, API usage patterns, custom pattern definition, integration with EHR systems, and data validation workflows. For each tutorial, include step-by-step instructions, code snippets, and expected outcomes. Develop example configurations for different healthcare scenarios (hospital systems, research institutions, insurance providers, etc.). Package examples as downloadable starter templates. Include screenshots and diagrams where appropriate.
 
-## 5. Document extension points and plugin development [pending]
-### Dependencies: 10.3
-### Description: Create developer documentation for extending the tool and building plugins
-### Details:
-Create a Developers.md guide that documents the architecture, extension points, and plugin system. Include class diagrams, interface definitions, and the plugin lifecycle. Provide a step-by-step tutorial for creating a simple plugin with code examples. Document the plugin API, events, and hooks. Include information on testing plugins and contribution guidelines.
-
-## 6. Create compliance reference documentation [pending]
+## 4. Develop troubleshooting guides and FAQs [pending]
 ### Dependencies: 10.2, 10.3
-### Description: Document how the tool helps with compliance for HIPAA, GDPR, HITRUST, and other frameworks
+### Description: Create comprehensive troubleshooting documentation and frequently asked questions with solutions
 ### Details:
-Create a Compliance.md document that explains how the tool maps to specific requirements in HIPAA, GDPR, and HITRUST. Include tables showing requirement IDs, descriptions, and how the tool addresses each one. Provide configuration examples specifically tailored for compliance scanning. Include disclaimer about not guaranteeing compliance and recommendation to consult legal experts.
+Compile common issues encountered during development and usage. Create a structured troubleshooting guide organized by component and error type. Include error messages, possible causes, and step-by-step resolution steps. Develop an FAQ section addressing common questions about configuration, performance, security, and integration. Add a decision tree for problem diagnosis. Document performance optimization strategies for different deployment scenarios. Include monitoring and logging best practices.
 
-## 7. Set up documentation website with navigation and search [pending]
-### Dependencies: 10.1, 10.2, 10.3, 10.4, 10.5, 10.6
-### Description: Implement a documentation website using mdBook or similar tool with proper organization
+## 5. Document security best practices and contribution guidelines [pending]
+### Dependencies: 10.1, 10.2
+### Description: Create security documentation and guidelines for open-source contributors
 ### Details:
-Select and set up a documentation tool (mdBook recommended). Organize all documentation into a logical structure with chapters and sections. Implement navigation, table of contents, and search functionality. Ensure mobile-friendly design. Set up automated deployment of the documentation site when documentation files change. Include syntax highlighting for code examples and a dark/light mode toggle.
+Document security best practices specific to healthcare data processing: data encryption, access control, audit logging, compliance considerations (HIPAA, GDPR, etc.). Create a CONTRIBUTING.md file with: code of conduct, development setup instructions, coding standards, pull request process, and issue reporting guidelines. Include documentation on the review process, testing requirements, and documentation standards for contributions. Add templates for bug reports, feature requests, and pull requests. Document the project's governance model and decision-making process.
 
