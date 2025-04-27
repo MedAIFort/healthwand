@@ -4,7 +4,7 @@
       "id": 1,
       "title": "Set up Rust CLI foundation with basic PHI detection",
       "description": "Create the core Rust CLI application with basic pattern matching for common PHI types (SSNs, Medical IDs, etc.)",
-      "status": "pending",
+      "status": "in-progress",
       "dependencies": [],
       "priority": "high",
       "details": "Initialize a new Rust project with Cargo. Implement command-line argument parsing using clap or structopt. Create pattern matchers for basic PHI types (SSNs, Medical IDs, ICD-10 codes) using regex. Implement file traversal to scan text files. Design a simple JSON output format for detection results. Include basic redaction functionality that replaces detected PHI with placeholders (e.g., 'XXX-XX-XXXX' for SSNs). Ensure proper error handling and logging.",

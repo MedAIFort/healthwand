@@ -1,0 +1,9 @@
+[package]
+name = "phi-detector"
+version = "0.1.0"
+edition = "2024"
+authors = ["Kresna Sucandra <https://github.com/SHA888>"]
+license = "MIT"
+
+[dependencies]
+clap = { version = "4.5", features = ["derive"] }
