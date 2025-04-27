@@ -1,0 +1,43 @@
+# Task ID: 4
+# Title: Create JSON reporting system
+# Status: pending
+# Dependencies: 3
+# Priority: medium
+# Description: Implement a reporting system that outputs detection results in JSON format for auditing and integration
+# Details:
+Design JSON schema for PHI findings reports. Implement report generation logic that converts internal PHI findings to JSON format. Add summary statistics (total files scanned, findings by type, etc.). Include file path, line number, and context information in reports. Add options for different verbosity levels in reports. Implement report writing to file or stdout based on user preference.
+
+# Test Strategy:
+Verify JSON output against schema. Test report generation with various detection scenarios. Validate that all required fields are present in the output.
+
+# Subtasks:
+## 1. Design JSON schema for PHI findings [pending]
+### Dependencies: None
+### Description: Create a comprehensive JSON schema that defines the structure for PHI detection reports
+### Details:
+Define a JSON schema that includes: 1) Top-level metadata (timestamp, scan configuration, summary statistics), 2) File-level information (path, size, scan status), 3) Finding structure (type of PHI, confidence score, line number, column position, context snippet), 4) Summary section (counts by PHI type, total files scanned, etc.). Document the schema with examples and ensure it's extensible for future enhancements. Consider including schema version field for backward compatibility.
+
+## 2. Implement core JSON conversion logic [pending]
+### Dependencies: 4.1
+### Description: Create the core functionality to convert internal PHI findings data structures to JSON format
+### Details:
+Develop a ReportGenerator class that takes the internal PHI findings data and converts it to the JSON structure defined in the schema. Implement methods to: 1) Convert individual PHI findings to JSON objects, 2) Group findings by file, 3) Add file metadata, 4) Generate the complete report structure. Use appropriate serialization libraries and ensure proper handling of special characters and encoding. Include unit tests that verify the conversion logic produces valid JSON according to the schema.
+
+## 3. Add summary statistics generation [pending]
+### Dependencies: 4.2
+### Description: Implement logic to calculate and include summary statistics in the JSON reports
+### Details:
+Extend the ReportGenerator to calculate statistics including: 1) Total files scanned, 2) Number of files with findings, 3) Total findings count, 4) Findings breakdown by PHI type, 5) Confidence score distribution. Create helper methods to efficiently compute these statistics from the raw findings data. Ensure statistics are properly formatted and included in the JSON output. Add unit tests to verify statistics calculations are accurate.
+
+## 4. Implement verbosity level configuration [pending]
+### Dependencies: 4.2, 4.3
+### Description: Add support for different levels of detail in the JSON reports based on user preferences
+### Details:
+Create an enum for verbosity levels (e.g., MINIMAL, STANDARD, DETAILED, DEBUG). Modify the ReportGenerator to accept a verbosity parameter and adjust output accordingly: 1) MINIMAL - only summary statistics and counts, 2) STANDARD - includes file paths and finding types, 3) DETAILED - adds line numbers and context snippets, 4) DEBUG - includes all available information. Implement filtering logic to include/exclude fields based on verbosity. Update documentation to explain the different verbosity options and their use cases.
+
+## 5. Add flexible output destination options [pending]
+### Dependencies: 4.4
+### Description: Implement functionality to write reports to files or stdout based on user preference
+### Details:
+Create an OutputHandler class that can direct JSON output to different destinations: 1) File output with configurable path, 2) Standard output (console), 3) Both simultaneously. Add pretty-printing option for human-readable output with proper indentation. Implement proper error handling for file I/O operations. Add compression option for large reports. Include a configuration object that allows users to specify output preferences. Update the CLI interface to expose these options to users. Add integration tests that verify end-to-end report generation and output.
+

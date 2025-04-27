@@ -1,0 +1,49 @@
+# Task ID: 7
+# Title: Build RESTful API server with Actix Web
+# Status: pending
+# Dependencies: 3
+# Priority: medium
+# Description: Implement an API server that provides PHI detection capabilities via HTTP endpoints
+# Details:
+Set up Actix Web framework with basic server configuration. Create RESTful endpoints for PHI detection in text. Implement request/response models for the API. Add authentication mechanism (API keys). Implement rate limiting for API requests. Create Swagger/OpenAPI documentation. Reuse the core detection logic from the CLI implementation. Add health check and metrics endpoints.
+
+# Test Strategy:
+Write integration tests for API endpoints. Test authentication and rate limiting. Perform load testing to ensure server stability under high traffic.
+
+# Subtasks:
+## 1. Set up Actix Web server with basic configuration [pending]
+### Dependencies: None
+### Description: Initialize the Actix Web framework with basic server configuration including routing, middleware structure, and error handling
+### Details:
+Create a new Rust project with Actix Web dependencies. Implement the server configuration with appropriate logging, CORS settings, and JSON serialization/deserialization support. Set up the basic application structure with modular components. Configure the server to run on a configurable port with proper shutdown handling. Implement global error handling middleware that returns appropriate HTTP status codes and error messages.
+
+## 2. Integrate PHI detection core logic [pending]
+### Dependencies: 7.1
+### Description: Adapt and integrate the existing PHI detection logic from the CLI implementation into the API server
+### Details:
+Import the core PHI detection modules from the CLI implementation. Create service abstractions that wrap the detection logic for use in API endpoints. Ensure the detection logic is properly initialized at server startup. Implement appropriate error handling for the detection logic. Consider performance optimizations for the server context, such as pooling resources or caching detection patterns.
+
+## 3. Implement RESTful API endpoints with request/response models [pending]
+### Dependencies: 7.1, 7.2
+### Description: Design and implement the API endpoints with proper request validation and response formatting
+### Details:
+Define request and response data models using serde for serialization. Implement the main PHI detection endpoint that accepts text input and returns detection results. Add input validation for all endpoints. Create additional utility endpoints as needed (e.g., for getting supported PHI types). Ensure all endpoints follow RESTful principles with appropriate HTTP methods and status codes. Implement pagination for endpoints that might return large result sets.
+
+## 4. Add authentication and rate limiting [pending]
+### Dependencies: 7.1, 7.3
+### Description: Implement API key authentication and rate limiting middleware for API security
+### Details:
+Create an API key authentication middleware that validates requests against configured keys. Implement storage for API keys (in-memory for development, database or external service for production). Add rate limiting middleware that restricts requests based on client IP and/or API key. Configure different rate limits for different endpoints or client tiers. Implement appropriate HTTP responses for authentication and rate limiting errors (401, 429). Add logging for security events.
+
+## 5. Create health check and metrics endpoints [pending]
+### Dependencies: 7.1
+### Description: Implement operational endpoints for monitoring server health and performance
+### Details:
+Create a /health endpoint that reports on system status and dependencies. Implement a /metrics endpoint that exposes performance metrics (request counts, latencies, error rates). Add instrumentation throughout the application code to collect metrics. Consider integration with monitoring systems like Prometheus. Implement deeper health checks that verify the PHI detection system is functioning correctly. Add version information to the health endpoint.
+
+## 6. Generate Swagger/OpenAPI documentation [pending]
+### Dependencies: 7.3, 7.4, 7.5
+### Description: Create comprehensive API documentation using OpenAPI specification
+### Details:
+Integrate a Swagger/OpenAPI documentation generator with Actix Web (e.g., utoipa). Document all endpoints, request/response models, authentication requirements, and error responses. Include example requests and responses. Add descriptions for all fields and endpoints. Configure the Swagger UI for interactive API exploration. Ensure documentation is automatically updated when the API changes. Add a documentation endpoint that serves the OpenAPI specification and UI.
+

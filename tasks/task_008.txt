@@ -1,0 +1,43 @@
+# Task ID: 8
+# Title: Add basic NLP context-aware detection
+# Status: pending
+# Dependencies: 3
+# Priority: low
+# Description: Enhance detection accuracy by implementing context-aware NLP techniques to reduce false positives
+# Details:
+Integrate a lightweight NLP library for context analysis. Implement named entity recognition for medical terms and personal information. Add confidence scoring based on surrounding context. Create rules for common false positive scenarios. Implement context window analysis to determine if a regex match is likely PHI. Add configuration options to enable/disable NLP features. Ensure NLP components are optional dependencies to keep the core tool lightweight.
+
+# Test Strategy:
+Compare detection accuracy with and without NLP. Test with edge cases known to produce false positives with regex-only detection. Measure performance impact of NLP processing.
+
+# Subtasks:
+## 1. Integrate lightweight NLP library as optional dependency [pending]
+### Dependencies: None
+### Description: Set up a lightweight NLP library integration with proper dependency management to ensure it remains optional
+### Details:
+Research and select an appropriate lightweight NLP library (e.g., spaCy with small models, NLTK). Implement as an optional dependency using conditional imports. Create an abstraction layer that allows the core functionality to work without NLP features. Add configuration options in settings to enable/disable NLP features. Document installation instructions for users who want the enhanced NLP capabilities.
+
+## 2. Implement named entity recognition for sensitive information [pending]
+### Dependencies: 8.1
+### Description: Add capability to identify medical terms and personal information using NLP-based named entity recognition
+### Details:
+Extend the detection system to use the NLP library's named entity recognition capabilities. Focus on medical terms (diseases, medications, procedures) and personal information (names, locations, organizations). Create custom entity patterns for domain-specific PHI that standard NLP models might miss. Implement a fallback mechanism when NLP features are disabled. Test with various medical texts to ensure proper recognition of sensitive entities.
+
+## 3. Develop context window analysis for regex matches [pending]
+### Dependencies: 8.1, 8.2
+### Description: Create a system to analyze text surrounding potential PHI matches to determine if they are likely to be actual PHI
+### Details:
+Implement a configurable context window (N words/tokens before and after) around regex matches. Extract and analyze surrounding text using NLP techniques to determine if the context suggests PHI or non-PHI usage. Create a scoring mechanism based on contextual clues (e.g., presence of medical terminology, personal identifiers, or common false positive indicators). Integrate with existing regex detection to provide additional validation of potential matches.
+
+## 4. Create confidence scoring system based on context [pending]
+### Dependencies: 8.3
+### Description: Implement a scoring mechanism that rates the confidence of PHI detection based on contextual analysis
+### Details:
+Design and implement a confidence scoring algorithm that combines regex match strength with contextual analysis. Define thresholds for high, medium, and low confidence detections. Allow for configuration of confidence thresholds in settings. Extend the detection results to include confidence scores. Update the reporting mechanism to display confidence levels for each detection. Implement filtering options based on confidence scores.
+
+## 5. Implement rules for common false positive scenarios [pending]
+### Dependencies: 8.3, 8.4
+### Description: Create a rule-based system to identify and filter out common false positive patterns based on contextual information
+### Details:
+Identify common false positive scenarios through analysis of detection results. Create a rule engine that can evaluate contextual patterns to exclude false positives. Implement specific rules for medical terminology that might be confused with PHI. Add rules for common formats that might trigger regex patterns but aren't PHI in context. Make rules configurable and extensible so users can add custom rules. Test extensively with real-world data to validate false positive reduction while maintaining high sensitivity for actual PHI.
+

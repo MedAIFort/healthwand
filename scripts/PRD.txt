@@ -1,0 +1,83 @@
+<context>
+# Overview  
+HealthWand is an open-source framework for detecting, redacting, masking, and anonymizing sensitive healthcare data (Protected Health Information, PHI) across text, images, and structured data. It ensures compliance with HIPAA, GDPR, and HITRUST by identifying and protecting PHI such as SSNs, medical IDs, ICD-10 codes, drug names, and patient information. HealthWand empowers healthcare developers to secure software via CI/CD integration, API server, and customizable detection pipelines.
+
+# Core Features  
+- **PHI Detection**: Identifies sensitive data in text, images (OCR), and structured data using regex and NLP.
+- **Redaction and Anonymization**: Masks or redacts PHI to prevent data leaks.
+- **Customizable Pipelines**: Users can define custom PHI patterns and detection rules via configuration files.
+- **NLP Support**: Context-aware detection to reduce false positives.
+- **GitHub Actions Integration**: Automated PHI scanning in CI/CD pipelines.
+- **High Performance**: Built in Rust for speed and memory safety.
+- **Compliance-Ready**: Supports audit trails and reporting.
+- **Extensible**: Modular architecture for adding new detection methods, including ML-based capabilities.
+
+# User Experience  
+- **User Personas**:
+  - Healthcare software developers
+  - Compliance officers
+  - Open-source contributors
+- **Key User Flows**:
+  - CLI: Scan codebases or files for PHI, generate reports
+  - API: Real-time PHI detection via HTTP endpoint
+  - CI/CD: GitHub Action integration to fail builds on PHI detection
+- **UI/UX Considerations**:
+  - Clear CLI output and error messages
+  - JSON reports for audits
+  - Easy configuration via YAML
+  - Documentation and community support
+</context>
+<PRD>
+# Technical Architecture  
+- **System Components**:
+  - CLI tool (Rust)
+  - API server (Actix Web)
+  - Analyzer (regex, NLP, custom pipelines)
+  - Config management (YAML)
+  - GitHub Action wrapper
+- **Data Models**:
+  - PHI finding (type, value, file, line, confidence)
+  - Configurable pattern definitions
+- **APIs and Integrations**:
+  - RESTful API for PHI detection
+  - GitHub Actions integration
+- **Infrastructure Requirements**:
+  - Rust toolchain
+  - Optionally Docker for containerized deployment
+
+# Development Roadmap  
+- **MVP Requirements**:
+  - CLI PHI detection for text/code
+  - Configurable YAML patterns
+  - JSON output reports
+  - GitHub Action integration
+  - API server for text PHI detection
+- **Future Enhancements**:
+  - OCR/image support
+  - Advanced NLP and ML-based detection
+  - Compliance reporting and audit trail features
+  - Enterprise integrations (encrypted storage, HITRUST, etc.)
+  - Community-driven PHI pattern contributions
+
+# Logical Dependency Chain
+- Foundation: CLI core, config loading, regex-based detection
+- Add: JSON reporting, GitHub Action integration
+- Next: API server (reuse detection logic)
+- Then: NLP/context-aware detection
+- Then: Extensibility for custom patterns
+- Then: Advanced features (OCR, ML, audit trail, enterprise)
+- Ensure: MVP delivers CLI, config, reporting, and CI/CD integration as quickly as possible
+
+# Risks and Mitigations  
+- **Technical challenges**: Accurate PHI detection, especially with NLP/OCR
+  - Mitigation: Start with regex, incrementally add NLP/ML
+- **MVP scope creep**: Too many features in v1
+  - Mitigation: Strictly define MVP as CLI+config+CI/CD+API
+- **Resource constraints**: Community-driven, may lack contributors
+  - Mitigation: Clear documentation, encourage open-source contributions
+
+# Appendix  
+- Research: HIPAA, GDPR, HITRUST PHI requirements
+- Example config and report formats (see README)
+- Technical references: Rust, Actix Web, YAML, GitHub Actions
+</PRD>

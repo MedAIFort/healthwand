@@ -1,0 +1,43 @@
+# Task ID: 5
+# Title: Implement PHI redaction and anonymization
+# Status: pending
+# Dependencies: 3
+# Priority: medium
+# Description: Add capabilities to redact or anonymize detected PHI in files
+# Details:
+Implement redaction strategies (replacement with asterisks, removal, etc.). Create anonymization logic that replaces PHI with realistic but fake data. Add in-place file modification option with backup creation. Implement different redaction modes based on PHI type. Add command-line options to control redaction behavior. Ensure atomic file operations to prevent data corruption.
+
+# Test Strategy:
+Test redaction on sample files and verify PHI is properly masked. Validate file backup functionality. Check that anonymized data maintains the format of the original PHI.
+
+# Subtasks:
+## 1. Design and implement core redaction strategies [pending]
+### Dependencies: None
+### Description: Create the fundamental redaction methods that will be applied to detected PHI
+### Details:
+Implement a RedactionStrategy interface/abstract class with methods for redacting text. Create concrete implementations for common strategies: (1) AsteriskRedaction - replace characters with asterisks while preserving length, (2) RemovalRedaction - completely remove the PHI, (3) PlaceholderRedaction - replace with a generic placeholder like [REDACTED]. Each strategy should take PHI text and return the redacted version. Include unit tests to verify each strategy works correctly with different PHI types.
+
+## 2. Develop PHI anonymization engine [pending]
+### Dependencies: 5.1
+### Description: Create a system to replace PHI with realistic but fake data while maintaining data consistency
+### Details:
+Implement an AnonymizationEngine class that generates realistic fake data for different PHI types (names, addresses, phone numbers, etc.). Use libraries like Faker if available. Ensure consistency so the same PHI value is always replaced with the same fake value within a document. Create a mapping store to track replacements. Implement PHI type detection to apply appropriate anonymization (e.g., dates replaced with fake dates, not names). Add configuration options for anonymization behavior. Include comprehensive unit tests.
+
+## 3. Implement safe file modification with backup system [pending]
+### Dependencies: 5.1
+### Description: Create a system for safely modifying files with PHI while preserving the original content
+### Details:
+Develop a FileProcessor class that handles reading, modifying, and writing files. Implement a backup system that creates a copy of the original file before modification (with configurable backup location). Use atomic file operations (write to temporary file, then rename) to prevent data corruption if the process is interrupted. Add recovery mechanisms to restore from backup if an error occurs. Implement progress tracking for large files. Include extensive error handling and logging. Write unit and integration tests to verify file operations work correctly and safely.
+
+## 4. Create PHI-type specific redaction mode selector [pending]
+### Dependencies: 5.1, 5.2
+### Description: Implement a system to apply different redaction strategies based on PHI type and context
+### Details:
+Develop a RedactionModeSelector that determines the appropriate redaction strategy based on PHI type, sensitivity, and context. Implement configuration options to specify default strategies for each PHI type (e.g., names use anonymization, medical record numbers use asterisk redaction). Create a rule-based system to handle special cases and exceptions. Integrate with the existing PHI detection system to receive type information. Include a fallback strategy for unknown PHI types. Add unit tests to verify the selector chooses appropriate strategies for different scenarios.
+
+## 5. Add command-line interface and configuration options [pending]
+### Dependencies: 5.1, 5.2, 5.3, 5.4
+### Description: Implement user-facing controls for the redaction and anonymization system
+### Details:
+Extend the command-line interface to include options for controlling redaction behavior: --redaction-mode (redact/anonymize/both), --backup-dir (path for backups), --strategy-map (JSON mapping PHI types to strategies), --in-place (boolean for modifying original files), --dry-run (preview changes without modifying files). Implement configuration file support to store default settings. Add detailed help documentation for each option. Create validation for user inputs. Implement reporting of redaction statistics (counts by PHI type, files modified, etc.). Test the CLI with various option combinations to ensure correct behavior.
+

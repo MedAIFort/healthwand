@@ -303,9 +303,9 @@ See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for guidelines on adding PHI pattern
 
 ## Roadmap
 
-- **v1.0 (Phase 1)**: Core PHI detection, GitHub Action, and API server (Q3 2025).
-- **v2.0 (Phase 2)**: Image processing (OCR), advanced NLP, and compliance reporting (Q1 2026).
-- **v3.0 (Phase 3)**: ML-based detection, enterprise integrations, and HITRUST certification (Q3 2027).
+- **v1.0 (Phase 1)**: Core PHI detection, GitHub Action, and API server.
+- **v2.0 (Phase 2)**: Image processing (OCR), advanced NLP, and compliance reporting.
+- **v3.0 (Phase 3)**: ML-based detection, enterprise integrations, and HITRUST certification.
 
 ## License
 

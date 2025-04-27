@@ -1,0 +1,49 @@
+# Task ID: 3
+# Title: Develop regex-based PHI detection engine
+# Status: pending
+# Dependencies: 2
+# Priority: high
+# Description: Build the core detection engine that uses regex patterns to identify PHI in text and code files
+# Details:
+Implement a PHI analyzer module that applies regex patterns from the configuration to input text. Create data structures to represent PHI findings (type, value, location, confidence). Develop file traversal logic to scan directories recursively. Add filtering capabilities to exclude certain file types or directories. Implement multi-threading for performance optimization when scanning large codebases. Include context capture to store a snippet of text around the detected PHI.
+
+# Test Strategy:
+Create a test suite with sample files containing various PHI patterns. Measure detection accuracy and performance. Test with large files to ensure memory efficiency.
+
+# Subtasks:
+## 1. Implement PHI finding data structures [pending]
+### Dependencies: None
+### Description: Create the core data structures to represent PHI findings and detection results
+### Details:
+Design and implement classes/structs to represent: 1) PHIFinding with properties for type, value, location (file path, line number, character position), confidence score, and surrounding context; 2) DetectionResult to aggregate findings from a single file or scan session; 3) Include serialization methods for these structures to support reporting. These data structures will be the foundation for the entire detection engine.
+
+## 2. Develop regex pattern manager [pending]
+### Dependencies: None
+### Description: Create a component to load, validate, and manage regex patterns from configuration
+### Details:
+Implement a PatternManager class that: 1) Loads regex patterns from configuration files; 2) Validates patterns for correctness; 3) Organizes patterns by PHI category (e.g., names, SSNs, emails); 4) Provides an efficient interface to retrieve applicable patterns; 5) Supports pattern metadata like confidence thresholds and description. Include unit tests to verify pattern loading and validation works correctly.
+
+## 3. Build core text analysis engine [pending]
+### Dependencies: 3.1, 3.2
+### Description: Implement the main regex-based scanning logic to detect PHI in text content
+### Details:
+Create a PHIAnalyzer class that: 1) Takes text input and applies configured regex patterns; 2) Uses the PatternManager to get relevant patterns; 3) Creates PHIFinding objects for each match; 4) Captures surrounding context for each finding; 5) Calculates confidence scores based on pattern metadata and match characteristics; 6) Returns a DetectionResult with all findings. Optimize for performance when processing large text files.
+
+## 4. Implement file system traversal [pending]
+### Dependencies: None
+### Description: Develop logic to recursively scan directories and process files
+### Details:
+Create a FileScanner component that: 1) Recursively traverses directory structures; 2) Implements configurable filtering to exclude directories or file types; 3) Handles different file encodings correctly; 4) Manages file access errors gracefully; 5) Provides progress reporting for long-running scans. Include support for gitignore-style pattern matching for exclusions and ability to resume interrupted scans.
+
+## 5. Add multi-threading support [pending]
+### Dependencies: 3.3, 3.4
+### Description: Enhance the scanning engine with parallel processing capabilities
+### Details:
+Implement a ThreadPoolExecutor or similar mechanism to: 1) Process multiple files concurrently; 2) Manage a configurable thread pool size; 3) Handle thread synchronization for result aggregation; 4) Implement proper error handling for worker threads; 5) Add progress tracking across threads; 6) Ensure resources are properly managed. Include performance benchmarking to determine optimal thread count based on system capabilities.
+
+## 6. Integrate components and add configuration options [pending]
+### Dependencies: 3.1, 3.2, 3.3, 3.4, 3.5
+### Description: Connect all components and implement comprehensive configuration capabilities
+### Details:
+Create a PHIDetectionEngine class that: 1) Integrates all components (PHIAnalyzer, PatternManager, FileScanner, threading); 2) Provides a simple API for scanning files or directories; 3) Implements configuration options for all aspects (regex patterns, file exclusions, thread count, confidence thresholds, etc.); 4) Includes detailed logging of the scanning process; 5) Produces comprehensive scan reports; 6) Handles edge cases like very large files or deeply nested directories. Add integration tests to verify the complete system works correctly.
+
