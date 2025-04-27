@@ -29,3 +29,6 @@ node_modules/
 # Task Master
 README-task-master.md
 scripts/example_prd.txt
+
+# Rust build output
+phi-detector/target/
