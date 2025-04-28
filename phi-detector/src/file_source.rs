@@ -51,13 +51,21 @@ impl LocalFileSource {
         }
     }
 
-    fn collect_files_recursive(&self, dir: &Path, files: &mut Vec<PathBuf>) -> Result<(), FileSourceError> {
+    fn collect_files_recursive(&self, dir: &Path, files: &mut Vec<PathBuf>, depth: usize) -> Result<(), FileSourceError> {
+        const MAX_DEPTH: usize = 100;
+        if depth > MAX_DEPTH {
+            return Ok(());
+        }
         for entry in fs::read_dir(dir)? {
             let entry = entry?;
+            let file_type = entry.file_type()?;
+            if file_type.is_symlink() {
+                continue;
+            }
             let path = entry.path();
-            if path.is_dir() {
-                self.collect_files_recursive(&path, files)?;
-            } else if self.is_text_file(&path) {
+            if file_type.is_dir() {
+                self.collect_files_recursive(&path, files, depth + 1)?;
+            } else if file_type.is_file() && self.is_text_file(&path) {
                 files.push(path);
             }
         }
@@ -70,7 +78,7 @@ impl FileSource for LocalFileSource {
         let mut files = Vec::new();
         let meta = fs::metadata(&self.root)?;
         if meta.is_dir() {
-            self.collect_files_recursive(&self.root, &mut files)?;
+            self.collect_files_recursive(&self.root, &mut files, 0)?;
         } else if meta.is_file() && self.is_text_file(&self.root) {
             files.push(self.root.clone());
         }
