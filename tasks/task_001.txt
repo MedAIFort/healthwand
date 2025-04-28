@@ -29,13 +29,13 @@ Create a file handling module that can: recursively traverse directories if spec
 ### Details:
 Create a dedicated module for PHI pattern definitions. Implement regex patterns for: SSNs (format: XXX-XX-XXXX), Medical Record Numbers (various formats), ICD-10 codes (letter followed by 2 digits, optional decimal and more digits), and basic date of birth patterns. Use the regex crate with compiled regex patterns for performance. Create a PHIType enum to categorize different types of detected PHI. Implement unit tests for each pattern with both matching and non-matching examples.
 
-## 4. Implement PHI scanning and detection engine [in-progress]
+## 4. Implement PHI scanning and detection engine [done]
 ### Dependencies: 1.2, 1.3
 ### Description: Create the core scanning logic that applies regex patterns to file contents
 ### Details:
 Develop a Scanner struct that takes file content and applies all PHI detection patterns. For each match, record the match text, position, PHI type, and confidence level. Implement context extraction to capture surrounding text for verification. Create a Detection struct to hold match details. Optimize for performance by using appropriate regex options and processing strategies. Add unit and integration tests with sample text containing various PHI patterns.
 
-## 5. Implement redaction functionality [pending]
+## 5. Implement redaction functionality [in-progress]
 ### Dependencies: 1.4
 ### Description: Create a module to redact or mask detected PHI in the original text
 ### Details:
