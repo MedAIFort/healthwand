@@ -32,6 +32,7 @@ struct Cli {
 }
 
 mod file_source;
+mod phi_patterns;
 
 fn main() {
     let cli = Cli::parse();
