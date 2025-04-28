@@ -47,19 +47,73 @@ impl Redactor {
                 PHIType::IndonesianBPJS => "[REDACTED-BPJS]".to_string(),
             },
             RedactionStrategy::PartialMasking => match phi_type {
-                PHIType::SSN => format!("***-**-{}", &matched[7..]),
+                PHIType::SSN => {
+                    if matched.len() >= 4 {
+                        let visible_part = &matched[matched.len() - 4..];
+                        let mask_length = matched.len() - 4;
+                        format!("{}{}", "*".repeat(mask_length), visible_part)
+                    } else {
+                        "*".repeat(matched.len())
+                    }
+                },
                 PHIType::MedicalRecordNumber => {
                     let len = matched.len();
                     if len > 4 {
-                        format!("{}{}", "*".repeat(len-4), &matched[len-4..])
+                        format!("{}{}", "*".repeat(len - 4), &matched[len - 4..])
                     } else {
                         "*".repeat(len)
                     }
                 },
-                PHIType::ICD10 => "[REDACTED-ICD10]".to_string(),
-                PHIType::DateOfBirth => "[REDACTED-DOB]".to_string(),
-                PHIType::IndonesianNIK => format!("********{}", &matched[8..]),
-                PHIType::IndonesianBPJS => format!("*******{}", &matched[7..]),
+                PHIType::ICD10 => {
+                    // Keep only the first character visible
+                    if !matched.is_empty() {
+                        format!("{}{}", &matched[0..1], "*".repeat(matched.len() - 1))
+                    } else {
+                        "*".repeat(matched.len())
+                    }
+                },
+                PHIType::DateOfBirth => {
+                    // Show only the year part
+                    if matched.len() >= 4 {
+                        if matched.contains('/') || matched.contains('-') {
+                            let parts: Vec<&str> =
+                                matched.split(|c| c == '/' || c == '-').collect();
+                            if parts.len() >= 3 {
+                                let year_part =
+                                    if parts[0].len() == 4 { parts[0] } else { parts[2] };
+                                format!("**/**/{}", year_part)
+                            } else {
+                                "*".repeat(matched.len())
+                            }
+                        } else {
+                            "*".repeat(matched.len())
+                        }
+                    } else {
+                        "*".repeat(matched.len())
+                    }
+                },
+                PHIType::IndonesianNIK => {
+                    if matched.len() > 8 {
+                        format!(
+                            "{}{}",
+                            "*".repeat(matched.len() - 8),
+                            &matched[matched.len() - 8..]
+                        )
+                    } else {
+                        "*".repeat(matched.len())
+                    }
+                },
+                PHIType::IndonesianBPJS => {
+                    if matched.len() > 6 {
+                        format!(
+                            "{}{}",
+                            "*".repeat(matched.len() - 6),
+                            &matched[matched.len() - 6..]
+                        )
+                    } else {
+                        "*".repeat(matched.len())
+                    }
+                },
             },
             RedactionStrategy::PlaceholderSubstitution => match phi_type {
                 PHIType::SSN => "[REDACTED-SSN]".to_string(),
