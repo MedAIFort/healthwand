@@ -10,6 +10,7 @@ pub enum PHIType {
     IndonesianBPJS, // BPJS Health Insurance Number
 }
 
+#[derive(Debug, Clone)]
 pub struct PHIPattern {
     pub phi_type: PHIType,
     pub regex: Regex,
@@ -35,7 +36,7 @@ impl PHIPattern {
             PHIPattern {
                 phi_type: PHIType::DateOfBirth,
                 // MM/DD/YYYY or YYYY-MM-DD or DD/MM/YYYY (basic)
-                regex: Regex::new(r"\b(\d{2}/\d{2}/\d{4}|\d{4}-\d{2}-\d{2})\b").unwrap(),
+                regex: Regex::new(r"\b(\d{2}/\d{2}/\d{4}|\d{4}-\d{2}-\d{2}|\d{2}/\d{2}/\d{4})\b").unwrap(),
             },
             PHIPattern {
                 phi_type: PHIType::IndonesianNIK,

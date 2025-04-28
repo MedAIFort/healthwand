@@ -23,13 +23,13 @@ Create a new Rust project using `cargo new phi-detector --bin`. Set up the proje
 ### Details:
 Create a file handling module that can: recursively traverse directories if specified, filter for text-based files (.txt, .md, .csv, etc.), read file contents efficiently (using buffered reading for large files), and handle file system errors gracefully. Implement a FileSource trait/interface that can be extended later for different input sources. Add proper error types and propagation. Write unit tests for file traversal and reading functionality using test fixtures.
 
-## 3. Develop regex patterns for basic PHI detection [in-progress]
+## 3. Develop regex patterns for basic PHI detection [done]
 ### Dependencies: 1.1
 ### Description: Create a pattern matching module with regex definitions for common PHI types
 ### Details:
 Create a dedicated module for PHI pattern definitions. Implement regex patterns for: SSNs (format: XXX-XX-XXXX), Medical Record Numbers (various formats), ICD-10 codes (letter followed by 2 digits, optional decimal and more digits), and basic date of birth patterns. Use the regex crate with compiled regex patterns for performance. Create a PHIType enum to categorize different types of detected PHI. Implement unit tests for each pattern with both matching and non-matching examples.
 
-## 4. Implement PHI scanning and detection engine [pending]
+## 4. Implement PHI scanning and detection engine [in-progress]
 ### Dependencies: 1.2, 1.3
 ### Description: Create the core scanning logic that applies regex patterns to file contents
 ### Details:
