@@ -22,7 +22,7 @@
           "id": 2,
           "title": "Implement file traversal and reading functionality",
           "description": "Create modules to traverse directories and read file contents for scanning",
-          "status": "in-progress",
+          "status": "done",
           "dependencies": [
             1
           ],
@@ -32,7 +32,7 @@
           "id": 3,
           "title": "Develop regex patterns for basic PHI detection",
           "description": "Create a pattern matching module with regex definitions for common PHI types",
-          "status": "pending",
+          "status": "in-progress",
           "dependencies": [
             1
           ],

@@ -17,13 +17,13 @@ Write unit tests for each pattern matcher. Create integration tests with sample 
 ### Details:
 Create a new Rust project using `cargo new phi-detector --bin`. Set up the project structure with appropriate modules. Implement CLI argument parsing using clap (v3+) with the following options: input file/directory path, output format options, redaction toggle, and verbosity level. Create a configuration struct to hold parsed arguments. Write unit tests for argument parsing. Update Cargo.toml with necessary dependencies including clap with derive features.
 
-## 2. Implement file traversal and reading functionality [in-progress]
+## 2. Implement file traversal and reading functionality [done]
 ### Dependencies: 1.1
 ### Description: Create modules to traverse directories and read file contents for scanning
 ### Details:
 Create a file handling module that can: recursively traverse directories if specified, filter for text-based files (.txt, .md, .csv, etc.), read file contents efficiently (using buffered reading for large files), and handle file system errors gracefully. Implement a FileSource trait/interface that can be extended later for different input sources. Add proper error types and propagation. Write unit tests for file traversal and reading functionality using test fixtures.
 
-## 3. Develop regex patterns for basic PHI detection [pending]
+## 3. Develop regex patterns for basic PHI detection [in-progress]
 ### Dependencies: 1.1
 ### Description: Create a pattern matching module with regex definitions for common PHI types
 ### Details:
