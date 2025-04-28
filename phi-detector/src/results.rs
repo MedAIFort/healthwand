@@ -36,3 +36,10 @@ pub struct ResultsSummary {
     pub redacted_count: usize,
     pub errors: Vec<String>,
 }
+
+/// Combined output for JSON serialization: detection results and summary.
+#[derive(Debug, Serialize, Deserialize)]
+pub struct OutputBundle {
+    pub results: Vec<DetectionResult>,
+    pub summary: ResultsSummary,
+}

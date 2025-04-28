@@ -45,7 +45,8 @@ impl Redactor {
         redacted
     }
 
-    fn redaction_text(&self, phi_type: &PHIType, matched: &str) -> String {
+    /// Returns the redacted string for a given PHI type and matched text, according to the current strategy.
+    pub fn redaction_text(&self, phi_type: &PHIType, matched: &str) -> String {
         match self.strategy {
             RedactionStrategy::FullReplacement => match phi_type {
                 PHIType::SSN => "XXX-XX-XXXX".to_string(),

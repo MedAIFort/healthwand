@@ -1,7 +1,10 @@
 use clap::{Parser, ValueEnum};
 use std::path::PathBuf;
-use file_source::{FileSource, LocalFileSource};
-use results::{DetectionResult, ResultsSummary};
+use phi_detector::file_source::{FileSource, LocalFileSource};
+use phi_detector::results::{DetectionResult, ResultsSummary, OutputBundle};
+use phi_detector::scanner;
+use phi_detector::phi_patterns;
+use phi_detector::redactor::*;
 use log::{info, warn, error};
 use thiserror::Error;
 use std::collections::HashMap;
@@ -35,12 +38,6 @@ struct Cli {
     #[arg(short, long, action = clap::ArgAction::Count)]
     verbose: u8,
 }
-
-mod file_source;
-mod phi_patterns;
-mod scanner;
-mod redactor;
-mod results;
 
 #[derive(Debug, Error)]
 pub enum AppError {
@@ -80,7 +77,14 @@ fn main() {
                         Ok(content) => {
                             let scanner = scanner::Scanner::new(phi_patterns::PHIPattern::all_patterns(), 10);
                             let detections = scanner.scan(&content);
-                            let redactor = redactor::Redactor::new(redactor::RedactionStrategy::FullReplacement);
+                            let redactor = Redactor::new(RedactionStrategy::FullReplacement);
+
+                            // Precompute redacted text for each detection (safe, independent of buffer mutation)
+                            let mut redacted_map = std::collections::HashMap::new();
+                            for det in &detections {
+                                let replacement = redactor.redaction_text(&det.phi_type, &det.matched_text);
+                                redacted_map.insert((det.start, det.end), replacement);
+                            }
                             let redacted = redactor.redact(&content, &detections);
 
                             for det in &detections {
@@ -90,7 +94,7 @@ fn main() {
                                     location: (det.start, det.end),
                                     context: det.context.clone(),
                                     matched_text: det.matched_text.clone(),
-                                    redacted_text: Some(redacted[det.start..det.end].to_string()),
+                                    redacted_text: redacted_map.get(&(det.start, det.end)).cloned(),
                                 };
                                 *summary.detections_by_type.entry(det.phi_type.clone()).or_insert(0) += 1;
                                 all_results.push(result);
@@ -113,18 +117,44 @@ fn main() {
         }
     }
 
-    // Output JSON
-    match serde_json::to_string_pretty(&all_results) {
-        Ok(json) => println!("{}", json),
-        Err(e) => {
-            error!("Failed to serialize results: {}", e);
-            errors.push(format!("Serialize: {}", e));
+    // Output results according to --output format
+    match cli.output {
+        OutputFormat::Json => {
+            let output_bundle = OutputBundle {
+                results: all_results,
+                summary,
+            };
+            match serde_json::to_string_pretty(&output_bundle) {
+                Ok(json) => println!("{}", json),
+                Err(e) => {
+                    error!("Failed to serialize results: {}", e);
+                    errors.push(format!("Serialize: {}", e));
+                }
+            }
+        }
+        OutputFormat::Text => {
+            println!("Detection Results:");
+            for result in &all_results {
+                println!("- File: {} | Type: {:?} | Location: {:?} | Context: {} | Matched: {} | Redacted: {}",
+                    result.file_path,
+                    result.phi_type,
+                    result.location,
+                    result.context,
+                    result.matched_text,
+                    result.redacted_text.as_deref().unwrap_or("<none>"));
+            }
+            println!("\nSummary:\n  Files processed: {}\n  Total detections: {}\n  Redacted: {}\n  Detections by type: {:?}",
+                summary.files_processed,
+                summary.total_detections,
+                summary.redacted_count,
+                summary.detections_by_type);
+            if !summary.errors.is_empty() {
+                println!("  Errors: {:?}", summary.errors);
+            }
         }
     }
 
-    // Print summary
-    println!("\nSummary: Files processed: {}, Total detections: {}, Redacted: {}", summary.files_processed, summary.total_detections, summary.redacted_count);
-    println!("Detections by type: {:?}", summary.detections_by_type);
+    // Print errors if any
     if !errors.is_empty() {
         println!("Errors: {:?}", errors);
     }
