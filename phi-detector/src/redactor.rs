@@ -41,8 +41,8 @@ impl Redactor {
         match self.strategy {
             RedactionStrategy::FullReplacement => match phi_type {
                 PHIType::SSN => "XXX-XX-XXXX".to_string(),
-                PHIType::MedicalRecordNumber => "XXXXXXXXXXXX".to_string(),
-                PHIType::ICD10 => "XXX.XXXX".to_string(),
+                PHIType::MedicalRecordNumber => "X".repeat(matched.len()),
+                PHIType::ICD10 => "X".repeat(matched.len()),
                 PHIType::DateOfBirth => "XX/XX/XXXX".to_string(),
                 PHIType::IndonesianNIK => "XXXXXXXXXXXXXXXX".to_string(),
                 PHIType::IndonesianBPJS => "XXXXXXXXXXXXX".to_string(),
