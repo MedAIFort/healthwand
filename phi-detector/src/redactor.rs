@@ -40,11 +40,11 @@ impl Redactor {
         match self.strategy {
             RedactionStrategy::FullReplacement => match phi_type {
                 PHIType::SSN => "XXX-XX-XXXX".to_string(),
-                PHIType::MedicalRecordNumber => "[REDACTED-MRN]".to_string(),
-                PHIType::ICD10 => "[REDACTED-ICD10]".to_string(),
-                PHIType::DateOfBirth => "[REDACTED-DOB]".to_string(),
-                PHIType::IndonesianNIK => "[REDACTED-NIK]".to_string(),
-                PHIType::IndonesianBPJS => "[REDACTED-BPJS]".to_string(),
+                PHIType::MedicalRecordNumber => "XXXXXXXXXXXX".to_string(),
+                PHIType::ICD10 => "XXX.XXXX".to_string(),
+                PHIType::DateOfBirth => "XX/XX/XXXX".to_string(),
+                PHIType::IndonesianNIK => "XXXXXXXXXXXXXXXX".to_string(),
+                PHIType::IndonesianBPJS => "XXXXXXXXXXXXX".to_string(),
             },
             RedactionStrategy::PartialMasking => match phi_type {
                 PHIType::SSN => {
@@ -145,7 +145,7 @@ mod tests {
         let detections = scanner.scan(text);
         let redactor = Redactor::new(RedactionStrategy::FullReplacement);
         let result = redactor.redact(text, &detections);
-        assert_eq!(result, "SSN: XXX-XX-XXXX, MRN: [REDACTED-MRN]");
+        assert_eq!(result, "SSN: XXX-XX-XXXX, MRN: XXXXXXXXXXXX");
     }
 
     #[test]
@@ -175,7 +175,7 @@ mod tests {
         let detections = scanner.scan(text);
         let redactor = Redactor::new(RedactionStrategy::FullReplacement);
         let result = redactor.redact(text, &detections);
-        assert_eq!(result, "NIK: [REDACTED-NIK], BPJS: [REDACTED-BPJS]");
+        assert_eq!(result, "NIK: XXXXXXXXXXXXXXXX, BPJS: XXXXXXXXXXXXX");
     }
 
     #[test]
