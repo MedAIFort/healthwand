@@ -48,12 +48,23 @@ Example:
 
 ## Output Modes
 
-- **JSON**: All detection results are output as a JSON array, followed by a summary object.
+- **JSON**: All detection results and the summary are output as a single root JSON object:
+  ```json
+  {
+    "results": [ /* array of DetectionResult objects */ ],
+    "summary": { /* ResultsSummary object */ }
+  }
+  ```
+  This is always valid JSON. Errors encountered during processing are included in the `summary.errors` array.
 - **Text**: Results are printed in a human-readable format to the console.
 
 ## Logging
 
-- Logging is controlled by the `--verbose` flag and supports multiple levels (info, warn, error).
+- Logging is controlled by the `--verbose` flag and supports multiple levels:
+  - `0`: Warnings and errors only
+  - `1`: Info, warnings, and errors
+  - `2`: Debug, info, warnings, and errors
+  - `3+`: Trace, debug, info, warnings, and errors
 - Errors and warnings are logged to the console and included in the summary.
 
 ---

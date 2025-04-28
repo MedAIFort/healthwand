@@ -52,9 +52,19 @@ pub enum AppError {
 }
 
 fn main() {
-    env_logger::init();
-    let cli = Cli::parse();
+    // Set log level based on verbosity flag
+    let env = env_logger::Env::default();
+    let mut builder = env_logger::Builder::from_env(env);
+    match Cli::parse().verbose {
+        0 => builder.filter_level(log::LevelFilter::Warn),
+        1 => builder.filter_level(log::LevelFilter::Info),
+        2 => builder.filter_level(log::LevelFilter::Debug),
+        _ => builder.filter_level(log::LevelFilter::Trace),
+    };
+    builder.init();
+    println!("Parsed CLI args: {:?}", Cli::parse());
     info!("Starting PHI detection pipeline");
+    let cli = Cli::parse();
     let mut summary = ResultsSummary::default();
     let mut all_results = Vec::new();
     let mut errors = Vec::new();
@@ -77,15 +87,19 @@ fn main() {
                         Ok(content) => {
                             let scanner = scanner::Scanner::new(phi_patterns::PHIPattern::all_patterns(), 10);
                             let detections = scanner.scan(&content);
-                            let redactor = Redactor::new(RedactionStrategy::FullReplacement);
-
-                            // Precompute redacted text for each detection (safe, independent of buffer mutation)
+                            // Only perform redaction if requested
                             let mut redacted_map = std::collections::HashMap::new();
-                            for det in &detections {
-                                let replacement = redactor.redaction_text(&det.phi_type, &det.matched_text);
-                                redacted_map.insert((det.start, det.end), replacement);
-                            }
-                            let redacted = redactor.redact(&content, &detections);
+                            let redacted = if cli.redact {
+                                let redactor = Redactor::new(RedactionStrategy::FullReplacement);
+                                // Precompute redacted text for each detection
+                                for det in &detections {
+                                    let replacement = redactor.redaction_text(&det.phi_type, &det.matched_text);
+                                    redacted_map.insert((det.start, det.end), replacement);
+                                }
+                                redactor.redact(&content, &detections)
+                            } else {
+                                content.clone()
+                            };
 
                             for det in &detections {
                                 let result = DetectionResult {
