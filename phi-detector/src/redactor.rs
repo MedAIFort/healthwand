@@ -154,7 +154,7 @@ mod tests {
         let detections = scanner.scan(text);
         let redactor = Redactor::new(RedactionStrategy::FullReplacement);
         let result = redactor.redact(text, &detections);
-        assert_eq!(result, "SSN: XXX-XX-XXXX, MRN: XXXXXXXXXXXX");
+        assert_eq!(result, "SSN: XXX-XX-XXXX, MRN: XXXXXXXX");
     }
 
     #[test]

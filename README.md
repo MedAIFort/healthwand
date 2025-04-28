@@ -1,4 +1,16 @@
+<div align="center">
+
 # HealthWand
+
+![Rust](https://img.shields.io/badge/Rust-1.65%2B-orange?logo=rust)
+![Python](https://img.shields.io/badge/Python-3.9%2B-brightgreen?logo=python)
+![Status](https://img.shields.io/badge/status-development-yellow)
+
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/MedAIFort/healthwand?utm_source=oss&utm_medium=github&utm_campaign=MedAIFort%2Fhealthwand&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
+[![codecov](https://codecov.io/gh/MedAIFort/healthwand/branch/main/graph/badge.svg)](https://codecov.io/gh/MedAIFort/healthwand)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+</div>
 
 **HealthWand** is an open-source framework for detecting, redacting, masking, and anonymizing sensitive healthcare data, known as **Protected Health Information (PHI)**, across text, images, and structured data. Designed for healthcare applications and built with **Rust** for high-performance pattern matching and **Python** for context-aware Natural Language Processing (NLP), HealthWand ensures compliance with **HIPAA**, **GDPR**, and **HITRUST** standards by identifying and protecting PHI such as **Social Security Numbers (SSNs)**, **Medical IDs**, **ICD-10 codes**, **Drug names**, and **Patient information**. With support for Natural Language Processing (NLP), pattern matching, and customizable pipelines, HealthWand integrates seamlessly into CI/CD pipelines and platforms, empowering developers to secure healthcare software. 
 
@@ -277,7 +289,6 @@ HealthWand evolves to secure healthcare data. This roadmap is tentative and subj
 - **v3.0 (Phase 3)**: Machine learning-based PHI detection, enterprise integrations (e.g., EHR platforms), and HITRUST certification.
 
 *Note: We welcome feedback via GitHub Issues or Discussions to shape HealthWand’s future.*
-
 
 ## License
 HealthWand is licensed under the MIT License. See [LICENSE](LICENSE) for details.

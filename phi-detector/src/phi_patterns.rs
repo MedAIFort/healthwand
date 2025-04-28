@@ -1,6 +1,7 @@
 use regex::Regex;
+use serde;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 pub enum PHIType {
     SSN,
     MedicalRecordNumber,
