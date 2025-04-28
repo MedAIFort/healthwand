@@ -30,7 +30,8 @@ impl Redactor {
                 redacted.push_str(&replacement);
                 last = det.end;
             }
-            // If overlaps, skip (already handled by previous match)
+            // Skip if this detection overlaps with an already processed one
+            // (start position is before the end of the last processed detection)
         }
         redacted.push_str(&text[last..]);
         redacted
