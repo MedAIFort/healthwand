@@ -11,13 +11,13 @@ Initialize a new Rust project with Cargo. Implement command-line argument parsin
 Write unit tests for each pattern matcher. Create integration tests with sample files containing mock PHI data. Measure performance on large files to establish baseline metrics.
 
 # Subtasks:
-## 1. Initialize Rust project and implement CLI argument parsing [pending]
+## 1. Initialize Rust project and implement CLI argument parsing [done]
 ### Dependencies: None
 ### Description: Set up the initial Rust project structure and implement command-line argument parsing
 ### Details:
 Create a new Rust project using `cargo new phi-detector --bin`. Set up the project structure with appropriate modules. Implement CLI argument parsing using clap (v3+) with the following options: input file/directory path, output format options, redaction toggle, and verbosity level. Create a configuration struct to hold parsed arguments. Write unit tests for argument parsing. Update Cargo.toml with necessary dependencies including clap with derive features.
 
-## 2. Implement file traversal and reading functionality [pending]
+## 2. Implement file traversal and reading functionality [in-progress]
 ### Dependencies: 1.1
 ### Description: Create modules to traverse directories and read file contents for scanning
 ### Details:
