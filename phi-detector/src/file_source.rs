@@ -122,4 +122,72 @@ mod tests {
         let files = fs.files().unwrap();
         assert!(files.is_empty());
     }
+
+    #[test]
+    fn test_files_nonexistent_root() {
+        let fs = LocalFileSource::new("/this/path/should/not/exist", vec!["txt".to_string()]);
+        let result = fs.files();
+        assert!(result.is_err());
+        match result {
+            Err(FileSourceError::Io(_)) => {},
+            _ => panic!("Expected Io error for nonexistent root"),
+        }
+    }
+
+    #[test]
+    fn test_files_on_regular_file() {
+        let dir = tempdir().unwrap();
+        let file_path = dir.path().join("single.txt");
+        let mut file = File::create(&file_path).unwrap();
+        writeln!(file, "test").unwrap();
+        let fs = LocalFileSource::new(&file_path, vec!["txt".to_string()]);
+        let files = fs.files().unwrap();
+        assert_eq!(files.len(), 1);
+        assert_eq!(files[0], file_path);
+    }
+
+    #[test]
+    fn test_read_file_not_allowed_extension() {
+        let dir = tempdir().unwrap();
+        let file_path = dir.path().join("notallowed.bin");
+        let mut file = File::create(&file_path).unwrap();
+        writeln!(file, "data").unwrap();
+        let fs = LocalFileSource::new(dir.path(), vec!["txt".to_string()]);
+        let result = fs.read_file(&file_path);
+        assert!(result.is_err());
+        match result {
+            Err(FileSourceError::NotTextFile(p)) => assert_eq!(p, file_path),
+            _ => panic!("Expected NotTextFile error for disallowed extension"),
+        }
+    }
+
+    #[test]
+    fn test_read_file_permission_denied() {
+        let dir = tempdir().unwrap();
+        let file_path = dir.path().join("private.txt");
+        let mut file = File::create(&file_path).unwrap();
+        writeln!(file, "secret").unwrap();
+        drop(file);
+        // Remove read permissions (Unix only)
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let mut perms = fs::metadata(&file_path).unwrap().permissions();
+            perms.set_mode(0o000);
+            fs::set_permissions(&file_path, perms).unwrap();
+            let fs = LocalFileSource::new(dir.path(), vec!["txt".to_string()]);
+            let result = fs.read_file(&file_path);
+            assert!(result.is_err());
+            match result {
+                Err(FileSourceError::Io(e)) => {
+                    assert!(e.kind() == std::io::ErrorKind::PermissionDenied);
+                },
+                _ => panic!("Expected Io error for permission denied"),
+            }
+            // Restore permissions so tempdir can clean up
+            let mut perms = fs::metadata(&file_path).unwrap().permissions();
+            perms.set_mode(0o644);
+            fs::set_permissions(&file_path, perms).unwrap();
+        }
+    }
 }
