@@ -32,7 +32,7 @@
           "id": 3,
           "title": "Develop regex patterns for basic PHI detection",
           "description": "Create a pattern matching module with regex definitions for common PHI types",
-          "status": "in-progress",
+          "status": "done",
           "dependencies": [
             1
           ],
@@ -42,7 +42,7 @@
           "id": 4,
           "title": "Implement PHI scanning and detection engine",
           "description": "Create the core scanning logic that applies regex patterns to file contents",
-          "status": "pending",
+          "status": "in-progress",
           "dependencies": [
             2,
             3
