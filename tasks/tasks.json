@@ -42,7 +42,7 @@
           "id": 4,
           "title": "Implement PHI scanning and detection engine",
           "description": "Create the core scanning logic that applies regex patterns to file contents",
-          "status": "in-progress",
+          "status": "done",
           "dependencies": [
             2,
             3
@@ -53,7 +53,7 @@
           "id": 5,
           "title": "Implement redaction functionality",
           "description": "Create a module to redact or mask detected PHI in the original text",
-          "status": "pending",
+          "status": "in-progress",
           "dependencies": [
             4
           ],
