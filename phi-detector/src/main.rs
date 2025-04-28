@@ -94,14 +94,20 @@ fn main() {
                                     location: (det.start, det.end),
                                     context: det.context.clone(),
                                     matched_text: det.matched_text.clone(),
-                                    redacted_text: redacted_map.get(&(det.start, det.end)).cloned(),
+                                    redacted_text: if cli.redact {
+                                        redacted_map.get(&(det.start, det.end)).cloned()
+                                    } else {
+                                        None
+                                    },
                                 };
                                 *summary.detections_by_type.entry(det.phi_type.clone()).or_insert(0) += 1;
                                 all_results.push(result);
                             }
                             summary.files_processed += 1;
                             summary.total_detections += detections.len();
-                            summary.redacted_count += detections.len();
+                            if cli.redact {
+                                summary.redacted_count += detections.len();
+                            }
                         }
                         Err(e) => {
                             error!("Error reading {}: {}", f.display(), e);
