@@ -1,6 +1,6 @@
 # Task ID: 1
 # Title: Set up Rust CLI foundation with basic PHI detection
-# Status: pending
+# Status: in-progress
 # Dependencies: None
 # Priority: high
 # Description: Create the core Rust CLI application with basic pattern matching for common PHI types (SSNs, Medical IDs, etc.)
