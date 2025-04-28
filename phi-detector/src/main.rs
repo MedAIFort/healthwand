@@ -115,6 +115,7 @@ fn main() {
         Err(e) => {
             println!("Error traversing input: {}", e);
             errors.push(format!("Traverse: {}", e));
+            summary.errors.push(format!("Traverse: {}", e));
         }
     }
 
