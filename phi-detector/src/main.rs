@@ -106,6 +106,7 @@ fn main() {
                         Err(e) => {
                             error!("Error reading {}: {}", f.display(), e);
                             errors.push(format!("Read: {}", e));
+                            summary.errors.push(format!("Read: {}", e));
                         }
                     }
                 }
