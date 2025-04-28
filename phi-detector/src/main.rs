@@ -1,6 +1,14 @@
 use clap::{Parser, ValueEnum};
 use std::path::PathBuf;
-use file_source::{FileSource, LocalFileSource};
+use phi_detector::file_source::{FileSource, LocalFileSource};
+use phi_detector::results::{DetectionResult, ResultsSummary, OutputBundle};
+use phi_detector::scanner;
+use phi_detector::phi_patterns;
+use phi_detector::redactor::*;
+use log::{info, warn, error};
+use thiserror::Error;
+use std::collections::HashMap;
+use serde_json;
 
 /// Supported output formats
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum, Debug)]
@@ -31,14 +39,35 @@ struct Cli {
     verbose: u8,
 }
 
-mod file_source;
-mod phi_patterns;
-mod scanner;
-mod redactor;
+#[derive(Debug, Error)]
+pub enum AppError {
+    #[error("File IO error: {0}")]
+    FileIO(#[from] std::io::Error),
+    #[error("JSON serialization error: {0}")]
+    Serde(#[from] serde_json::Error),
+    #[error("Scan error: {0}")]
+    Scan(String),
+    #[error("Redaction error: {0}")]
+    Redact(String),
+}
 
 fn main() {
+    // Set log level based on verbosity flag
+    let env = env_logger::Env::default();
+    let mut builder = env_logger::Builder::from_env(env);
+    match Cli::parse().verbose {
+        0 => builder.filter_level(log::LevelFilter::Warn),
+        1 => builder.filter_level(log::LevelFilter::Info),
+        2 => builder.filter_level(log::LevelFilter::Debug),
+        _ => builder.filter_level(log::LevelFilter::Trace),
+    };
+    builder.init();
+    println!("Parsed CLI args: {:?}", Cli::parse());
+    info!("Starting PHI detection pipeline");
     let cli = Cli::parse();
-    println!("Parsed CLI args: {:?}", cli);
+    let mut summary = ResultsSummary::default();
+    let mut all_results = Vec::new();
+    let mut errors = Vec::new();
 
     // Allowed text file extensions
     let allowed_exts = vec!["txt", "md", "csv"]; // Extend as needed
@@ -53,21 +82,103 @@ fn main() {
                 for f in &files {
                     println!("  {}", f.display());
                 }
-                // Example: Read and print first 100 chars of each file
                 for f in &files {
                     match file_source.read_file(f) {
                         Ok(content) => {
-                            let preview = content.chars().take(100).collect::<String>();
-                            println!("\n--- {} ---\n{}...", f.display(), preview);
+                            let scanner = scanner::Scanner::new(phi_patterns::PHIPattern::all_patterns(), 10);
+                            let detections = scanner.scan(&content);
+                            // Only perform redaction if requested
+                            let mut redacted_map = std::collections::HashMap::new();
+                            let redacted = if cli.redact {
+                                let redactor = Redactor::new(RedactionStrategy::FullReplacement);
+                                // Precompute redacted text for each detection
+                                for det in &detections {
+                                    let replacement = redactor.redaction_text(&det.phi_type, &det.matched_text);
+                                    redacted_map.insert((det.start, det.end), replacement);
+                                }
+                                redactor.redact(&content, &detections)
+                            } else {
+                                content.clone()
+                            };
+
+                            for det in &detections {
+                                let result = DetectionResult {
+                                    file_path: f.display().to_string(),
+                                    phi_type: det.phi_type.clone(),
+                                    location: (det.start, det.end),
+                                    context: det.context.clone(),
+                                    matched_text: det.matched_text.clone(),
+                                    redacted_text: if cli.redact {
+                                        redacted_map.get(&(det.start, det.end)).cloned()
+                                    } else {
+                                        None
+                                    },
+                                };
+                                *summary.detections_by_type.entry(det.phi_type.clone()).or_insert(0) += 1;
+                                all_results.push(result);
+                            }
+                            summary.files_processed += 1;
+                            summary.total_detections += detections.len();
+                            if cli.redact {
+                                summary.redacted_count += detections.len();
+                            }
                         }
-                        Err(e) => println!("Error reading {}: {}", f.display(), e),
+                        Err(e) => {
+                            error!("Error reading {}: {}", f.display(), e);
+                            errors.push(format!("Read: {}", e));
+                            summary.errors.push(format!("Read: {}", e));
+                        }
                     }
                 }
             }
         }
         Err(e) => {
             println!("Error traversing input: {}", e);
+            errors.push(format!("Traverse: {}", e));
+            summary.errors.push(format!("Traverse: {}", e));
         }
+    }
+
+    // Output results according to --output format
+    match cli.output {
+        OutputFormat::Json => {
+            let output_bundle = OutputBundle {
+                results: all_results,
+                summary,
+            };
+            match serde_json::to_string_pretty(&output_bundle) {
+                Ok(json) => println!("{}", json),
+                Err(e) => {
+                    error!("Failed to serialize results: {}", e);
+                    errors.push(format!("Serialize: {}", e));
+                }
+            }
+        }
+        OutputFormat::Text => {
+            println!("Detection Results:");
+            for result in &all_results {
+                println!("- File: {} | Type: {:?} | Location: {:?} | Context: {} | Matched: {} | Redacted: {}",
+                    result.file_path,
+                    result.phi_type,
+                    result.location,
+                    result.context,
+                    result.matched_text,
+                    result.redacted_text.as_deref().unwrap_or("<none>"));
+            }
+            println!("\nSummary:\n  Files processed: {}\n  Total detections: {}\n  Redacted: {}\n  Detections by type: {:?}",
+                summary.files_processed,
+                summary.total_detections,
+                summary.redacted_count,
+                summary.detections_by_type);
+            if !summary.errors.is_empty() {
+                println!("  Errors: {:?}", summary.errors);
+            }
+        }
+    }
+
+    // Print errors if any
+    if !errors.is_empty() {
+        println!("Errors: {:?}", errors);
     }
 }
 

@@ -35,13 +35,13 @@ Create a dedicated module for PHI pattern definitions. Implement regex patterns 
 ### Details:
 Develop a Scanner struct that takes file content and applies all PHI detection patterns. For each match, record the match text, position, PHI type, and confidence level. Implement context extraction to capture surrounding text for verification. Create a Detection struct to hold match details. Optimize for performance by using appropriate regex options and processing strategies. Add unit and integration tests with sample text containing various PHI patterns.
 
-## 5. Implement redaction functionality [in-progress]
+## 5. Implement redaction functionality [done]
 ### Dependencies: 1.4
 ### Description: Create a module to redact or mask detected PHI in the original text
 ### Details:
 Implement a Redactor struct that takes Detection objects and original text to produce redacted output. Create different redaction strategies: full replacement (e.g., 'XXX-XX-XXXX' for SSNs), partial masking (e.g., showing only last 4 digits), and placeholder substitution (e.g., '[REDACTED-SSN]'). Ensure redaction preserves text layout and length where appropriate. Handle overlapping matches correctly. Add configuration options to control redaction behavior. Write tests to verify redaction correctness with various PHI types.
 
-## 6. Implement results output formatting and logging [pending]
+## 6. Implement results output formatting and logging [in-progress]
 ### Dependencies: 1.4, 1.5
 ### Description: Create output formatting for detection results and add proper error handling and logging
 ### Details:
