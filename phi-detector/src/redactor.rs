@@ -25,9 +25,17 @@ impl Redactor {
 
         for det in sorted {
             if det.start >= last {
+                // Non-overlapping span – redact normally
                 redacted.push_str(&text[last..det.start]);
-                let replacement = self.redaction_text(&det.phi_type, &det.matched_text);
-                redacted.push_str(&replacement);
+                redacted.push_str(&self.redaction_text(&det.phi_type, &det.matched_text));
+                last = det.end;
+            } else if det.end > last {
+                // Overlaps but extends further – make sure the tail gets redacted
+                redacted.push_str(&self.redaction_text(
+                    &det.phi_type,
+                    // use the uncovered slice for length parity
+                    &det.matched_text[(det.matched_text.len() - (det.end - last))..]
+                ));
                 last = det.end;
             }
             // Skip if this detection overlaps with an already processed one
