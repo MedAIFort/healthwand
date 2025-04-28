@@ -48,18 +48,23 @@ impl Redactor {
             },
             RedactionStrategy::PartialMasking => match phi_type {
                 PHIType::SSN => {
-                    if matched.len() >= 4 {
-                        let visible_part = &matched[matched.len() - 4..];
-                        let mask_length = matched.len() - 4;
-                        format!("{}{}", "*".repeat(mask_length), visible_part)
+                    // Preserve SSN format: ***-**-1234
+                    if matched.len() == 11 && matched.chars().nth(3) == Some('-') && matched.chars().nth(6) == Some('-') {
+                        format!("***-**-{}", &matched[7..])
                     } else {
-                        "*".repeat(matched.len())
+                        // fallback: mask all but last 4
+                        let len = matched.len();
+                        if len > 4 {
+                            format!("{}{}", "*".repeat(len-4), &matched[len-4..])
+                        } else {
+                            "*".repeat(len)
+                        }
                     }
                 },
                 PHIType::MedicalRecordNumber => {
                     let len = matched.len();
                     if len > 4 {
-                        format!("{}{}", "*".repeat(len - 4), &matched[len - 4..])
+                        format!("{}{}", "*".repeat(len-4), &matched[len-4..])
                     } else {
                         "*".repeat(len)
                     }
@@ -171,5 +176,55 @@ mod tests {
         let redactor = Redactor::new(RedactionStrategy::FullReplacement);
         let result = redactor.redact(text, &detections);
         assert_eq!(result, "NIK: [REDACTED-NIK], BPJS: [REDACTED-BPJS]");
+    }
+
+    #[test]
+    fn test_empty_text() {
+        let text = "";
+        let scanner = Scanner::new(PHIPattern::all_patterns(), 0);
+        let detections = scanner.scan(text);
+        let redactor = Redactor::new(RedactionStrategy::FullReplacement);
+        let result = redactor.redact(text, &detections);
+        assert_eq!(result, "");
+    }
+
+    #[test]
+    fn test_no_detections() {
+        let text = "This text contains no PHI patterns.";
+        let empty_detections: Vec<crate::scanner::Detection> = vec![];
+        let redactor = Redactor::new(RedactionStrategy::FullReplacement);
+        let result = redactor.redact(text, &empty_detections);
+        assert_eq!(result, text);
+    }
+
+    #[test]
+    fn test_detection_at_start() {
+        let text = "123-45-6789 is a SSN at the start.";
+        let scanner = Scanner::new(PHIPattern::all_patterns(), 0);
+        let detections = scanner.scan(text);
+        let redactor = Redactor::new(RedactionStrategy::FullReplacement);
+        let result = redactor.redact(text, &detections);
+        assert_eq!(result, "XXX-XX-XXXX is a SSN at the start.");
+    }
+
+    #[test]
+    fn test_detection_at_end() {
+        let text = "SSN at the end: 123-45-6789";
+        let scanner = Scanner::new(PHIPattern::all_patterns(), 0);
+        let detections = scanner.scan(text);
+        let redactor = Redactor::new(RedactionStrategy::FullReplacement);
+        let result = redactor.redact(text, &detections);
+        assert_eq!(result, "SSN at the end: XXX-XX-XXXX");
+    }
+
+    #[test]
+    fn test_partial_masking_short_mrn() {
+        let text = "Short MRN: 1234";
+        let scanner = Scanner::new(PHIPattern::all_patterns(), 0);
+        let detections = scanner.scan(text);
+        let redactor = Redactor::new(RedactionStrategy::PartialMasking);
+        let result = redactor.redact(text, &detections);
+        // Should not mask, as MRN pattern requires 8-12 digits; expect original text
+        assert_eq!(result, "Short MRN: 1234");
     }
 }
