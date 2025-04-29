@@ -1,14 +1,11 @@
 use clap::{Parser, ValueEnum};
-use std::path::PathBuf;
+use log::{error, info};
 use phi_detector::file_source::{FileSource, LocalFileSource};
-use phi_detector::results::{DetectionResult, ResultsSummary, OutputBundle};
-use phi_detector::scanner;
 use phi_detector::phi_patterns;
 use phi_detector::redactor::*;
-use log::{info, warn, error};
+use phi_detector::results::{DetectionResult, OutputBundle, ResultsSummary};
+use phi_detector::scanner;
 use thiserror::Error;
-use std::collections::HashMap;
-use serde_json;
 
 /// Supported output formats
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum, Debug)]
@@ -70,8 +67,11 @@ fn main() {
     let mut errors = Vec::new();
 
     // Allowed text file extensions
-    let allowed_exts = vec!["txt", "md", "csv"]; // Extend as needed
-    let file_source = LocalFileSource::new(&cli.input, allowed_exts.iter().map(|s| s.to_string()).collect());
+    let allowed_exts = ["txt", "md", "csv"]; // Extend as needed
+    let file_source = LocalFileSource::new(
+        &cli.input,
+        allowed_exts.iter().map(|s| s.to_string()).collect(),
+    );
 
     match file_source.files() {
         Ok(files) => {
@@ -85,15 +85,17 @@ fn main() {
                 for f in &files {
                     match file_source.read_file(f) {
                         Ok(content) => {
-                            let scanner = scanner::Scanner::new(phi_patterns::PHIPattern::all_patterns(), 10);
+                            let scanner =
+                                scanner::Scanner::new(phi_patterns::PHIPattern::all_patterns(), 10);
                             let detections = scanner.scan(&content);
                             // Only perform redaction if requested
                             let mut redacted_map = std::collections::HashMap::new();
-                            let redacted = if cli.redact {
+                            let _redacted = if cli.redact {
                                 let redactor = Redactor::new(RedactionStrategy::FullReplacement);
                                 // Precompute redacted text for each detection
                                 for det in &detections {
-                                    let replacement = redactor.redaction_text(&det.phi_type, &det.matched_text);
+                                    let replacement =
+                                        redactor.redaction_text(&det.phi_type, &det.matched_text);
                                     redacted_map.insert((det.start, det.end), replacement);
                                 }
                                 redactor.redact(&content, &detections)
@@ -114,7 +116,10 @@ fn main() {
                                         None
                                     },
                                 };
-                                *summary.detections_by_type.entry(det.phi_type.clone()).or_insert(0) += 1;
+                                *summary
+                                    .detections_by_type
+                                    .entry(det.phi_type.clone())
+                                    .or_insert(0) += 1;
                                 all_results.push(result);
                             }
                             summary.files_processed += 1;
@@ -157,19 +162,23 @@ fn main() {
         OutputFormat::Text => {
             println!("Detection Results:");
             for result in &all_results {
-                println!("- File: {} | Type: {:?} | Location: {:?} | Context: {} | Matched: {} | Redacted: {}",
+                println!(
+                    "- File: {} | Type: {:?} | Location: {:?} | Context: {} | Matched: {} | Redacted: {}",
                     result.file_path,
                     result.phi_type,
                     result.location,
                     result.context,
                     result.matched_text,
-                    result.redacted_text.as_deref().unwrap_or("<none>"));
+                    result.redacted_text.as_deref().unwrap_or("<none>")
+                );
             }
-            println!("\nSummary:\n  Files processed: {}\n  Total detections: {}\n  Redacted: {}\n  Detections by type: {:?}",
+            println!(
+                "\nSummary:\n  Files processed: {}\n  Total detections: {}\n  Redacted: {}\n  Detections by type: {:?}",
                 summary.files_processed,
                 summary.total_detections,
                 summary.redacted_count,
-                summary.detections_by_type);
+                summary.detections_by_type
+            );
             if !summary.errors.is_empty() {
                 println!("  Errors: {:?}", summary.errors);
             }
@@ -191,12 +200,14 @@ mod tests {
     fn test_cli_parsing() {
         let args = [
             "phi-detector",
-            "--input", "data/file.txt",
-            "--output", "text",
+            "--input",
+            "data/file.txt",
+            "--output",
+            "text",
             "--redact",
             "-vv",
         ];
-        let cli = Cli::parse_from(&args);
+        let cli = Cli::parse_from(args);
         assert_eq!(cli.input, "data/file.txt");
         assert_eq!(cli.output, OutputFormat::Text);
         assert!(cli.redact);

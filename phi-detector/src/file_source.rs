@@ -1,5 +1,5 @@
 use std::fs::{self, File};
-use std::io::{self, BufRead, BufReader, Read};
+use std::io::{self, BufReader, Read};
 use std::path::{Path, PathBuf};
 
 #[derive(Debug)]
@@ -45,13 +45,20 @@ impl LocalFileSource {
 
     fn is_text_file(&self, path: &Path) -> bool {
         if let Some(ext) = path.extension().and_then(|e| e.to_str()) {
-            self.allowed_extensions.iter().any(|x| x.eq_ignore_ascii_case(ext))
+            self.allowed_extensions
+                .iter()
+                .any(|x| x.eq_ignore_ascii_case(ext))
         } else {
             false
         }
     }
 
-    fn collect_files_recursive(&self, dir: &Path, files: &mut Vec<PathBuf>, depth: usize) -> Result<(), FileSourceError> {
+    fn collect_files_recursive(
+        &self,
+        dir: &Path,
+        files: &mut Vec<PathBuf>,
+        depth: usize,
+    ) -> Result<(), FileSourceError> {
         const MAX_DEPTH: usize = 100;
         if depth > MAX_DEPTH {
             return Ok(());
@@ -137,7 +144,7 @@ mod tests {
         let result = fs.files();
         assert!(result.is_err());
         match result {
-            Err(FileSourceError::Io(_)) => {},
+            Err(FileSourceError::Io(_)) => {}
             _ => panic!("Expected Io error for nonexistent root"),
         }
     }
@@ -189,7 +196,7 @@ mod tests {
             match result {
                 Err(FileSourceError::Io(e)) => {
                     assert!(e.kind() == std::io::ErrorKind::PermissionDenied);
-                },
+                }
                 _ => panic!("Expected Io error for permission denied"),
             }
             // Restore permissions so tempdir can clean up

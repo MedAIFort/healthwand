@@ -1,6 +1,6 @@
 # Task ID: 2
 # Title: Implement YAML configuration system
-# Status: pending
+# Status: in-progress
 # Dependencies: 1
 # Priority: high
 # Description: Create a YAML-based configuration system for defining custom PHI patterns and detection rules
@@ -11,7 +11,7 @@ Design a YAML schema for defining PHI patterns, including regex patterns, contex
 Create test cases with various configuration scenarios. Validate that custom patterns are correctly loaded and applied. Test error handling for malformed configurations.
 
 # Subtasks:
-## 1. Design YAML schema for PHI patterns [pending]
+## 1. Design YAML schema for PHI patterns [done]
 ### Dependencies: None
 ### Description: Create a comprehensive YAML schema that defines the structure for PHI pattern configurations
 ### Details:
