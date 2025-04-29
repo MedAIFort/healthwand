@@ -1,0 +1,118 @@
+# Example PHI patterns YAML configuration for healthwand phi-detector
+patterns:
+  - id: "ssn"
+    name: "Social Security Number"
+    description: "Detects US Social Security Numbers"
+    regex: "\\b\\d{3}-\\d{2}-\\d{4}\\b"
+    context:
+      before: ["ssn", "social security"]
+      after: []
+      window: 10
+    confidence: 0.95
+    redaction:
+      template: "[REDACTED-SSN]"
+      strategy: "full"
+    metadata:
+      category: "identifier"
+      severity: "high"
+      examples:
+        - "123-45-6789"
+        - "987-65-4321"
+  - id: "mrn"
+    name: "Medical Record Number"
+    description: "Detects generic MRNs"
+    regex: "\\bMRN[:\\s]*\\d{6,10}\\b"
+    context:
+      before: ["mrn", "medical record number"]
+      after: []
+      window: 8
+    confidence: 0.90
+    redaction:
+      template: "[REDACTED-MRN]"
+      strategy: "partial"
+    metadata:
+      category: "medical"
+      severity: "medium"
+      examples:
+        - "MRN: 123456789"
+        - "Medical record number 987654"
+  - id: "icd10"
+    name: "ICD-10 Code"
+    description: "Detects ICD-10 medical codes"
+    regex: "\\b[A-TV-Z][0-9]{2}(\\.[A-Z0-9]{1,4})?\\b"
+    context:
+      before: ["icd", "icd-10", "diagnosis"]
+      after: []
+      window: 5
+    confidence: 0.85
+    redaction:
+      template: "[REDACTED-ICD10]"
+      strategy: "full"
+    metadata:
+      category: "medical"
+      severity: "medium"
+      examples:
+        - "A12"
+        - "B99.8"
+        - "C01.123"
+  - id: "dob"
+    name: "Date of Birth"
+    description: "Detects dates in common birth date formats"
+    regex: "\\b(\\d{2}/\\d{2}/\\d{4}|\\d{4}-\\d{2}-\\d{2}|\\d{2}/\\d{2}/\\d{4})\\b"
+    context:
+      before: ["dob", "date of birth", "lahir"]
+      after: []
+      window: 5
+    confidence: 0.80
+    redaction:
+      template: "[REDACTED-DOB]"
+      strategy: "full"
+    metadata:
+      category: "personal"
+      severity: "medium"
+      examples:
+        - "12/31/2000"
+        - "2000-12-31"
+        - "31/12/2000"
+  - id: "indonesian_nik"
+    name: "Indonesian NIK"
+    description: "Detects Indonesian National Identity Number (NIK)"
+    regex: "\\b\\d{16}\\b"
+    context:
+      before: ["nik", "nomor induk kependudukan", "ktp"]
+      after: []
+      window: 6
+    confidence: 0.95
+    redaction:
+      template: "[REDACTED-NIK]"
+      strategy: "full"
+    metadata:
+      category: "identifier"
+      severity: "high"
+      examples:
+        - "1234567890123456"
+  - id: "indonesian_bpjs"
+    name: "Indonesian BPJS"
+    description: "Detects Indonesian BPJS Health Insurance Number"
+    regex: "\\b\\d{13}\\b"
+    context:
+      before: ["bpjs", "bpjs kesehatan", "no bpjs"]
+      after: []
+      window: 6
+    confidence: 0.93
+    redaction:
+      template: "[REDACTED-BPJS]"
+      strategy: "full"
+    metadata:
+      category: "insurance"
+      severity: "high"
+      examples:
+        - "1234567890123"
+defaults:
+  confidence: 0.8
+  redaction:
+    template: "[REDACTED]"
+    strategy: "full"
+  context:
+    window: 5
+overrides: {}

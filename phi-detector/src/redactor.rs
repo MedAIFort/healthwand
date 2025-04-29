@@ -1,11 +1,11 @@
-use crate::scanner::Detection;
 use crate::phi_patterns::PHIType;
+use crate::scanner::Detection;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RedactionStrategy {
     FullReplacement,         // e.g., XXX-XX-XXXX
-    PartialMasking,         // e.g., ***-**-1234
-    PlaceholderSubstitution // e.g., [REDACTED-SSN]
+    PartialMasking,          // e.g., ***-**-1234
+    PlaceholderSubstitution, // e.g., [REDACTED-SSN]
 }
 
 pub struct Redactor {
@@ -34,7 +34,7 @@ impl Redactor {
                 redacted.push_str(&self.redaction_text(
                     &det.phi_type,
                     // use the uncovered slice for length parity
-                    &det.matched_text[(det.matched_text.len() - (det.end - last))..]
+                    &det.matched_text[(det.matched_text.len() - (det.end - last))..],
                 ));
                 last = det.end;
             }
@@ -59,26 +59,29 @@ impl Redactor {
             RedactionStrategy::PartialMasking => match phi_type {
                 PHIType::SSN => {
                     // Preserve SSN format: ***-**-1234
-                    if matched.len() == 11 && matched.chars().nth(3) == Some('-') && matched.chars().nth(6) == Some('-') {
+                    if matched.len() == 11
+                        && matched.chars().nth(3) == Some('-')
+                        && matched.chars().nth(6) == Some('-')
+                    {
                         format!("***-**-{}", &matched[7..])
                     } else {
                         // fallback: mask all but last 4
                         let len = matched.len();
                         if len > 4 {
-                            format!("{}{}", "*".repeat(len-4), &matched[len-4..])
+                            format!("{}{}", "*".repeat(len - 4), &matched[len - 4..])
                         } else {
                             "*".repeat(len)
                         }
                     }
-                },
+                }
                 PHIType::MedicalRecordNumber => {
                     let len = matched.len();
                     if len > 4 {
-                        format!("{}{}", "*".repeat(len-4), &matched[len-4..])
+                        format!("{}{}", "*".repeat(len - 4), &matched[len - 4..])
                     } else {
                         "*".repeat(len)
                     }
-                },
+                }
                 PHIType::ICD10 => {
                     // Keep only the first character visible
                     if !matched.is_empty() {
@@ -86,16 +89,18 @@ impl Redactor {
                     } else {
                         "*".repeat(matched.len())
                     }
-                },
+                }
                 PHIType::DateOfBirth => {
                     // Show only the year part
                     if matched.len() >= 4 {
                         if matched.contains('/') || matched.contains('-') {
-                            let parts: Vec<&str> =
-                                matched.split(|c| c == '/' || c == '-').collect();
+                            let parts: Vec<&str> = matched.split(['/', '-']).collect();
                             if parts.len() >= 3 {
-                                let year_part =
-                                    if parts[0].len() == 4 { parts[0] } else { parts[2] };
+                                let year_part = if parts[0].len() == 4 {
+                                    parts[0]
+                                } else {
+                                    parts[2]
+                                };
                                 format!("**/**/{}", year_part)
                             } else {
                                 "*".repeat(matched.len())
@@ -106,7 +111,7 @@ impl Redactor {
                     } else {
                         "*".repeat(matched.len())
                     }
-                },
+                }
                 PHIType::IndonesianNIK => {
                     if matched.len() > 8 {
                         format!(
@@ -117,7 +122,7 @@ impl Redactor {
                     } else {
                         "*".repeat(matched.len())
                     }
-                },
+                }
                 PHIType::IndonesianBPJS => {
                     if matched.len() > 6 {
                         format!(
@@ -128,7 +133,7 @@ impl Redactor {
                     } else {
                         "*".repeat(matched.len())
                     }
-                },
+                }
             },
             RedactionStrategy::PlaceholderSubstitution => match phi_type {
                 PHIType::SSN => "[REDACTED-SSN]".to_string(),
@@ -145,8 +150,8 @@ impl Redactor {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::scanner::Scanner;
     use crate::phi_patterns::PHIPattern;
+    use crate::scanner::Scanner;
 
     #[test]
     fn test_full_replacement() {

@@ -1,7 +1,7 @@
 use phi_detector::phi_patterns::PHIType;
-use phi_detector::scanner::Scanner;
-use phi_detector::redactor::{Redactor, RedactionStrategy};
+use phi_detector::redactor::{RedactionStrategy, Redactor};
 use phi_detector::results::{DetectionResult, ResultsSummary};
+use phi_detector::scanner::Scanner;
 
 #[test]
 fn test_full_pipeline_json_output() {
@@ -34,7 +34,10 @@ fn test_pipeline_summary() {
     let detections = scanner.scan(text);
     let mut summary = ResultsSummary::default();
     for det in &detections {
-        *summary.detections_by_type.entry(det.phi_type.clone()).or_insert(0) += 1;
+        *summary
+            .detections_by_type
+            .entry(det.phi_type.clone())
+            .or_insert(0) += 1;
     }
     summary.files_processed += 1;
     summary.total_detections += detections.len();

@@ -76,7 +76,7 @@
       "id": 2,
       "title": "Implement YAML configuration system",
       "description": "Create a YAML-based configuration system for defining custom PHI patterns and detection rules",
-      "status": "pending",
+      "status": "in-progress",
       "dependencies": [
         1
       ],
@@ -88,7 +88,7 @@
           "id": 1,
           "title": "Design YAML schema for PHI patterns",
           "description": "Create a comprehensive YAML schema that defines the structure for PHI pattern configurations",
-          "status": "pending",
+          "status": "done",
           "dependencies": [],
           "details": "Design a schema that includes: (1) Pattern definitions with regex support, (2) Context rules for determining when patterns apply, (3) Confidence scoring mechanisms, (4) Redaction templates and strategies, (5) Metadata fields for pattern documentation. Create JSON Schema validation rules to ensure configuration correctness. Include examples for common PHI types like names, addresses, medical record numbers, etc. The schema should be extensible for future pattern types while maintaining backward compatibility."
         },
