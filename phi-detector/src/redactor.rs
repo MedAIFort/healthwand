@@ -17,6 +17,30 @@ impl Redactor {
         Self { strategy }
     }
 
+    /// Redacts all detected PHI spans in the input text according to the configured redaction strategy.
+    ///
+    /// Handles overlapping detections by ensuring each character is redacted only once, using the appropriate strategy for each PHI type. Returns the fully redacted string with sensitive information masked or replaced.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use crate::redactor::{Redactor, RedactionStrategy};
+    /// use crate::scanner::Detection;
+    /// use crate::phi_patterns::PHIType;
+    ///
+    /// let redactor = Redactor::new(RedactionStrategy::FullReplacement);
+    /// let text = "Patient SSN: 123-45-6789";
+    /// let detections = vec![
+    ///     Detection {
+    ///         start: 14,
+    ///         end: 25,
+    ///         phi_type: PHIType::SSN,
+    ///         matched_text: "123-45-6789".to_string(),
+    ///     }
+    /// ];
+    /// let result = redactor.redact(text, &detections);
+    /// assert_eq!(result, "Patient SSN: XXX-XX-XXXX");
+    /// ```
     pub fn redact(&self, text: &str, detections: &[Detection]) -> String {
         let mut redacted = String::with_capacity(text.len());
         let mut last = 0;
@@ -45,8 +69,20 @@ impl Redactor {
         redacted
     }
 
-    /// Returns the redacted string for a given PHI type and matched text, according to the current strategy.
-    pub fn redaction_text(&self, phi_type: &PHIType, matched: &str) -> String {
+    /// Generates a redacted version of a detected PHI value based on its type and the configured redaction strategy.
+    ///
+    /// The output format varies by strategy and PHI type, supporting full replacement, partial masking, or placeholder substitution.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use crate::phi_patterns::PHIType;
+    /// use crate::redactor::{Redactor, RedactionStrategy};
+    ///
+    /// let redactor = Redactor::new(RedactionStrategy::PartialMasking);
+    /// let masked = redactor.redaction_text(&PHIType::SSN, "123-45-6789");
+    /// assert_eq!(masked, "***-**-6789");
+    /// ```    pub fn redaction_text(&self, phi_type: &PHIType, matched: &str) -> String {
         match self.strategy {
             RedactionStrategy::FullReplacement => match phi_type {
                 PHIType::SSN => "XXX-XX-XXXX".to_string(),

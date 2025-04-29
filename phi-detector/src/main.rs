@@ -48,6 +48,18 @@ pub enum AppError {
     Redact(String),
 }
 
+/// Runs the PHI detection and optional redaction pipeline as a command-line application.
+///
+/// Parses command-line arguments, configures logging, scans input files for Protected Health Information (PHI) using predefined patterns, optionally redacts detected PHI, aggregates results and statistics, and outputs findings in either JSON or human-readable text format. Handles file I/O and serialization errors, and reports them in the output.
+///
+/// # Examples
+///
+/// ```no_run
+/// // Run from the command line:
+/// // $ phi-detector --input ./data --output text --redact -vv
+/// // This scans all .txt, .md, and .csv files in ./data, redacts PHI, and prints results in text format with verbose logging.
+/// main();
+/// ```
 fn main() {
     // Set log level based on verbosity flag
     let env = env_logger::Env::default();

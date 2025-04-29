@@ -16,6 +16,15 @@ pub struct Scanner {
 }
 
 impl Scanner {
+    /// Creates a new `Scanner` with the specified PHI patterns and context window size.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let patterns = PHIPattern::all_patterns();
+    /// let scanner = Scanner::new(patterns, 10);
+    /// assert_eq!(scanner.context_window, 10);
+    /// ```
     pub fn new(patterns: Vec<PHIPattern>, context_window: usize) -> Self {
         Self {
             patterns,
@@ -23,6 +32,20 @@ impl Scanner {
         }
     }
 
+    /// Scans the input text for all configured PHI patterns and returns detected instances.
+    ///
+    /// For each PHI pattern, finds all matches in the text, extracts the matched substring,
+    /// its byte indices, the PHI type, a fixed confidence score, and a configurable window of surrounding context.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let patterns = PHIPattern::all_patterns();
+    /// let scanner = Scanner::new(patterns, 5);
+    /// let text = "Patient SSN: 123-45-6789";
+    /// let detections = scanner.scan(text);
+    /// assert!(detections.iter().any(|d| d.phi_type.to_string() == "SSN"));
+    /// ```
     pub fn scan(&self, text: &str) -> Vec<Detection> {
         let mut detections = Vec::new();
         for pat in &self.patterns {
@@ -45,6 +68,17 @@ impl Scanner {
         detections
     }
 
+    /// Extracts a substring of the input text surrounding a specified range, including a given number of characters before and after the range.
+    ///
+    /// The context window extends up to `window` characters before `start` and after `end`, without exceeding the text boundaries.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let text = "Sensitive: 123-45-6789 is an SSN.";
+    /// let context = extract_context(text, 11, 22, 5);
+    /// assert_eq!(context, "tive: 123-45-6789 is a");
+    /// ```
     fn extract_context(text: &str, start: usize, end: usize, window: usize) -> String {
         let left = start.saturating_sub(window);
         let right = usize::min(text.len(), end + window);
