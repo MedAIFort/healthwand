@@ -32,3 +32,4 @@ scripts/example_prd.txt
 
 # Rust build output
 phi-detector/target/
+
