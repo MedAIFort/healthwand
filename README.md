@@ -16,16 +16,19 @@
 
 <!-- Available on the **GitHub Actions Marketplace**, it empowers developers to secure healthcare applications like FHIR APIs, EHR systems, and telemedicine platforms. -->
 
+> Note: The repository currently provides the Rust CLI `phi-detector` (under `phi-detector/`) for PHI scanning and redaction. Additional components (e.g., Python NLP validator and API server) are planned and tracked in the roadmap.
+
 ## Features
 
 - **PHI Detection**: Identifies sensitive data (e.g., SSNs, ICD-10 codes, FHIR fields, drug names) in code, commits, images (via OCR), and structured data (e.g., JSON, CSV).
 - **Redaction and Anonymization**: Masks or redacts PHI (e.g., "123-45-6789" → "XXX-XX-XXXX") to prevent data leaks.
 - **Customizable Pipelines**: Define custom PHI patterns and detection rules via YAML configuration.
-- **Context-Aware NLP**: Uses Python-based NLP to reduce false positives (e.g., distinguishes "patient SSN" from random numbers).
+- **Context-Aware NLP (planned)**: Uses Python-based NLP to reduce false positives (e.g., distinguishes "patient SSN" from random numbers).
 - **GitHub Actions Integration**: Automates PHI scanning in CI/CD pipelines, available on the GitHub Actions Marketplace.
 - **High Performance**: Rust ensures fast scanning of large codebases, with Python enhancing NLP accuracy.
 - **Compliance-Ready**: Supports audit trails and reporting for healthcare regulations.
 - **Extensible**: Modular Rust and Python architecture for adding new detection methods, including future AI capabilities.
+- **Regional Support (Indonesia)**: Built-in YAML patterns for Indonesian identifiers, including **KTP/NIK (16-digit)** and **BPJS (13-digit)** numbers.
 
 ## Use Cases
 
@@ -38,85 +41,77 @@
 
 ### Prerequisites
 - **Rust**: Stable toolchain (1.65 or later) with Cargo.
-- **Python**: Version 3.9 or later.
+- **Python**: Version 3.9 or later (optional; NLP validator is planned).
 - **Git**: For cloning the repository.
 
 ### Steps
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/your-org/healthwand.git
+   git clone https://github.com/MedAIFort/healthwand.git
    cd healthwand
    ```
-2. **Build Rust CLI:**
+2. **Build Rust CLI (`phi-detector`):**
    ```bash
+   cd phi-detector
    cargo build --release
    cargo install --path .
    ```
-3. **Install Python NLP:**
+3. **Verify Installation:**
    ```bash
-   pip install -r python/requirements.txt
-   ```
-4. **Verify Installation:**
-   ```bash
-   healthwand --version
-   healthwand-nlp --version
+   phi-detector --help
    ```
 
 ## Usage
 
-### CLI
-Scan a file or directory for PHI using the HealthWand CLI:
+### CLI (phi-detector)
+Scan files or directories for PHI using the Rust CLI:
 
 ```bash
-healthwand scan --input src/ --config config.yaml --output phi-report.json
-healthwand-nlp validate --input phi-report.json --output validated-phi-report.json
+phi-detector --input ./docs --output json --redact -vv
 ```
-- `--input`: Path to a file or directory (e.g., `src/` for codebases).
-- `--config`: YAML configuration file with PHI patterns.
-- `--output`: JSON file for detection results.
+- `--input`: Path to a file or directory to scan.
+- `--output`: `json` (structured bundle) or `text`.
+- `--redact`: Enable in-line redaction in outputs.
+- `-v`/`-vv`: Increase verbosity for logs.
 
-Example output (`phi-report.json`):
+By default, the CLI scans text-like files with extensions: `.txt`, `.md`, `.csv`.
 
-```json
-[
-  {
-    "type": "SSN",
-    "value": "123-45-6789",
-    "file": "src/api.rs",
-    "line": 42,
-    "confidence": 0.95
-  },
-  {
-    "type": "ICD10_CODE",
-    "value": "E11.9",
-    "file": "src/data.yaml",
-    "line": 10,
-    "confidence": 0.9
-  }
-]
+See detailed JSON schema in `phi-detector/docs/output_format.md`.
+
+#### Example: Indonesian identifiers
+
+```bash
+echo "NIK: 1234567890123456, BPJS: 1234567890123" > sample.txt
+phi-detector --input ./sample.txt --output text
 ```
 
 ## Configuration
-Customize PHI detection with a `config.yaml` file:
+Customize PHI detection using YAML patterns (example provided at `phi-detector/config/phi_patterns.yaml`):
 
 ```yaml
 patterns:
   - name: SSN
     regex: '\b\d{3}-\d{2}-\d{4}\b'
     score: 0.95
-  - name: ICD10_CODE
-    regex: '\b[A-Z][0-9]{2}\.[0-9]{1,2}\b'
-    score: 0.9
-  - name: FHIR_FIELD
-    regex: '\b(patient\.id|encounter\.id)\b'
-    score: 0.85
-nlp:
-  model: en_core_sci_sm
-  context: ["patient", "medical", "diagnosis"]
+  - name: Indonesian NIK (KTP)
+    regex: '\b\d{16}\b'
+    score: 0.95
+  - name: Indonesian BPJS
+    regex: '\b\d{13}\b'
+    score: 0.93
+# nlp configuration is planned and will be added when the NLP validator is integrated
 ```
 
+Note: The current CLI uses built-in patterns; YAML loading is available in the library and planned for the CLI.
+
+## Regional Support: Indonesia (BPJS, KTP/NIK)
+
+- **KTP/NIK (Nomor Induk Kependudukan)**: 16-digit national ID. Detected via `indonesian_nik` pattern with KTP/NIK context words.
+- **BPJS Kesehatan**: 13-digit health insurance number. Detected via `indonesian_bpjs` pattern with BPJS context words.
+- See `phi-detector/config/phi_patterns.yaml` for configurable regexes, confidence, redaction templates, and examples.
+
 ## GitHub Action
-Integrate HealthWand into CI/CD pipelines using the HealthWand GitHub Action, available on the GitHub Actions Marketplace.
+Integrate `phi-detector` into CI/CD to block PHI from entering your repo history.
 
 ### Example Workflow
 Create a `.github/workflows/healthcare-compliance.yml` file:
@@ -138,116 +133,69 @@ jobs:
         with:
           fetch-depth: 0
       - name: Set up Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-      - name: Install Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-      - name: Install dependencies
+        uses: dtolnay/rust-toolchain@stable
+      - name: Build phi-detector
         run: |
-          pip install -r python/requirements.txt
-      - name: Build HealthWand CLI
-        run: |
+          cd phi-detector
           cargo build --release
       - name: Run PHI Scan
         run: |
-          healthwand scan --input src/ --config config.yaml --output phi-report.json
-      - name: Validate with NLP
-        run: |
-          healthwand-nlp validate --input phi-report.json --output validated-phi-report.json
+          cd phi-detector
+          ./target/release/phi-detector --input . --output json > ../phi-report.json
       - name: Upload Report
         uses: actions/upload-artifact@v3
         with:
           name: phi-report
-          path: validated-phi-report.json
+          path: phi-report.json
 ```
-
-- **fail-on-phi**: Fail the build if PHI is detected (default: true).
 
 **Outputs:**
 - `phi-report.json`: JSON file with detected PHI, uploaded as an artifact.
 
-## API Server
-Deploy HealthWand as a Python-based API server for real-time PHI detection:
-
-**Run API:**
-```bash
-cd python
-uvicorn api.main:app --host 0.0.0.0 --port 8080
-```
-
-**API Endpoint:**
-```bash
-curl -X POST http://localhost:8080/scan \
-  -H "Content-Type: application/json" \
-  -d '{"text": "Patient SSN: 123-45-6789"}'
-```
-
-**Response:**
-```json
-{
-  "findings": [
-    {
-      "type": "SSN",
-      "value": "123-45-6789",
-      "confidence": 0.95
-    }
-  ]
-}
-```
+## API Server (Planned)
+A Python-based API server for real-time PHI detection is planned. For now, use the Rust CLI in CI or local workflows.
 
 ## Project Structure
 ```
 healthwand/
-├── src/                 # Rust source code
-│   ├── analyzer/        # Detection pipelines
-│   ├── cli/             # Command-line interface
-│   ├── lib.rs           # Core library
-├── python/              # Python source code
-│   ├── nlp/             # NLP processing
-│   ├── api/             # API server
-│   ├── requirements.txt # Python dependencies
-├── config/              # PHI patterns (config.yaml)
-├── action/              # GitHub Action definition (action.yml)
-├── tests/               # Unit and integration tests
-├── docker/              # Dockerfile for CLI and API
-├── docs/                # Documentation
-├── .github/workflows/   # CI/CD workflows
+├── phi-detector/        # Rust CLI crate for PHI detection & redaction
+│   ├── src/             # CLI + library modules
+│   ├── config/          # YAML patterns (e.g., Indonesian NIK/BPJS)
+│   ├── docs/            # Output format docs
+│   └── tests/           # Integration tests
+├── docs/                # Repository documentation
+├── scripts/             # Project scripts
+├── tasks/               # Task descriptions
 ├── README.md            # This file
 ├── LICENSE              # MIT License
-├── Cargo.toml           # Rust dependencies
 └── CHANGELOG.md         # Release notes
 ```
 
 ## Customization
 
 ### Adding PHI Patterns
-Modify `config/config.yaml` to include healthcare-specific patterns:
+Modify `phi-detector/config/phi_patterns.yaml` to include healthcare-specific patterns:
 
 ```yaml
 patterns:
   - name: DRUG_NAME
     regex: '\b(lipitor|metformin)\b'
     score: 0.9
-  - name: FHIR_FIELD
-    regex: '\b(patient\.id|encounter\.id)\b'
-    score: 0.85
+  - name: Indonesian BPJS
+    regex: '\b\d{13}\b'
+    score: 0.93
 ```
 
 ### Extending NLP
 Customize NLP in `python/nlp/` to enhance context-aware detection, such as recognizing medical terms or FHIR-specific entities.
 
 ### Custom Pipelines
-Create detection pipelines in `src/analyzer/` for new data types:
+Use the library scanner in Rust to build detection flows:
 
 ```rust
-use healthwand::analyzer::Pipeline;
-let pipeline = Pipeline::new()
-    .add_regex_detector("SSN")
-    .add_nlp_validator("en_core_sci_sm");
-let findings = pipeline.scan("Patient SSN: 123-45-6789");
+use phi_detector::scanner::Scanner;
+let scanner = Scanner::new(phi_detector::phi_patterns::PHIPattern::all_patterns(), 10);
+let findings = scanner.scan("NIK: 1234567890123456");
 ```
 
 ## Compliance
