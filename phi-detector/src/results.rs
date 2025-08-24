@@ -1,5 +1,5 @@
-use serde::{Serialize, Deserialize};
 use crate::phi_patterns::PHIType;
+use serde::{Deserialize, Serialize};
 
 /// Represents a single PHI detection result, suitable for JSON output.
 ///
