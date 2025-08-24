@@ -46,6 +46,20 @@ pub struct PHIPatternConfig {
 }
 
 impl PHIPatternConfig {
+    /// Loads PHI pattern configurations from a YAML file.
+    ///
+    /// Reads the specified YAML file and deserializes its contents into a `PHIPatternsFile` struct containing pattern definitions, defaults, and overrides.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the file cannot be read or if the YAML content is invalid.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let patterns = PHIPatternConfig::from_yaml_file("patterns.yaml").unwrap();
+    /// assert!(!patterns.patterns.is_empty());
+    /// ```
     pub fn from_yaml_file<P: AsRef<std::path::Path>>(
         path: P,
     ) -> Result<PHIPatternsFile, Box<dyn std::error::Error>> {
@@ -74,6 +88,16 @@ pub struct PHIPattern {
 }
 
 impl PHIPattern {
+    /// Returns a list of predefined PHI patterns for common sensitive data types.
+    ///
+    /// Each pattern includes a compiled regular expression, redaction strategy, and associated PHI type. Patterns cover SSN, Medical Record Number, ICD-10 code, Date of Birth, Indonesian NIK, and Indonesian BPJS numbers.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let patterns = PHIPattern::all_patterns();
+    /// assert!(patterns.iter().any(|p| p.phi_type == PHIType::SSN));
+    /// ```
     pub fn all_patterns() -> Vec<PHIPattern> {
         vec![
             PHIPattern {
@@ -222,6 +246,16 @@ mod config_tests {
     use tempfile::NamedTempFile;
 
     #[test]
+    /// Tests loading PHI pattern configurations from a YAML file and verifies correct deserialization.
+    ///
+    /// This test writes a sample YAML pattern definition to a temporary file, loads it using `from_yaml_file`,
+    /// and asserts that the pattern's fields are correctly parsed.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// test_load_patterns_from_yaml();
+    /// ```
     fn test_load_patterns_from_yaml() {
         let yaml = r#"
 patterns:
@@ -245,6 +279,7 @@ patterns:
     }
 
     #[test]
+    /// ```
     fn test_invalid_yaml() {
         let yaml = "not: valid: yaml";
         let mut tmp = NamedTempFile::new().expect("Failed to create temp file");

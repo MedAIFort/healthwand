@@ -4,6 +4,15 @@ use phi_detector::results::{DetectionResult, ResultsSummary};
 use phi_detector::scanner::Scanner;
 
 #[test]
+/// Tests the PHI detection and redaction pipeline, verifying JSON output includes all expected PHI types.
+///
+/// This test scans a sample text containing SSN, MRN, and NIK identifiers, applies full redaction, serializes detection results to JSON, and asserts that all PHI types are present in the output.
+///
+/// # Examples
+///
+/// ```
+/// test_full_pipeline_json_output();
+/// ```
 fn test_full_pipeline_json_output() {
     let text = "SSN: 123-45-6789, MRN: 12345678, NIK: 1234567890123456";
     let scanner = Scanner::new(phi_detector::phi_patterns::PHIPattern::all_patterns(), 10);

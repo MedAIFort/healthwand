@@ -43,6 +43,17 @@ impl LocalFileSource {
         }
     }
 
+    /// Determines if the given file path has an allowed text file extension.
+    ///
+    /// Returns `true` if the file's extension matches any of the allowed extensions (case-insensitive), otherwise returns `false`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let source = LocalFileSource::new("some_dir", vec!["txt".to_string()]);
+    /// assert!(source.is_text_file(Path::new("file.txt")));
+    /// assert!(!source.is_text_file(Path::new("file.png")));
+    /// ```
     fn is_text_file(&self, path: &Path) -> bool {
         if let Some(ext) = path.extension().and_then(|e| e.to_str()) {
             self.allowed_extensions
@@ -53,6 +64,23 @@ impl LocalFileSource {
         }
     }
 
+    /// Recursively collects files with allowed extensions from a directory and its subdirectories up to a maximum depth.
+    ///
+    /// Traverses the given directory, skipping symbolic links, and adds files matching the allowed extensions to the provided vector. Stops recursion at a depth of 100 to prevent excessive traversal.
+    ///
+    /// # Errors
+    ///
+    /// Returns a `FileSourceError::Io` if an I/O error occurs during directory traversal.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::path::PathBuf;
+    /// let source = LocalFileSource::new("some_dir", vec!["txt".to_string()]);
+    /// let mut files = Vec::new();
+    /// source.collect_files_recursive(PathBuf::from("some_dir").as_path(), &mut files, 0).unwrap();
+    /// assert!(files.iter().all(|p| p.extension().unwrap() == "txt"));
+    /// ```
     fn collect_files_recursive(
         &self,
         dir: &Path,
