@@ -1,0 +1,169 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Implement Core Rust CLI Structure",
+        "description": "Create the foundation for the phi-detector CLI tool with basic command-line argument parsing and project structure.",
+        "details": "Set up a new Rust project with Cargo:\n1. Initialize project structure with `cargo new phi-detector`\n2. Configure dependencies in Cargo.toml:\n   - clap (for CLI argument parsing)\n   - regex (for pattern matching)\n   - serde/serde_yaml (for YAML config parsing)\n   - serde_json (for JSON output)\n3. Implement basic CLI argument structure:\n   - Required: `--input` (file or directory path)\n   - Optional: `--output` (json|text, default: text)\n   - Optional: `--config` (path to YAML config file)\n4. Create modular architecture with separate modules for:\n   - CLI interface\n   - PHI detection engine\n   - File/directory traversal\n   - Output formatting\n5. Implement logging and error handling",
+        "testStrategy": "1. Unit tests for argument parsing\n2. Integration tests verifying CLI can be invoked with basic arguments\n3. Manual testing of help text and argument validation\n4. Verify project builds and runs with cargo build/run",
+        "priority": "high",
+        "dependencies": [],
+        "status": "completed",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Implement YAML Configuration Parser",
+        "description": "Create a module to load and parse PHI pattern definitions from YAML configuration files.",
+        "details": "1. Define Rust structs that represent PHI pattern configurations:\n```rust\n#[derive(Debug, Deserialize)]\nstruct PatternConfig {\n    patterns: Vec<PhiPattern>,\n}\n\n#[derive(Debug, Deserialize)]\nstruct PhiPattern {\n    name: String,\n    description: String,\n    regex: String,\n    category: String,\n    sensitivity: Option<String>,\n    examples: Option<Vec<String>>,\n}\n```\n2. Implement a configuration loader that:\n   - Reads YAML from a file path\n   - Deserializes into the pattern structs\n   - Validates pattern definitions (compile regex patterns)\n   - Provides default patterns if no config is provided\n3. Create a default patterns file at `config/phi_patterns.yaml` with common PHI patterns:\n   - SSNs (###-##-####)\n   - MRNs (various formats)\n   - ICD-10 codes\n   - Drug names (common format patterns)\n   - Indonesia's NIK (16-digit) and BPJS (13-digit)\n4. Implement error handling for malformed YAML or invalid regex patterns",
+        "testStrategy": "1. Unit tests with sample YAML files containing valid and invalid patterns\n2. Test loading from default location and custom path\n3. Test error handling for malformed YAML\n4. Test validation of regex patterns\n5. Verify all default patterns compile correctly",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "completed",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Implement PHI Detection Engine",
+        "description": "Create the core detection engine that scans text content for PHI patterns defined in the configuration.",
+        "details": "1. Implement a PHI detector module that:\n   - Takes text input and pattern configurations\n   - Compiles regex patterns efficiently (once, not per scan)\n   - Scans text for matches against all patterns\n   - Records match positions, pattern names, and surrounding context\n2. Optimize for performance:\n   - Use multi-threading for large files (rayon crate)\n   - Implement efficient regex matching strategies\n   - Consider memory usage for large files\n3. Create data structures for detection results:\n```rust\n#[derive(Debug, Serialize)]\nstruct DetectionResult {\n    file_path: String,\n    matches: Vec<PhiMatch>,\n    stats: ScanStats,\n}\n\n#[derive(Debug, Serialize)]\nstruct PhiMatch {\n    pattern_name: String,\n    category: String,\n    line_number: usize,\n    column_start: usize,\n    column_end: usize,\n    matched_text: String,\n    context: String,\n}\n```\n4. Implement context extraction to capture text surrounding the match\n5. Add severity levels based on pattern sensitivity",
+        "testStrategy": "1. Unit tests with sample text containing known PHI patterns\n2. Benchmark tests for performance on large files\n3. Test detection accuracy with various pattern types\n4. Test edge cases (pattern at file boundaries, overlapping matches)\n5. Verify correct position reporting (line/column)",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "in_progress",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Implement File Traversal and Content Processing",
+        "description": "Create a module to traverse directories, identify relevant files, and process their content for PHI detection.",
+        "details": "1. Implement file system traversal:\n   - Support for individual files and recursive directory scanning\n   - Filter files by default extensions (.txt, .md, .csv) or custom extensions\n   - Handle symlinks and permission issues gracefully\n2. Implement content readers for different file types:\n   - Plain text files (UTF-8 with fallbacks)\n   - CSV files (extract fields for scanning)\n   - JSON files (traverse and extract string values)\n   - Markdown files (consider both text and code blocks)\n3. Create a processing pipeline that:\n   - Identifies file type\n   - Selects appropriate content reader\n   - Extracts text content\n   - Passes content to PHI detector\n   - Collects and aggregates results\n4. Implement progress reporting for large directory scans\n5. Add error handling for inaccessible or corrupted files",
+        "testStrategy": "1. Unit tests with sample directory structures\n2. Tests for each file type parser\n3. Test handling of invalid/corrupted files\n4. Test performance on deep directory structures\n5. Test with large files to verify memory efficiency",
+        "priority": "medium",
+        "dependencies": [
+          3
+        ],
+        "status": "in_progress",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Implement Redaction and Anonymization",
+        "description": "Create functionality to mask or redact detected PHI in output or processed files.",
+        "details": "1. Implement redaction strategies:\n   - Full redaction (replace with [REDACTED])\n   - Pattern-preserving masking (e.g., 123-45-6789 → XXX-XX-XXXX)\n   - Partial redaction (show first/last N characters)\n   - Pseudonymization (consistent replacement of values)\n2. Create a redaction engine that:\n   - Takes detection results and original content\n   - Applies specified redaction strategy\n   - Produces redacted output\n3. Add CLI options for redaction:\n   - `--redact` flag to enable redaction\n   - `--redaction-style` to select strategy\n   - `--output-file` for redacted content\n4. Implement in-place redaction option with backup creation\n5. Add reporting of redaction statistics",
+        "testStrategy": "1. Unit tests for each redaction strategy\n2. Test redaction accuracy with various PHI types\n3. Test handling of overlapping matches\n4. Verify original files are preserved unless in-place redaction is specified\n5. Test with large files to verify performance",
+        "priority": "medium",
+        "dependencies": [
+          3,
+          4
+        ],
+        "status": "in_progress",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "Implement Output Formatting and Reporting",
+        "description": "Create structured output formats (JSON and text) for PHI detection results and implement basic reporting.",
+        "details": "1. Implement JSON output format according to `phi-detector/docs/output_format.md`:\n```rust\nfn format_json_output(results: Vec<DetectionResult>) -> String {\n    serde_json::to_string_pretty(&results).unwrap_or_else(|e| {\n        eprintln!(\"Error serializing results: {}\", e);\n        String::from(\"{\\\"error\\\": \\\"Failed to serialize results\\\"}\")\n    })\n}\n```\n2. Implement human-readable text output:\n   - Summary statistics (files scanned, PHI found by category)\n   - File-by-file breakdown\n   - Highlighted matches with context\n3. Add color support for terminal output (using colored crate)\n4. Implement output filtering options:\n   - Filter by pattern type/category\n   - Minimum severity threshold\n   - Include/exclude specific files\n5. Create documentation for the output format in `phi-detector/docs/output_format.md`",
+        "testStrategy": "1. Unit tests for JSON serialization\n2. Verify JSON output matches schema definition\n3. Test text output formatting with various result sets\n4. Test color output in different terminal environments\n5. Verify filtering options work correctly",
+        "priority": "medium",
+        "dependencies": [
+          3,
+          4
+        ],
+        "status": "in_progress",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Create Documentation and Examples",
+        "description": "Develop comprehensive documentation, usage examples, and pattern configuration guides for the phi-detector tool.",
+        "details": "1. Create a detailed README.md with:\n   - Project overview and purpose\n   - Installation instructions\n   - Basic usage examples\n   - Configuration options\n   - GitHub Action integration guide\n2. Document the output format in `docs/output_format.md`:\n   - JSON schema definition\n   - Example outputs\n   - Field descriptions\n3. Create pattern configuration guide in `docs/pattern_configuration.md`:\n   - YAML format specification\n   - Pattern definition syntax\n   - Examples for common PHI types\n   - Best practices for custom patterns\n4. Add example configurations in `examples/` directory:\n   - Basic PHI patterns\n   - Healthcare-specific patterns (ICD-10, drug names)\n   - Regional patterns (Indonesia NIK/BPJS)\n5. Create usage examples in `examples/` directory:\n   - Basic CLI usage\n   - GitHub Action workflow examples\n   - Custom configuration examples",
+        "testStrategy": "1. Verify documentation accuracy with tool usage\n2. Test example configurations\n3. Review for completeness and clarity\n4. Ensure all CLI options are documented\n5. Validate GitHub Action examples",
+        "priority": "medium",
+        "dependencies": [
+          1,
+          2,
+          3,
+          6,
+          7,
+          8
+        ],
+        "status": "in_progress",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Create GitHub Action Integration",
+        "description": "Develop a GitHub Action wrapper for the phi-detector CLI to enable PHI scanning in CI/CD pipelines.",
+        "details": "1. Create GitHub Action definition in `action.yml`:\n```yaml\nname: 'PHI Detector'  \ndescription: 'Scan repositories for Protected Health Information (PHI)'  \ninputs:  \n  path:  \n    description: 'Path to scan for PHI'  \n    required: false  \n    default: '.'  \n  config:  \n    description: 'Path to custom PHI pattern config'  \n    required: false  \n  output-format:  \n    description: 'Output format (json or text)'  \n    required: false  \n    default: 'json'  \n  fail-on-detection:  \n    description: 'Fail the workflow if PHI is detected'  \n    required: false  \n    default: 'true'  \nruns:  \n  using: 'docker'  \n  image: 'Dockerfile'  \n  args:  \n    - '--input'  \n    - ${{ inputs.path }}  \n    - '--output'  \n    - ${{ inputs.output-format }}  \n    - ${{ inputs.config && format('--config {0}', inputs.config) || '' }}  \nbranding:  \n  icon: 'shield'  \n  color: 'green'  \n```\n2. Create a Dockerfile for the action:\n   - Use a small base image (e.g., Alpine)\n   - Install Rust and build dependencies\n   - Build the phi-detector CLI\n   - Set the CLI as the entrypoint\n3. Implement GitHub-specific output formatting:\n   - Generate GitHub annotations for PHI findings\n   - Create workflow summary with statistics\n   - Support for GitHub Actions environment variables\n4. Add example workflow in README.md:\n```yaml\nname: PHI Detection\n\non: [push, pull_request]\n\njobs:\n  scan-for-phi:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v3\n      - name: Scan for PHI\n        uses: your-org/phi-detector@v1\n        with:\n          path: './src'\n          output-format: 'json'\n          fail-on-detection: 'true'\n```",
+        "testStrategy": "1. Test GitHub Action locally with act tool\n2. Verify Docker build process\n3. Test with sample repositories containing PHI\n4. Verify GitHub annotations are correctly generated\n5. Test different input combinations",
+        "priority": "medium",
+        "dependencies": [
+          1,
+          3,
+          6
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Implement CLI Configuration Flag",
+        "description": "Add support for specifying custom PHI pattern configurations via CLI flag, extending the existing library support for YAML configurations.",
+        "details": "1. Extend the CLI argument parser to accept a `--config` flag:\n```rust\n.arg(\n    Arg::new(\"config\")\n        .long(\"config\")\n        .value_name(\"FILE\")\n        .help(\"Path to custom PHI pattern configuration file\")\n        .required(false)\n)\n```\n2. Modify the configuration loader to:\n   - Check for config path from CLI arguments first\n   - Fall back to default config location if not specified\n   - Validate the provided config file exists and is readable\n3. Add documentation for the config flag in help text and README\n4. Implement config validation and provide helpful error messages for invalid configs\n5. Add examples of custom configurations in the documentation",
+        "testStrategy": "1. Unit tests for CLI argument parsing with config flag\n2. Test loading custom configurations from different paths\n3. Test error handling for invalid config paths\n4. Test precedence (CLI config overrides default)\n5. Integration tests with sample custom configurations",
+        "priority": "medium",
+        "dependencies": [
+          1,
+          2
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Create Documentation and Examples",
+        "description": "Develop comprehensive documentation, usage examples, and pattern configuration guides for the phi-detector tool.",
+        "details": "1. Create a detailed README.md with:\n   - Project overview and purpose\n   - Installation instructions\n   - Basic usage examples\n   - Configuration options\n   - GitHub Action integration guide\n2. Document the output format in `docs/output_format.md`:\n   - JSON schema definition\n   - Example outputs\n   - Field descriptions\n3. Create pattern configuration guide in `docs/pattern_configuration.md`:\n   - YAML format specification\n   - Pattern definition syntax\n   - Examples for common PHI types\n   - Best practices for custom patterns\n4. Add example configurations in `examples/` directory:\n   - Basic PHI patterns\n   - Healthcare-specific patterns (ICD-10, drug names)\n   - Regional patterns (Indonesia NIK/BPJS)\n5. Create usage examples in `examples/` directory:\n   - Basic CLI usage\n   - GitHub Action workflow examples\n   - Custom configuration examples",
+        "testStrategy": "1. Verify documentation accuracy with tool usage\n2. Test example configurations\n3. Review for completeness and clarity\n4. Ensure all CLI options are documented\n5. Validate GitHub Action examples",
+        "priority": "medium",
+        "dependencies": [
+          1,
+          2,
+          3,
+          6,
+          7,
+          8
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Implement Basic API Server Foundation",
+        "description": "Create the foundation for the planned API server to provide PHI detection as a service.",
+        "details": "1. Set up a Python project structure for the API server:\n   - Use FastAPI and Uvicorn as specified in the PRD\n   - Create requirements.txt with dependencies\n   - Set up project structure with routes, models, and services\n2. Implement basic API endpoints:\n```python\nfrom fastapi import FastAPI, File, UploadFile, Form\nfrom pydantic import BaseModel\nimport subprocess\nimport json\nimport tempfile\nimport os\n\napp = FastAPI(title=\"HealthWand PHI Detection API\")\n\nclass DetectionResponse(BaseModel):\n    file_name: str\n    matches: list\n    stats: dict\n\n@app.post(\"/detect\", response_model=DetectionResponse)\nasync def detect_phi(file: UploadFile = File(...)):\n    # Save uploaded file to temp location\n    temp_file = tempfile.NamedTemporaryFile(delete=False)\n    try:\n        contents = await file.read()\n        temp_file.write(contents)\n        temp_file.close()\n        \n        # Call phi-detector CLI\n        result = subprocess.run(\n            [\"phi-detector\", \"--input\", temp_file.name, \"--output\", \"json\"],\n            capture_output=True,\n            text=True\n        )\n        \n        # Parse and return results\n        detection_results = json.loads(result.stdout)\n        return detection_results[0] if detection_results else {\"file_name\": file.filename, \"matches\": [], \"stats\": {}}\n    finally:\n        os.unlink(temp_file.name)\n```\n3. Create a Dockerfile for the API server:\n```dockerfile\nFROM python:3.9-slim\n\nWORKDIR /app\n\nCOPY requirements.txt .\nRUN pip install --no-cache-dir -r requirements.txt\n\n# Install Rust and build phi-detector\nRUN apt-get update && apt-get install -y curl build-essential\nRUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y\nENV PATH=\"/root/.cargo/bin:${PATH}\"\n\nCOPY . .\nRUN cd phi-detector && cargo build --release\nRUN cp phi-detector/target/release/phi-detector /usr/local/bin/\n\nCMD [\"uvicorn\", \"api.main:app\", \"--host\", \"0.0.0.0\", \"--port\", \"8000\"]\n```\n4. Implement basic authentication and rate limiting\n5. Add OpenAPI documentation",
+        "testStrategy": "1. Unit tests for API endpoints\n2. Test file upload and processing\n3. Test error handling for invalid files\n4. Test API documentation generation\n5. Test Docker build and deployment",
+        "priority": "low",
+        "dependencies": [
+          1,
+          3,
+          6
+        ],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-08-24T11:01:48.676Z",
+      "updated": "2025-08-24T11:01:48.676Z",
+      "description": "Tasks for master context"
+    }
+  }
+}
