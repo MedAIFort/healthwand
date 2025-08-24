@@ -1,16 +1,17 @@
 <context>
 # Overview  
-HealthWand is an open-source framework for detecting, redacting, masking, and anonymizing sensitive healthcare data (Protected Health Information, PHI) across text, images, and structured data. It is designed for healthcare developers and organizations who must ensure compliance with HIPAA, GDPR, and HITRUST by identifying and protecting PHI such as SSNs, Medical IDs, ICD-10 codes, drug names, and patient information. HealthWand provides high-performance pattern matching (Rust), context-aware NLP (Python), and seamless integration into CI/CD pipelines to empower secure healthcare software development.
+HealthWand is an open-source toolkit for detecting, redacting, masking, and anonymizing sensitive healthcare data (PHI) across text and structured data today, with OCR and NLP planned. It helps teams meet HIPAA, GDPR, and HITRUST requirements by identifying PHI such as SSNs, MRNs, ICD-10 codes, drug names, and regional IDs (e.g., Indonesia’s NIK/BPJS). The current deliverable is a fast Rust CLI (`phi-detector`) with configurable patterns; Python NLP validation and an API server are planned.
 
 # Core Features  
-- PHI Detection: Identifies sensitive data (e.g., SSNs, ICD-10 codes, FHIR fields, drug names) in code, commits, images (via OCR), and structured data (JSON, CSV).
+- PHI Detection (CLI): Identifies sensitive data (e.g., SSNs, ICD-10 codes, FHIR fields, drug names) in code/docs and structured data (JSON, CSV). OCR for images is planned.
 - Redaction and Anonymization: Masks or redacts PHI to prevent data leaks (e.g., "123-45-6789" → "XXX-XX-XXXX").
-- Customizable Pipelines: Users can define custom PHI patterns and detection rules via YAML configuration.
-- Context-Aware NLP: Reduces false positives by using NLP to distinguish real PHI from similar-looking data.
+- Customizable Pipelines: Users can define custom PHI patterns and detection rules via YAML configuration (library support now; CLI flag planned).
+- Context-Aware NLP (planned): Reduce false positives using NLP to distinguish real PHI from similar-looking data.
 - GitHub Actions Integration: Automates PHI scanning in CI/CD pipelines.
 - High Performance: Rust core ensures fast scanning of large codebases, Python enhances NLP accuracy.
 - Compliance-Ready: Supports audit trails and reporting for healthcare regulations.
 - Extensible: Modular architecture for adding new detection methods, including future AI capabilities.
+- Regional Support (Indonesia): Patterns for KTP/NIK (16-digit) and BPJS (13-digit).
 
 # User Experience  
 User Personas:
@@ -19,10 +20,10 @@ User Personas:
 - Platform integrators deploying PHI detection as an API service.
 
 Key User Flows:
-- Install HealthWand CLI and Python NLP dependencies.
-- Scan codebases or data files for PHI using CLI or API.
+- Install Rust CLI (`phi-detector`).
+- Scan codebases or data files for PHI using the CLI.
 - Integrate PHI scanning into GitHub Actions workflows.
-- Customize detection patterns via YAML config.
+- Customize detection patterns via YAML config (CLI flag planned; library supports YAML today).
 - Review and act on PHI scan reports.
 
 UI/UX Considerations:
@@ -33,30 +34,28 @@ UI/UX Considerations:
 <PRD>
 # Technical Architecture  
 - System Components:
-  - Rust CLI for high-speed PHI detection
-  - Python NLP module for context-aware validation
-  - YAML config for patterns and NLP settings
-  - Optional API server (Python FastAPI/Uvicorn)
+  - Rust CLI (`phi-detector`) for high-speed PHI detection
+  - YAML config for patterns (library supported; CLI flag planned)
+  - Python NLP validator (planned)
+  - API server (planned; Python FastAPI/Uvicorn)
   - GitHub Action wrapper for CI/CD integration
 - Data Models:
-  - PHI pattern definitions (YAML)
-  - Detection results (JSON)
+  - PHI pattern definitions (YAML; see `phi-detector/config/phi_patterns.yaml`)
+  - Detection results (JSON; see `phi-detector/docs/output_format.md`)
 - APIs and Integrations:
-  - CLI commands
-  - REST API endpoints (for API server)
-  - GitHub Actions interface
+  - CLI commands (`phi-detector --input ... --output [json|text]`)
+  - REST API endpoints (planned, for API server)
+  - GitHub Actions interface (example workflow in README)
 - Infrastructure Requirements:
   - Rust toolchain (>=1.65)
-  - Python 3.9+
+  - Python 3.9+ (optional; for planned NLP/API)
   - Docker (optional for deployment)
 
 # Development Roadmap  
 - Phase 1 (v1.0):
-  - Core PHI detection (SSNs, ICD-10, FHIR fields)
-  - YAML-based config
-  - CLI and Python NLP integration
-  - GitHub Action for CI/CD
-  - Basic API server
+  - Core PHI detection in text and structured data
+  - GitHub Action for CI/CD (example workflow provided)
+  - Initial API server (planned) for platform integration
 - Phase 2 (v2.0):
   - Image processing (OCR for scanned records)
   - Advanced NLP for context-aware detection
@@ -67,12 +66,12 @@ UI/UX Considerations:
   - HITRUST certification support
 
 # Logical Dependency Chain
-- Foundation: Rust CLI and YAML config
-- Add Python NLP validation
-- Integrate with GitHub Actions for CI/CD
-- Build API server for real-time detection
-- Extend to image/OCR and advanced NLP
-- Add compliance reporting and enterprise features
+- Foundation: Rust CLI and YAML patterns (library already supports YAML; add CLI flag)
+- CI: Integrate with GitHub Actions for CI/CD
+- Accuracy: Add Python NLP validation (planned)
+- Platform: Build API server for real-time detection (planned)
+- Media: Extend to OCR (planned)
+- Reporting: Add compliance reporting and enterprise features
 
 # Risks and Mitigations  
 - Technical challenges: Ensuring high accuracy with low false positives (mitigated by combining regex and NLP)
@@ -80,6 +79,10 @@ UI/UX Considerations:
 - Resource constraints: Modular design allows incremental development and community contributions
 
 # Appendix  
-- Research findings: NLP models (e.g., en_core_sci_sm), PHI pattern libraries, best practices for healthcare compliance
-- Technical specifications: See README for CLI/API usage, config structure, and integration examples
+- Research findings: PHI pattern libraries and healthcare compliance best practices
+- Technical specifications and references:
+  - README: project scope, usage, CI workflow
+  - CLI output schema: `phi-detector/docs/output_format.md`
+  - YAML patterns example: `phi-detector/config/phi_patterns.yaml`
+  - Default scanned extensions: `.txt`, `.md`, `.csv`
 </PRD>

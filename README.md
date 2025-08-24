@@ -20,11 +20,11 @@
 
 ## Features
 
-- **PHI Detection**: Identifies sensitive data (e.g., SSNs, ICD-10 codes, FHIR fields, drug names) in code, commits, images (via OCR), and structured data (e.g., JSON, CSV).
+- **PHI Detection**: Identifies sensitive data (e.g., SSNs, ICD-10 codes, FHIR fields, drug names) in code/docs and structured data (e.g., JSON, CSV). OCR for images is planned.
 - **Redaction and Anonymization**: Masks or redacts PHI (e.g., "123-45-6789" → "XXX-XX-XXXX") to prevent data leaks.
 - **Customizable Pipelines**: Define custom PHI patterns and detection rules via YAML configuration.
 - **Context-Aware NLP (planned)**: Uses Python-based NLP to reduce false positives (e.g., distinguishes "patient SSN" from random numbers).
-- **GitHub Actions Integration**: Automates PHI scanning in CI/CD pipelines, available on the GitHub Actions Marketplace.
+- **GitHub Actions Integration**: Integrates with GitHub Actions for CI/CD. Marketplace listing planned.
 - **High Performance**: Rust ensures fast scanning of large codebases, with Python enhancing NLP accuracy.
 - **Compliance-Ready**: Supports audit trails and reporting for healthcare regulations.
 - **Extensible**: Modular Rust and Python architecture for adding new detection methods, including future AI capabilities.
@@ -34,7 +34,7 @@
 
 - **Healthcare Software Development**: Scan codebases for PHI to ensure compliance in FHIR APIs or EHR systems.
 - **CI/CD Pipelines**: Fail builds if PHI is detected, protecting healthcare repos during development.
-- **Platform Integration**: Deploy as an API for real-time PHI detection in healthcare platforms.
+- **Platform Integration (planned)**: Deploy as an API for real-time PHI detection in healthcare platforms.
 - **Open-Source Projects**: Provide a free tool for startups to secure healthcare data cost-effectively.
 
 ## Installation
@@ -165,7 +165,7 @@ healthwand/
 │   └── tests/           # Integration tests
 ├── docs/                # Repository documentation
 ├── scripts/             # Project scripts
-├── tasks/               # Task descriptions
+├── .taskmaster/         # Task Master configuration and tasks
 ├── README.md            # This file
 ├── LICENSE              # MIT License
 └── CHANGELOG.md         # Release notes
@@ -186,8 +186,8 @@ patterns:
     score: 0.93
 ```
 
-### Extending NLP
-Customize NLP in `python/nlp/` to enhance context-aware detection, such as recognizing medical terms or FHIR-specific entities.
+### Extending NLP (Planned)
+Add a context-aware NLP validator to reduce false positives (e.g., distinguishing identifiers from random numbers). This will be added alongside a CLI flag to load NLP-related configs.
 
 ### Custom Pipelines
 Use the library scanner in Rust to build detection flows:
