@@ -1,12 +1,12 @@
-use phi_detector::phi_patterns::PHIType;
-use phi_detector::redactor::{RedactionStrategy, Redactor};
-use phi_detector::results::{DetectionResult, ResultsSummary};
-use phi_detector::scanner::Scanner;
+use healthwand::phi_patterns::PHIType;
+use healthwand::redactor::{RedactionStrategy, Redactor};
+use healthwand::results::{DetectionResult, ResultsSummary};
+use healthwand::scanner::Scanner;
 
 #[test]
 fn test_full_pipeline_json_output() {
     let text = "SSN: 123-45-6789, MRN: 12345678, NIK: 1234567890123456";
-    let scanner = Scanner::new(phi_detector::phi_patterns::PHIPattern::all_patterns(), 10);
+    let scanner = Scanner::new(healthwand::phi_patterns::PHIPattern::all_patterns(), 10);
     let detections = scanner.scan(text);
     let redactor = Redactor::new(RedactionStrategy::FullReplacement);
     let redacted = redactor.redact(text, &detections);
@@ -30,7 +30,7 @@ fn test_full_pipeline_json_output() {
 #[test]
 fn test_pipeline_summary() {
     let text = "SSN: 123-45-6789, SSN: 987-65-4321";
-    let scanner = Scanner::new(phi_detector::phi_patterns::PHIPattern::all_patterns(), 10);
+    let scanner = Scanner::new(healthwand::phi_patterns::PHIPattern::all_patterns(), 10);
     let detections = scanner.scan(text);
     let mut summary = ResultsSummary::default();
     for det in &detections {

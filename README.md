@@ -78,23 +78,42 @@ These are explicit anti-goals (see [`POSITIONING.md`](./POSITIONING.md) §3):
 
 ```bash
 git clone https://github.com/MedAIFort/healthwand.git
-cd healthwand/phi-detector
+cd healthwand
 cargo build --release
 cargo install --path .
-phi-detector --help
+healthwand --help
 ```
 
-### Scan a file
+### Scan a file (default JSON)
 
 ```bash
 echo "NIK pasien: 3271010101010001, BPJS: 0001234567890" > sample.txt
-phi-detector --input ./sample.txt --output text
+healthwand --input ./sample.txt
+```
+
+### Scan with text output
+
+```bash
+healthwand --input ./sample.txt --output text
+```
+
+### Scan with redaction
+
+```bash
+healthwand --input ./sample.txt --redact
+```
+
+### Scan with verbosity
+
+```bash
+healthwand --input ./sample.txt -v        # info level
+healthwand --input ./sample.txt -vv       # debug level
 ```
 
 ### Scan a repository with redaction
 
 ```bash
-phi-detector --input ./docs --output json --redact -vv > phi-report.json
+healthwand --input ./docs --output json --redact -vv > phi-report.json
 ```
 
 Flags:

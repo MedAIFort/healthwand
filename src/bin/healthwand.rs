@@ -1,10 +1,10 @@
 use clap::{Parser, ValueEnum};
 use log::{error, info};
-use phi_detector::file_source::{FileSource, LocalFileSource};
-use phi_detector::phi_patterns;
-use phi_detector::redactor::*;
-use phi_detector::results::{DetectionResult, OutputBundle, ResultsSummary};
-use phi_detector::scanner;
+use healthwand::file_source::{FileSource, LocalFileSource};
+use healthwand::phi_patterns;
+use healthwand::redactor::*;
+use healthwand::results::{DetectionResult, OutputBundle, ResultsSummary};
+use healthwand::scanner;
 use thiserror::Error;
 
 /// Supported output formats
@@ -16,7 +16,7 @@ enum OutputFormat {
 
 /// CLI configuration
 #[derive(Parser, Debug)]
-#[command(name = "phi-detector")]
+#[command(name = "healthwand")]
 #[command(about = "Detect and redact PHI in text files", long_about = None)]
 struct Cli {
     /// Input file or directory to scan

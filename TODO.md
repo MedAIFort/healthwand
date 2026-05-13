@@ -112,9 +112,9 @@ Steps follow `[ARCH §11]` exactly. Single PR per logical step; the whole milest
 
 ### M1.3 Binary rename
 
-- [ ] **T-0120** Move `src/main.rs` → `src/bin/healthwand.rs`. Add `src/lib.rs` as the public API entry point. [ARCH §2.1]
-- [ ] **T-0121** Update binary references in `src/bin/healthwand.rs` from any internal `phi-detector` strings to `healthwand`.
-- [ ] **T-0122** `[EXISTS-PARTIAL]` Audit CLI flag compatibility: ensure `--input`, `--output`, `--redact`, `-v`/`-vv` continue to accept the same values they did pre-rename. [ARCH §3, README #usage]
+- [x] **T-0120** Move `src/main.rs` → `src/bin/healthwand.rs`. Added `src/lib.rs` as the public API entry point.
+- [x] **T-0121** Update binary references in `src/bin/healthwand.rs` from any internal `phi-detector` strings to `healthwand`. Completed: updated command name.
+- [x] **T-0122** `[EXISTS-PARTIAL]` Audit CLI flag compatibility: ensured `--input`, `--output`, `--redact`, `-v`/`-vv` continue to accept the same values as before the rename.
 
 ### M1.4 CI rename
 

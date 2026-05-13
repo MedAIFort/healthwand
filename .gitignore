@@ -26,14 +26,28 @@ node_modules/
 # OS specific
 .DS_Store
 
-# Task Master
-README-task-master.md
-scripts/example_prd.txt
-
 # Rust build output
-phi-detector/target/
+target/
+Cargo.lock
+
+# Rust IDE files
+*.rs.bk
+
+# Test artifacts
+*.tmp
+*.bak
+
+# Coverage
+coverage/
+*.profraw
 
 
-# Task files
-# tasks.json
-# tasks/ 
+# Python (for NLP companion)
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.venv/
+venv/

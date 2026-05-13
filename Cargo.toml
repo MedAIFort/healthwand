@@ -17,4 +17,15 @@ path = "src/lib.rs"
 
 [[bin]]
 name = "healthwand"
-path = "src/main.rs"
+path = "src/bin/healthwand.rs"
+
+[dependencies]
+regex = "1.11"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_yaml = "0.9"
+log = "0.4"
+env_logger = "0.10"
+thiserror = "1.0"
+clap = { version = "4.5", features = ["derive"] }
+tempfile = "3.10"
