@@ -74,10 +74,14 @@ These tasks unblock everything downstream. None of them produce code; all produc
   - Decided MSRV: **Rust 1.87.0** (as recorded in audit).
 - [x] **T-0005** `[DECISION][BLOCKER]` Decide Python floor for the planned NLP companion. Pre-revival badge says 3.9 — EOL Oct 2025. Recommend **Python 3.11+** minimum.
   - Decided Python floor: **3.11+** (as confirmed by Python Developer's Guide).
-- [ ] **T-0006** `[REPO-STATE]` Audit `.taskmaster/` directory contents. The current README references it; decide whether to keep, retire, or migrate the Task Master configuration. If retire: open a follow-up task to remove the directory.
-- [ ] **T-0007** `[REPO-STATE]` Audit existing `CHANGELOG.md` and `CONTRIBUTING.md` (if present). If not present, flag for creation in M5.
-- [ ] **T-0008** `[REPO-STATE]` Audit existing `LICENSE` file — confirm MIT, current year, correct copyright holder line. The MIT license is locked; this is verification only.
-- [ ] **T-0009** `[DECISION]` Decide GitHub Action wrapper repo strategy: (a) `MedAIFort/healthwand-action` as a separate repo, or (b) action lives in-tree under `.github/actions/healthwand/`. Recommendation: (a) for independent action versioning. [ARCH §3.5]
+- [x] **T-0006** `[REPO-STATE]` Audit `.taskmaster/` directory contents. The current README references it; decide whether to keep, retire, or migrate the Task Master configuration. If retire: open a follow-up task to remove the directory.
+  - Decided: **retired**
+- [x] **T-0007** `[REPO-STATE]` Audit existing `CHANGELOG.md` and `CONTRIBUTING.md` (if present). If not present, flag for creation in M5.
+- [x] **T-0008** `[REPO-STATE]` Audit existing `LICENSE` file — confirm MIT, current year, correct copyright holder line. The MIT license is locked; this is verification only.
+  - Confirmed MIT license with updated year 2026.
+- [x] **T-0009** `[DECISION]` Decide GitHub Action wrapper repo strategy: (a) `MedAIFort/healthwand-action` as a separate repo, or (b) action lives in-tree under `.github/actions/healthwand/`. Decision: **Option (a) – separate repository** for independent action versioning.
+  - Rationale: Allows independent versioning, clearer CI, and reuse across projects.
+  - Next steps: Create `MedAIFort/healthwand-action` repo and publish the wrapper.
 - [ ] **T-0010** `[DECISION]` Decide whether to keep `phi-detector` reserved on crates.io (yank-deprecate) post-rename, or release the name. Recommendation: release; no significant pre-revival adoption. [ARCH §11 step 10]
 - [ ] **T-0011** `[REPO-STATE]` Identify any third-party references to `phi-detector` (mentions in other repos, blog posts, Substack, social media). If found, plan announcement of the rename. [ARCH §11]
 - [ ] **T-0012** Commit `audit-2026-05.md` to the scratch branch as the M0 deliverable. All M1+ work proceeds against this audit.
