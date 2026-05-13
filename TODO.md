@@ -97,18 +97,18 @@ Steps follow `[ARCH §11]` exactly. Single PR per logical step; the whole milest
 
 ### M1.2 Cargo manifest
 
-- [ ] **T-0110** Rewrite `Cargo.toml`:
-  - [ ] T-0110.1 Set `[package].name = "healthwand"` (or fallback per T-0003)
-  - [ ] T-0110.2 Set `[package].version = "0.2.0"`
-  - [ ] T-0110.3 Set `[package].edition = "2024"` (current latest stable as of 2026)
-  - [ ] T-0110.4 Set `[package].rust-version` to the MSRV decided in T-0004
-  - [ ] T-0110.5 Set `[package].authors` correctly (single maintainer per current state)
-  - [ ] T-0110.6 Set `[package].license = "MIT"`
-  - [ ] T-0110.7 Set `[package].repository`, `homepage`, `documentation` URLs
-  - [ ] T-0110.8 Set `[package].keywords = ["phi", "healthcare", "indonesia", "uu-pdp", "redaction"]` (crates.io max 5)
-  - [ ] T-0110.9 Set `[package].categories` appropriately (likely "command-line-utilities" + "data-structures" or similar)
-  - [ ] T-0110.10 Add `[lib]` section with `name = "healthwand"`, `path = "src/lib.rs"`
-  - [ ] T-0110.11 Add `[[bin]]` section with `name = "healthwand"`, `path = "src/bin/healthwand.rs"`
+- [x] **T-0110** Rewrite `Cargo.toml`:
+  - [x] T-0110.1 Set `[package].name = "healthwand"` (or fallback per T-0003)
+  - [x] T-0110.2 Set `[package].version = "0.2.0"`
+  - [x] T-0110.3 Set `[package].edition = "2024"` (current latest stable as of 2026)
+  - [x] T-0110.4 Set `[package].rust-version` to the MSRV decided in T-0004
+  - [x] T-0110.5 Set `[package].authors` correctly (single maintainer per current state)
+  - [x] T-0110.6 Set `[package].license = "MIT"`
+  - [x] T-0110.7 Set `[package].repository`, `homepage`, `documentation` URLs
+  - [x] T-0110.8 Set `[package].keywords = ["phi", "healthcare", "indonesia", "uu-pdp", "redaction"]`
+  - [x] T-0110.9 Set `[package].categories` appropriately ("command-line-utilities", "data-structures")
+  - [x] T-0110.10 Add `[lib]` section with `name = "healthwand"`, `path = "src/lib.rs"`
+  - [x] T-0110.11 Add `[[bin]]` section with `name = "healthwand"`, `path = "src/main.rs"`
 
 ### M1.3 Binary rename
 

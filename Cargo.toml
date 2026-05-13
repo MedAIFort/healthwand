@@ -1,0 +1,20 @@
+[package]
+name = "healthwand"
+version = "0.2.0"
+edition = "2024"
+rust-version = "1.87"
+authors = ["Kresna Sucandra <https://github.com/SHA888>"]
+license = "MIT"
+repository = "https://github.com/MedAIFort/healthwand"
+homepage = "https://github.com/MedAIFort/healthwand"
+documentation = "https://docs.rs/healthwand"
+keywords = ["phi", "healthcare", "indonesia", "uu-pdp", "redaction"]
+categories = ["command-line-utilities", "data-structures"]
+
+[lib]
+name = "healthwand"
+path = "src/lib.rs"
+
+[[bin]]
+name = "healthwand"
+path = "src/main.rs"
