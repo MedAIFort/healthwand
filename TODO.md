@@ -129,6 +129,12 @@ Steps follow `[ARCH §11]` exactly. Single PR per logical step; the whole milest
 
 ### M1.6 Migration commit hygiene
 
+- [x] **T-0150** `[REPO-STATE]` Update all in-repo cross-references from `phi-detector/` paths to the new layout (`src/`, `config/`, `docs/`).
+- [x] **T-0151** `[DOCS]` Update `docs/` internal links that pointed to `phi-detector/docs/`.
+- [x] **T-0152** `[CODE]` Search and replace remaining `phi-detector` string literals in code/docs (error messages, help text, comments).
+- [x] **T-0153** `[CI]` Run full audit: `cargo msrv verify`, `cargo clippy --all-targets`, `cargo test --all-targets`, `cargo fmt -- --check`.
+- [ ] **T-0154** `[RELEASE]` Commit M1 as "M1 complete: repository structure migration, crate rename, CI, docs" and tag v0.2.0.
+
 - [ ] **T-0150** Ensure git history preserves blame across moves. Use `git mv` (not delete-and-add) for all file movements. Each move in its own commit if necessary.
 - [ ] **T-0151** Tag the migration completion: `v0.2.0-rc.1` for testing; promote to `v0.2.0` after CI green **and after M1.7 dependency modernization completes**.
 - [ ] **T-0152** Open a GitHub Discussion or pinned issue announcing the rename, for any pre-revival user reference.

@@ -1,0 +1,27 @@
+name: Healthcare Compliance
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  phi-detection:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Build healthwand
+        run: cargo build --release
+      - name: Run PHI Scan
+        run: ./target/release/healthwand --input . --output json > phi-report.json
+      - name: Upload Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: phi-report
+          path: phi-report.json

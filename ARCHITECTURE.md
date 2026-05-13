@@ -815,7 +815,7 @@ To prevent scope creep:
 The rename is a v1.0 task. Migration steps, in order:
 
 1. **Pre-migration**: ~~confirm `healthwand` is available on crates.io. If not, fall back to `healthwand-rs` (decided at migration time).~~ ✓ **Resolved by audit 2026-05-13** — `healthwand` is available on crates.io. No fallback required. Note: the existing `phi-detector` crate on crates.io is an unrelated Phi Accrual Failure Detector (used by `lol-core`, `lolraft`, `sorock`); the rename is therefore mandatory, not optional.
-2. **Workspace rename**: move `phi-detector/src/` → `src/` at repo root. Move `phi-detector/config/` → `config/`. Move `phi-detector/docs/` → `docs/` (merge with existing `docs/`). Move `phi-detector/tests/` → `tests/`.
+2. **Workspace rename**: move `src/` (previously `phi-detector/src/`) to repo root. Move `config/` (previously `phi-detector/config/`). Move `docs/` (previously `phi-detector/docs/`) (merge with existing `docs/`). Move `tests/` (previously `phi-detector/tests/`).
 3. **Cargo.toml rewrite**: `[package].name = "healthwand"`; `[lib]` and `[[bin]]` sections. Binary name = `healthwand`.
 4. **Module reorganization** to the layout in §2.8. Where existing modules are correctly factored, preserve verbatim (Chesterton's Fence); where reorganization is needed, do it in a separate commit with clear "rename" git history.
 5. **Public API audit**: ensure the API exposed in §2.1 is what `lib.rs` re-exports. Mark internal items `pub(crate)`.

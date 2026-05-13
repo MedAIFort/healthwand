@@ -199,7 +199,7 @@ mod tests {
     #[test]
     fn test_cli_parsing() {
         let args = [
-            "phi-detector",
+            "healthwand",
             "--input",
             "data/file.txt",
             "--output",

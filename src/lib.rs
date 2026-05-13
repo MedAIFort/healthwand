@@ -1,4 +1,4 @@
-// Library root for phi-detector. Move shared code here for integration testing.
+// Library root for healthwand. Move shared code here for integration testing.
 
 pub mod file_source;
 pub mod phi_patterns;
