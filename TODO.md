@@ -68,7 +68,7 @@ This is the complete atomic task list for HealthWand's revival from its current 
 These tasks unblock everything downstream. None of them produce code; all produce knowledge or decisions.
 
 - [x] **T-0001** `[BLOCKER][REPO-STATE]` Inspect current repo state. Capture `Cargo.toml`, `Cargo.lock` (if present), all CI workflows under `.github/workflows/`, full file tree (top 3 levels), and last-commit dates per major path. Output to `audit-2026-05.md` in a scratch branch.
-- [ ] **T-0002** `[BLOCKER][REPO-STATE]` Verify the build status of `phi-detector/`. Document: (a) does `cargo build --release` succeed on current `main`? (b) does `cargo test` pass? (c) what warnings does `cargo clippy` produce? Output to the audit file.
+- [x] **T-0002** `[BLOCKER][REPO-STATE]` Verify the build status of `phi-detector/`. Document: (a) does `cargo build --release` succeed on current `main`? (b) does `cargo test` pass? (c) what warnings does `cargo clippy` produce? Output to the audit file.
 - [ ] **T-0003** `[BLOCKER]` Check crates.io availability for the name `healthwand`. If taken: pick fallback per [ARCH §11 step 1]. Suggested fallbacks in order: `healthwand-rs`, `healthwand-phi`, `healthwand-scan`. Document the result in the audit file. [ARCH §11]
 - [ ] **T-0004** `[DECISION][BLOCKER]` Decide MSRV (Minimum Supported Rust Version) for v1.0. Pre-revival badge says 1.65 — that is no longer reasonable. Recommended: stable minus two minor versions, validated empirically. Run `cargo msrv find` on the current code to determine the actual current MSRV.
 - [ ] **T-0005** `[DECISION][BLOCKER]` Decide Python floor for the planned NLP companion. Pre-revival badge says 3.9 — EOL Oct 2025. Recommend 3.11+ minimum.
