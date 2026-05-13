@@ -179,7 +179,7 @@ These are real unknowns the positioning does not pretend to resolve:
 
 - **Whether the planned Python NLP validator is still the right shape.** The original README listed it as a planned feature. With Bahasa-first context-aware detection as the rationale, it has a defensible role — but specific implementation choices (spaCy with Indonesian models? IndoNLU-derived models? A lighter regex+context-rules layer first?) are deferred to `ARCHITECTURE.md`.
 - **Whether the planned API server is still needed.** Its original rationale (real-time PHI detection for platforms) is weaker now that the GitHub Action covers most of the pre-deployment use case. Deferred.
-- **Whether `phi-detector` should rename to something Indonesian-context-signaling.** Possible but not urgent.
+- **Whether `phi-detector` should rename to something Indonesian-context-signaling.** **RESOLVED** — renamed to `healthwand` (M1 migration milestone).
 - **How to handle the broader `MedAIFort` org branding.** The org-level positioning is separate from this repo's positioning; deferred until after this repo's revival is shipped.
 
 ---

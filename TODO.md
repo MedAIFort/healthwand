@@ -123,9 +123,9 @@ Steps follow `[ARCH §11]` exactly. Single PR per logical step; the whole milest
 
 ### M1.5 Documentation rename
 
-- [ ] **T-0140** `[DOCS]` `README.md` is already drafted with `healthwand` naming. Verify no residual `phi-detector` references in body text (clone URLs are unchanged; binary name should already be `healthwand`).
-- [ ] **T-0141** `[DOCS]` Update `POSITIONING.md` §11 "phi-detector rename" — mark the rename decision as RESOLVED with reference to this milestone.
-- [ ] **T-0142** `[DOCS]` Update `ARCHITECTURE.md` §12 deferred questions table — mark "phi-detector rename" as RESOLVED.
+- [x] **T-0140** `[DOCS]` `README.md` is already drafted with `healthwand` naming. Verified no residual `phi-detector` references in body text.
+- [x] **T-0141** `[DOCS]` Update `POSITIONING.md` §11 "phi-detector rename" — marked as RESOLVED (M1 milestone).
+- [x] **T-0142** `[DOCS]` Update `ARCHITECTURE.md` §12 deferred questions table — marked "phi-detector rename" as RESOLVED.
 
 ### M1.6 Migration commit hygiene
 

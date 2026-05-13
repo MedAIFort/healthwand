@@ -16,7 +16,7 @@
 
 HealthWand is an open-source developer-tooling layer for detecting and redacting Indonesian Protected Health Information (PHI) — including data classified as _"specific personal data"_ (data spesifik) under **UU PDP** (Law No. 27 of 2022) Article 4(1). It runs as a Rust CLI, a GitHub Action, and (planned) a Bahasa-aware Python NLP validator, helping engineering teams catch sensitive patient data before it ships into code, logs, exports, or AI training artifacts.
 
-> **Repository status (May 2026).** HealthWand is in active revival after a development pause. The framing, audience, and scope are defined in [`POSITIONING.md`](./POSITIONING.md) (v0.1.0-draft.1); the technical architecture lives in [`ARCHITECTURE.md`](./ARCHITECTURE.md) (v0.1.0-draft.2). The Rust CLI `phi-detector` is the only built component (28 tests passing, clippy clean as of 2026-05-13); it will be renamed to `healthwand` during the migration milestone. Python NLP validator is planned (rule-based v1.x, transformer v2.0+ opt-in); API server is deferred to v2.0+. Verified during the 2026-05-13 audit: MSRV is Rust 1.87, Python floor is 3.11+, `healthwand` is available on crates.io.
+> **Repository status (May 2026).** HealthWand is in active revival after a development pause. The framing, audience, and scope are defined in [`POSITIONING.md`](./POSITIONING.md) (v0.1.0-draft.1); the technical architecture lives in [`ARCHITECTURE.md`](./ARCHITECTURE.md) (v0.1.0-draft.2). The Rust CLI `healthwand` is the only built component (28 tests passing, clippy clean as of 2026-05-13). Python NLP validator is planned (rule-based v1.x, transformer v2.0+ opt-in); API server is deferred to v2.0+. Verified during the 2026-05-13 audit: MSRV is Rust 1.87, Python floor is 3.11+, `healthwand` is available on crates.io.
 
 ---
 
@@ -123,7 +123,7 @@ Flags:
 - `--redact` — replace PHI matches with masked values in derived output.
 - `-v` / `-vv` — verbosity.
 
-By default, the CLI scans files with extensions `.txt`, `.md`, `.csv`. The detailed JSON schema lives in [`phi-detector/docs/output_format.md`](./phi-detector/docs/output_format.md).
+By default, the CLI scans files with extensions `.txt`, `.md`, `.csv`. The detailed JSON schema lives in [`healthwand/docs/output_format.md`](./healthwand/docs/output_format.md).
 
 ---
 
@@ -148,7 +148,7 @@ The full taxonomy with regex sources, false-positive notes, and detection-approa
 
 ## Configuration
 
-Custom patterns are defined in `phi-detector/config/phi_patterns.yaml`. Indonesian patterns first:
+Custom patterns are defined in `healthwand/config/phi_patterns.yaml`. Indonesian patterns first:
 
 ```yaml
 patterns:
@@ -198,14 +198,14 @@ jobs:
           fetch-depth: 0
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
-      - name: Build phi-detector
+      - name: Build healthwand
         run: |
-          cd phi-detector
+          cd healthwand
           cargo build --release
       - name: Run PHI Scan
         run: |
-          cd phi-detector
-          ./target/release/phi-detector --input . --output json > ../phi-report.json
+          cd healthwand
+          ./target/release/healthwand --input . --output json > ../phi-report.json
       - name: Upload Report
         uses: actions/upload-artifact@v4
         with:
@@ -260,7 +260,7 @@ healthwand/
 ├── README.md            # This file
 ├── LICENSE              # MIT
 ├── CHANGELOG.md         # Release notes
-├── phi-detector/        # Rust CLI crate (the only built component as of May 2026)
+├── healthwand/        # Rust CLI crate (the only built component as of May 2026)
 │   ├── src/             # CLI + library modules
 │   ├── config/          # YAML patterns (Indonesian-first)
 │   ├── docs/            # Output format docs
@@ -276,7 +276,7 @@ healthwand/
 
 ## Adding custom patterns
 
-Edit `phi-detector/config/phi_patterns.yaml`:
+Edit `healthwand/config/phi_patterns.yaml`:
 
 ```yaml
 patterns:
@@ -309,7 +309,7 @@ Aligned with [`POSITIONING.md`](./POSITIONING.md) §9 (Build → Works → Commu
 - **v1.x — Works phase.** Python NLP validator (Bahasa-first context-aware detection); deployment patterns documented for vendor adoption; first community-contributed patterns merged; first external write-up referencing HealthWand by name.
 - **v2.0+ — Community / expansion phase.** Expanded ecosystem integrations; multinational-adjacent features (attested releases, signed pattern bundles) considered if and only if there is demonstrated demand. Hosted dashboard concepts (originally floated as `medaifort.com`) remain deferred and out of scope for the OSS repo.
 
-The roadmap is tentative and subject to community signal. Open questions deliberately deferred (Python NLP shape, API-server need, possible rename of `phi-detector`) are documented in [`POSITIONING.md`](./POSITIONING.md) §11.
+The roadmap is tentative and subject to community signal. Open questions deliberately deferred (Python NLP shape, API-server need, possible rename of `healthwand`) are documented in [`POSITIONING.md`](./POSITIONING.md) §11.
 
 ---
 
@@ -319,7 +319,7 @@ Honest summary as of May 2026:
 
 | Component                          | Status                                                      |
 | ---------------------------------- | ----------------------------------------------------------- |
-| `phi-detector` Rust CLI            | Built; primary distribution channel                         |
+| `healthwand` Rust CLI              | Built; primary distribution channel                         |
 | YAML pattern loading (library)     | Implemented                                                 |
 | YAML pattern loading (CLI flag)    | Planned (modernization phase)                               |
 | GitHub Action Marketplace listing  | Planned                                                     |
