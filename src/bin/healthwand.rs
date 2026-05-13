@@ -1,10 +1,10 @@
 use clap::{Parser, ValueEnum};
-use log::{error, info};
 use healthwand::file_source::{FileSource, LocalFileSource};
 use healthwand::phi_patterns;
 use healthwand::redactor::*;
 use healthwand::results::{DetectionResult, OutputBundle, ResultsSummary};
 use healthwand::scanner;
+use log::{error, info};
 use thiserror::Error;
 
 /// Supported output formats
