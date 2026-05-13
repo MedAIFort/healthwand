@@ -72,7 +72,8 @@ These tasks unblock everything downstream. None of them produce code; all produc
 - [x] **T-0003** `[BLOCKER]` Check crates.io availability for the name `healthwand`. If taken: pick fallback per [ARCH §11 step 1]. Suggested fallbacks in order: `healthwand-rs`, `healthwand-phi`, `healthwand-scan`. Document the result in the audit file. [ARCH §11]
 - [x] **T-0004** `[DECISION][BLOCKER]` Decide MSRV (Minimum Supported Rust Version) for v1.0. Pre-revival badge says 1.65 — that is no longer reasonable. Recommended: stable minus two minor versions, validated empirically. Run `cargo msrv find` on the current code to determine the actual current MSRV.
   - Decided MSRV: **Rust 1.87.0** (as recorded in audit).
-- [ ] **T-0005** `[DECISION][BLOCKER]` Decide Python floor for the planned NLP companion. Pre-revival badge says 3.9 — EOL Oct 2025. Recommend 3.11+ minimum.
+- [x] **T-0005** `[DECISION][BLOCKER]` Decide Python floor for the planned NLP companion. Pre-revival badge says 3.9 — EOL Oct 2025. Recommend **Python 3.11+** minimum.
+  - Decided Python floor: **3.11+** (as confirmed by Python Developer's Guide).
 - [ ] **T-0006** `[REPO-STATE]` Audit `.taskmaster/` directory contents. The current README references it; decide whether to keep, retire, or migrate the Task Master configuration. If retire: open a follow-up task to remove the directory.
 - [ ] **T-0007** `[REPO-STATE]` Audit existing `CHANGELOG.md` and `CONTRIBUTING.md` (if present). If not present, flag for creation in M5.
 - [ ] **T-0008** `[REPO-STATE]` Audit existing `LICENSE` file — confirm MIT, current year, correct copyright holder line. The MIT license is locked; this is verification only.
