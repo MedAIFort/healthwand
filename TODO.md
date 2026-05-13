@@ -89,11 +89,11 @@ Steps follow `[ARCH §11]` exactly. Single PR per logical step; the whole milest
 
 ### M1.1 Repository structure changes
 
-- [ ] **T-0100** `[EXISTS-PARTIAL]` Move `phi-detector/src/` → repo root `src/`. Preserve verbatim per Chesterton's Fence; reorganization happens in M2. [ARCH §11 step 2]
-- [ ] **T-0101** `[EXISTS-PARTIAL]` Move `phi-detector/config/` → repo root `config/`. Update any in-code references.
-- [ ] **T-0102** `[EXISTS-PARTIAL]` Move `phi-detector/docs/` content → repo root `docs/`, merging with existing `docs/` (which contains the five design documents). Resolve naming conflicts.
-- [ ] **T-0103** `[EXISTS-PARTIAL]` Move `phi-detector/tests/` → repo root `tests/`.
-- [ ] **T-0104** Remove the now-empty `phi-detector/` directory.
+- [x] **T-0100** `[EXISTS-PARTIAL]` Move `phi-detector/src/` → repo root `src/`. Completed: moved all source files to `src/` at repo root. Reorganization (layering, module structure) deferred to M2.
+- [x] **T-0101** `[EXISTS-PARTIAL]` Move `phi-detector/config/` → repo root `config/`. Completed: moved config files to `config/` and updated references.
+- [x] **T-0102** `[EXISTS-PARTIAL]` Move `phi-detector/docs/` content → repo root `docs/`. Completed: moved `output_format.md` to `docs/` and merged with existing documentation.
+- [x] **T-0103** `[EXISTS-PARTIAL]` Move `phi-detector/tests/` → repo root `tests/`. Completed: moved test files to `tests/`.
+- [x] **T-0104** Remove the now-empty `phi-detector/` directory. Completed: directory removed.
 
 ### M1.2 Cargo manifest
 
