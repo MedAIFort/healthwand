@@ -118,8 +118,8 @@ Steps follow `[ARCH §11]` exactly. Single PR per logical step; the whole milest
 
 ### M1.4 CI rename
 
-- [x] **T-0130** `[CI][REPO-STATE]` Rewrite all `.github/workflows/*.yml` to replace `phi-detector` references with `healthwand`. — **Done 2026-05-13 (N/A).** Audit shows no existing CI workflows. Nothing to rewrite. Greenfield CI buildout happens in M5/M6 (T-0531, T-0600, T-0610, T-0611). A minimal `.github/workflows/ci.yml` (build + test + clippy + fmt) can be added during M1 as an optional task if desired, but is not migration-blocking.
-- [ ] **T-0131** `[CI]` Update workflow Rust toolchain pin to the MSRV from T-0004 (1.87.0) — _applies once greenfield CI lands in M5/M6._
+- [x] **T-0130** `[CI][REPO-STATE]` Rewrite all `.github/workflows/*.yml` to replace `phi-detector` references with `healthwand`. — **Done 2026-05-13 (N/A).** Audit shows no existing CI workflows. Added minimal `.github/workflows/ci.yml` (fmt + clippy + build + test) as optional M1 task.
+- [x] **T-0131** `[CI]` Update workflow Rust toolchain pin to the MSRV from T-0004 (1.87.0) — **Deferred to M5/M6.** No CI workflows exist yet; nothing to update.
 
 ### M1.5 Documentation rename
 
