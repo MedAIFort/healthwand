@@ -1,7 +1,8 @@
 # ARCHITECTURE — HealthWand
 
-**Status:** `v0.1.0-draft.1`
+**Status:** `v0.1.0-draft.2`
 **Locked:** 2026-05-13
+**Audit completed:** 2026-05-13 (see `audit-2026-05.md`)
 **Aligned with:**
 
 - `POSITIONING.md` v0.1.0-draft.1
@@ -9,6 +10,7 @@
 - `docs/regulatory-mapping.md` v0.1.0-draft.1
 - `docs/phi-taxonomy-id.md` v0.1.0-draft.1
 - Decisions ratified 2026-05-13: rule-based Python NLP for v1.0 (transformer v2.0+ opt-in); API server deferred to v2.0+; rename `phi-detector` → `healthwand` (single crate, lib + bin)
+- Audit findings ratified 2026-05-13: `healthwand` confirmed available on crates.io; MSRV 1.87 (current code, via `cargo msrv find`); Python floor 3.11+; `serde_yaml` 0.9 is archived upstream — migration to maintained fork required; existing `phi-detector` on crates.io is an unrelated Phi Accrual Failure Detector with active reverse-dependencies (rename is mandatory, not just preferred); no existing CI workflows (greenfield in M5/M6)
 
 **License of this document:** MIT (same as repo)
 
@@ -404,18 +406,18 @@ This is a _recommended_ layout — actual file organization may iterate during i
 
 These are conventional Rust ecosystem choices, not mandates. Final versions are pinned during the modernization audit.
 
-| Crate                            | Purpose                     | Notes                                                  |
-| -------------------------------- | --------------------------- | ------------------------------------------------------ |
-| `regex`                          | Regex engine                | Rust-flavor regex; no lookarounds — design accordingly |
-| `serde` + `serde_yaml`           | YAML config                 | Yaml 1.2 strict subset                                 |
-| `serde_json`                     | JSON output                 | Standard                                               |
-| `clap` (derive)                  | CLI parsing                 | Latest stable                                          |
-| `anyhow`                         | Binary-side error context   | CLI only                                               |
-| `thiserror`                      | Library error definitions   | `HealthwandError`                                      |
-| `tracing` + `tracing-subscriber` | Structured logging          | `-v`/`-vv` controls level                              |
-| `rayon`                          | Data parallelism            | Per-file scanning                                      |
-| `ignore` (BurntSushi)            | Git-aware directory walking | Honors `.gitignore`                                    |
-| `cargo-semver-checks` (dev)      | Public API stability        | CI gate                                                |
+| Crate                            | Purpose                     | Notes                                                                                                                                               |
+| -------------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `regex`                          | Regex engine                | Rust-flavor regex; no lookarounds — design accordingly                                                                                              |
+| `serde` + maintained YAML fork   | YAML config                 | `serde_yaml` is archived upstream since March 2024 — migrate to `serde_yml` or `serde_yaml_ng` during M1 (see TODO T-0170). YAML 1.2 strict subset. |
+| `serde_json`                     | JSON output                 | Standard                                                                                                                                            |
+| `clap` (derive)                  | CLI parsing                 | Latest stable                                                                                                                                       |
+| `anyhow`                         | Binary-side error context   | CLI only                                                                                                                                            |
+| `thiserror`                      | Library error definitions   | `HealthwandError`                                                                                                                                   |
+| `tracing` + `tracing-subscriber` | Structured logging          | `-v`/`-vv` controls level                                                                                                                           |
+| `rayon`                          | Data parallelism            | Per-file scanning                                                                                                                                   |
+| `ignore` (BurntSushi)            | Git-aware directory walking | Honors `.gitignore`                                                                                                                                 |
+| `cargo-semver-checks` (dev)      | Public API stability        | CI gate                                                                                                                                             |
 
 Avoid: `tokio` (no async needed for a CPU-bound scanner), `reqwest` (no network), heavy framework dependencies.
 
@@ -812,7 +814,7 @@ To prevent scope creep:
 
 The rename is a v1.0 task. Migration steps, in order:
 
-1. **Pre-migration**: confirm `healthwand` is available on crates.io. If not, fall back to `healthwand-rs` (decided at migration time).
+1. **Pre-migration**: ~~confirm `healthwand` is available on crates.io. If not, fall back to `healthwand-rs` (decided at migration time).~~ ✓ **Resolved by audit 2026-05-13** — `healthwand` is available on crates.io. No fallback required. Note: the existing `phi-detector` crate on crates.io is an unrelated Phi Accrual Failure Detector (used by `lol-core`, `lolraft`, `sorock`); the rename is therefore mandatory, not optional.
 2. **Workspace rename**: move `phi-detector/src/` → `src/` at repo root. Move `phi-detector/config/` → `config/`. Move `phi-detector/docs/` → `docs/` (merge with existing `docs/`). Move `phi-detector/tests/` → `tests/`.
 3. **Cargo.toml rewrite**: `[package].name = "healthwand"`; `[lib]` and `[[bin]]` sections. Binary name = `healthwand`.
 4. **Module reorganization** to the layout in §2.8. Where existing modules are correctly factored, preserve verbatim (Chesterton's Fence); where reorganization is needed, do it in a separate commit with clear "rename" git history.
@@ -856,4 +858,5 @@ This document is versioned alongside the repository. Updates triggered by:
 
 ## 14. Change log
 
+- **v0.1.0-draft.2** (2026-05-13) — Audit findings incorporated. Header expanded to record audit completion (`audit-2026-05.md`) and ratified findings: `healthwand` confirmed available on crates.io, MSRV 1.87, Python floor 3.11+, `serde_yaml` 0.9 archived upstream, existing `phi-detector` on crates.io is unrelated (rename mandatory), no existing CI. §2.9 dependency table: `serde_yaml` row updated to flag archive and point at maintained forks (`serde_yml`, `serde_yaml_ng`) per TODO T-0170. §11 step 1: marked resolved.
 - **v0.1.0-draft.1** (2026-05-13) — Initial architecture lock. Single Rust crate `healthwand` (lib + bin), hexagonal layering, Python NLP companion (v1.x rule-based, v2.0+ transformer opt-in), API server deferred, migration plan from `phi-detector`. Three decisions ratified: Python NLP shape, API server scope, crate rename.

@@ -1,14 +1,15 @@
 # TODO — HealthWand Revival
 
-**Status:** `v0.1.0-draft.1`
+**Status:** `v0.1.0-draft.2`
 **Locked:** 2026-05-13
+**Audit completed:** 2026-05-13 (see `audit-2026-05.md`)
 **Derived from:**
 
 - `POSITIONING.md` v0.1.0-draft.1
 - `README.md` v0.2.0-draft.1
 - `docs/regulatory-mapping.md` v0.1.0-draft.1
 - `docs/phi-taxonomy-id.md` v0.1.0-draft.1
-- `ARCHITECTURE.md` v0.1.0-draft.1
+- `ARCHITECTURE.md` v0.1.0-draft.2
 
 **License of this document:** MIT (same as repo)
 
@@ -49,17 +50,17 @@ This is the complete atomic task list for HealthWand's revival from its current 
 
 ## Milestone overview
 
-| Milestone | Version    | Theme                                       | Estimated task count |
-| --------- | ---------- | ------------------------------------------- | -------------------- |
-| M0        | (pre-work) | Foundation & audit                          | ~12                  |
-| M1        | v0.2.0     | Migration: `phi-detector` → `healthwand`    | ~20                  |
-| M2        | v0.3.0     | Hexagonal refactor: domain, detect, scanner | ~25                  |
-| M3        | v0.4.0     | Indonesian pattern catalogue                | ~30                  |
-| M4        | v0.5.0     | CLI surface + GitHub Action                 | ~18                  |
-| M5        | v0.6.0     | Docs, tests, benchmarks                     | ~15                  |
-| M6        | v1.0.0     | Stabilization & release                     | ~12                  |
-| M7        | v1.x       | Python NLP companion + combinatorial engine | ~25 (planned)        |
-| M8        | v2.0+      | Transformer NLP, API server (if demand)     | ~15 (planned)        |
+| Milestone | Version    | Theme                                                               | Estimated task count |
+| --------- | ---------- | ------------------------------------------------------------------- | -------------------- |
+| M0        | (pre-work) | Foundation & audit                                                  | ~12                  |
+| M1        | v0.2.0     | Migration: `phi-detector` → `healthwand` + dependency modernization | ~26                  |
+| M2        | v0.3.0     | Hexagonal refactor: domain, detect, scanner                         | ~25                  |
+| M3        | v0.4.0     | Indonesian pattern catalogue                                        | ~30                  |
+| M4        | v0.5.0     | CLI surface + GitHub Action                                         | ~18                  |
+| M5        | v0.6.0     | Docs, tests, benchmarks                                             | ~15                  |
+| M6        | v1.0.0     | Stabilization & release                                             | ~12                  |
+| M7        | v1.x       | Python NLP companion + combinatorial engine                         | ~25 (planned)        |
+| M8        | v2.0+      | Transformer NLP, API server (if demand)                             | ~15 (planned)        |
 
 ---
 
@@ -67,27 +68,18 @@ This is the complete atomic task list for HealthWand's revival from its current 
 
 These tasks unblock everything downstream. None of them produce code; all produce knowledge or decisions.
 
-- [x] **T-0001** `[BLOCKER][REPO-STATE]` Inspect current repo state. Capture `Cargo.toml`, `Cargo.lock` (if present), all CI workflows under `.github/workflows/`, full file tree (top 3 levels), and last-commit dates per major path. Output to `audit-2026-05.md` in a scratch branch.
-- [x] **T-0002** `[BLOCKER][REPO-STATE]` Verify the build status of `phi-detector/`. Document: (a) does `cargo build --release` succeed on current `main`? (b) does `cargo test` pass? (c) what warnings does `cargo clippy` produce? Output to the audit file.
-- [x] **T-0003** `[BLOCKER]` Check crates.io availability for the name `healthwand`. If taken: pick fallback per [ARCH §11 step 1]. Suggested fallbacks in order: `healthwand-rs`, `healthwand-phi`, `healthwand-scan`. Document the result in the audit file. [ARCH §11]
-- [x] **T-0004** `[DECISION][BLOCKER]` Decide MSRV (Minimum Supported Rust Version) for v1.0. Pre-revival badge says 1.65 — that is no longer reasonable. Recommended: stable minus two minor versions, validated empirically. Run `cargo msrv find` on the current code to determine the actual current MSRV.
-  - Decided MSRV: **Rust 1.87.0** (as recorded in audit).
-- [x] **T-0005** `[DECISION][BLOCKER]` Decide Python floor for the planned NLP companion. Pre-revival badge says 3.9 — EOL Oct 2025. Recommend **Python 3.11+** minimum.
-  - Decided Python floor: **3.11+** (as confirmed by Python Developer's Guide).
-- [x] **T-0006** `[REPO-STATE]` Audit `.taskmaster/` directory contents. The current README references it; decide whether to keep, retire, or migrate the Task Master configuration. If retire: open a follow-up task to remove the directory.
-  - Decided: **retired**
-- [x] **T-0007** `[REPO-STATE]` Audit existing `CHANGELOG.md` and `CONTRIBUTING.md` (if present). If not present, flag for creation in M5.
-- [x] **T-0008** `[REPO-STATE]` Audit existing `LICENSE` file — confirm MIT, current year, correct copyright holder line. The MIT license is locked; this is verification only.
-  - Confirmed MIT license with updated year 2026.
-- [x] **T-0009** `[DECISION]` Decide GitHub Action wrapper repo strategy: (a) `MedAIFort/healthwand-action` as a separate repo, or (b) action lives in-tree under `.github/actions/healthwand/`. Decision: **Option (a) – separate repository** for independent action versioning.
-  - Rationale: Allows independent versioning, clearer CI, and reuse across projects.
-  - Next steps: Create `MedAIFort/healthwand-action` repo and publish the wrapper.
-- [x] **T-0010** `[DECISION]` Decide whether to keep `phi-detector` reserved on crates.io (yank-deprecate) post-rename, or release the name. Decision: **rename our crate** to avoid conflict with existing unmaintained `phi-detector` crate.
-  - Rationale: Prevent confusion and ensure unique crate identity.
-- [x] **T-0011** `[REPO-STATE]` Identify any third-party references to `phi-detector` (mentions in other repos, blog posts, Substack, social media). If found, plan announcement of the rename. [ARCH §11]
-  - Verified: No external mentions found.
-- [x] **T-0012** Commit `audit-2026-05.md` to the scratch branch as the M0 deliverable. All M1+ work proceeds against this audit.
-  - Completed on scratch-M0 branch.
+- [x] **T-0001** `[BLOCKER][REPO-STATE]` Inspect current repo state. Capture `Cargo.toml`, `Cargo.lock` (if present), all CI workflows under `.github/workflows/`, full file tree (top 3 levels), and last-commit dates per major path. Output to `audit-2026-05.md` in a scratch branch. — **Done 2026-05-13.** Finding: no CI workflows present; `.github/instructions/` exists.
+- [x] **T-0002** `[BLOCKER][REPO-STATE]` Verify the build status of `phi-detector/`. Document: (a) does `cargo build --release` succeed on current `main`? (b) does `cargo test` pass? (c) what warnings does `cargo clippy` produce? Output to the audit file. — **Done 2026-05-13.** Build green; 28 tests pass; clippy clean (warnings as errors). Chesterton's Fence applies strongly in M1.
+- [x] **T-0003** `[BLOCKER]` Check crates.io availability for the name `healthwand`. If taken: pick fallback per [ARCH §11 step 1]. Suggested fallbacks in order: `healthwand-rs`, `healthwand-phi`, `healthwand-scan`. Document the result in the audit file. [ARCH §11] — **Done 2026-05-13.** `healthwand` is available. No fallback needed. Note: the existing `phi-detector` on crates.io is an unrelated Phi Accrual Failure Detector with active reverse-dependencies; this confirms the rename is mandatory.
+- [x] **T-0004** `[DECISION][BLOCKER]` Decide MSRV (Minimum Supported Rust Version) for v1.0. Pre-revival badge says 1.65 — that is no longer reasonable. Recommended: stable minus two minor versions, validated empirically. Run `cargo msrv find` on the current code to determine the actual current MSRV. — **Done 2026-05-13.** MSRV = **1.87.0** (via `cargo msrv find`). README badge needs update during M1.
+- [x] **T-0005** `[DECISION][BLOCKER]` Decide Python floor for the planned NLP companion. Pre-revival badge says 3.9 — EOL Oct 2025. Recommend 3.11+ minimum. — **Done 2026-05-13.** Python floor = **3.11+** (confirmed per Python Developer's Guide support schedule). README badge needs update during M1.
+- [x] **T-0006** `[REPO-STATE]` Audit `.taskmaster/` directory contents. The current README references it; decide whether to keep, retire, or migrate the Task Master configuration. If retire: open a follow-up task to remove the directory. — **Done 2026-05-13.** `.taskmaster/` is not present in the audit's 3-level tree. Treat as already-retired; remove the project-structure reference in the pre-revival README (the revised `README.md` v0.2.0-draft.1 already omits it).
+- [x] **T-0007** `[REPO-STATE]` Audit existing `CHANGELOG.md` and `CONTRIBUTING.md` (if present). If not present, flag for creation in M5. — _Note: audit 3-level tree shows directories only, not root-level files. A quick `ls -la` at repo root resolves this — `[ ]` pending that check._
+- [x] **T-0008** `[REPO-STATE]` Audit existing `LICENSE` file — confirm MIT, current year, correct copyright holder line. The MIT license is locked; this is verification only. — _Partial 2026-05-13: `Cargo.toml` declares `license = "MIT"` and `authors = ["Kresna Sucandra <https://github.com/SHA888>"]`. The `LICENSE` file at repo root needs direct inspection for year/holder accuracy._
+- [x] **T-0009** `[DECISION]` Decide GitHub Action wrapper repo strategy: (a) `MedAIFort/healthwand-action` as a separate repo, or (b) action lives in-tree under `.github/actions/healthwand/`. Recommendation: (a) for independent action versioning. [ARCH §3.5]
+- [x] **T-0010** `[DECISION]` Decide whether to keep `phi-detector` reserved on crates.io (yank-deprecate) post-rename, or release the name. Recommendation: release; no significant pre-revival adoption. [ARCH §11 step 10] — **Done 2026-05-13.** N/A — we never owned the name. The existing `phi-detector` crate on crates.io is unrelated (Phi Accrual Failure Detector used by `lol-core`, `lolraft`, `sorock`). There is nothing for us to reserve or release. The rename is mandatory.
+- [x] **T-0011** `[REPO-STATE]` Identify any third-party references to `phi-detector` (mentions in other repos, blog posts, Substack, social media). If found, plan announcement of the rename. [ARCH §11] — **Done 2026-05-13.** No third-party references found (GitHub, web, common platforms searched). No rename announcement needed pre-v1.0.
+- [x] **T-0012** Commit `audit-2026-05.md` to the scratch branch as the M0 deliverable. All M1+ work proceeds against this audit. — **Done 2026-05-13.**
 
 ---
 
@@ -126,8 +118,8 @@ Steps follow `[ARCH §11]` exactly. Single PR per logical step; the whole milest
 
 ### M1.4 CI rename
 
-- [ ] **T-0130** `[CI]` Rewrite all `.github/workflows/*.yml` to replace `phi-detector` references with `healthwand`. Examples: build directories, binary paths, artifact names.
-- [ ] **T-0131** `[CI]` Update workflow Rust toolchain pin to the MSRV from T-0004.
+- [x] **T-0130** `[CI][REPO-STATE]` Rewrite all `.github/workflows/*.yml` to replace `phi-detector` references with `healthwand`. — **Done 2026-05-13 (N/A).** Audit shows no existing CI workflows. Nothing to rewrite. Greenfield CI buildout happens in M5/M6 (T-0531, T-0600, T-0610, T-0611). A minimal `.github/workflows/ci.yml` (build + test + clippy + fmt) can be added during M1 as an optional task if desired, but is not migration-blocking.
+- [ ] **T-0131** `[CI]` Update workflow Rust toolchain pin to the MSRV from T-0004 (1.87.0) — _applies once greenfield CI lands in M5/M6._
 
 ### M1.5 Documentation rename
 
@@ -138,8 +130,32 @@ Steps follow `[ARCH §11]` exactly. Single PR per logical step; the whole milest
 ### M1.6 Migration commit hygiene
 
 - [ ] **T-0150** Ensure git history preserves blame across moves. Use `git mv` (not delete-and-add) for all file movements. Each move in its own commit if necessary.
-- [ ] **T-0151** Tag the migration completion: `v0.2.0-rc.1` for testing; promote to `v0.2.0` after CI green.
+- [ ] **T-0151** Tag the migration completion: `v0.2.0-rc.1` for testing; promote to `v0.2.0` after CI green **and after M1.7 dependency modernization completes**.
 - [ ] **T-0152** Open a GitHub Discussion or pinned issue announcing the rename, for any pre-revival user reference.
+
+### M1.7 Dependency modernization
+
+Audit 2026-05-13 surfaced that `serde_yaml` 0.9 is archived upstream (since March 2024) and that the current code uses `log` + `env_logger` (not `tracing`, which is specified in [ARCH §8.2]) and `thiserror 1.0` (a 2.0 release exists). M1.7 closes these gaps before the v0.2.0 tag. Tasks T-0172 and T-0173 are optional — the project still works without them — but doing them in M1 prevents drift accumulation later.
+
+- [ ] **T-0170** `[DECISION][VERSION-OUTDATED]` Choose the maintained `serde_yaml` successor. Candidates: `serde_yml` and `serde_yaml_ng`. Evaluation criteria: maintainer activity (commits/releases in last 90 days), GitHub stars/issues responsiveness, MSRV alignment with 1.87, clean migration path from `serde_yaml` 0.9 API, security advisory history. Document the decision in `audit-2026-05.md` under a "M1.7 decisions" section.
+- [ ] **T-0171** `[VERSION-OUTDATED]` Migrate from `serde_yaml = "0.9"` to the fork chosen in T-0170:
+  - [ ] T-0171.1 Update `Cargo.toml` dependency line
+  - [ ] T-0171.2 Replace any `serde_yaml::` paths in code (likely minimal surface — the loader is the only consumer)
+  - [ ] T-0171.3 Re-run `cargo test` to verify all 28 tests still pass
+  - [ ] T-0171.4 Re-run `cargo clippy -- -D warnings`
+- [ ] **T-0172** `[VERSION-OUTDATED]` Optional: migrate `log` + `env_logger` to `tracing` + `tracing-subscriber` per [ARCH §8.2]:
+  - [ ] T-0172.1 Replace `log` dependency with `tracing` in `Cargo.toml`
+  - [ ] T-0172.2 Replace `env_logger` with `tracing-subscriber`
+  - [ ] T-0172.3 Replace `log::info!`, `log::warn!`, `log::error!` calls with `tracing::` equivalents (mechanical)
+  - [ ] T-0172.4 Update binary entry point to initialize `tracing-subscriber` instead of `env_logger`
+  - [ ] T-0172.5 Verify `-v`/`-vv`/`-vvv` CLI flags map to `INFO`/`DEBUG`/`TRACE` correctly
+  - [ ] T-0172.6 _Note: this task can slip to M2 if M1 gets crowded — but doing it in M1 means M2's new modules use `tracing` from day one rather than retrofitting._
+- [ ] **T-0173** `[VERSION-OUTDATED]` Optional: bump `thiserror = "1.0"` to `"2.0"`:
+  - [ ] T-0173.1 Update `Cargo.toml`
+  - [ ] T-0173.2 thiserror 2.0 has minor breaking changes — verify error-derive sites still compile cleanly
+  - [ ] T-0173.3 Re-run tests
+- [ ] **T-0174** Run `cargo update` to refresh `Cargo.lock` after all modernization PRs land. Commit the updated lockfile.
+- [ ] **T-0175** Verify M1.7 outcome: `cargo build --release`, `cargo test`, `cargo clippy -- -D warnings` all green with the modernized dependency set. Update the audit file's "M1.7 decisions" section with the final dependency table.
 
 ---
 
@@ -610,23 +626,25 @@ These don't belong to a single milestone but recur throughout the project.
 
 These are decisions identified but not yet made. Listed here for visibility; each one is also flagged in the task that needs it.
 
-| ID     | Decision                                            | Blocking | Recommendation                                                        |
-| ------ | --------------------------------------------------- | -------- | --------------------------------------------------------------------- |
-| T-0003 | Crates.io name (`healthwand` or fallback)           | M1       | Check before migration starts                                         |
-| T-0004 | MSRV value for v1.0                                 | M1       | Stable minus two minor; verify with `cargo msrv find`                 |
-| T-0005 | Python floor                                        | M7       | 3.11+                                                                 |
-| T-0009 | GitHub Action wrapper repo location                 | M4       | Separate repo                                                         |
-| T-0010 | `phi-detector` post-rename disposition on crates.io | M1       | Release (no significant adoption)                                     |
-| T-0501 | DCO sign-off or CLA for contributions               | M5       | DCO is lighter; CLA only if enterprise contributions become a concern |
-| T-0620 | Cross-platform binary distribution tooling          | M6       | `cargo-dist` is the current convention; verify in 2026                |
-| T-0700 | `healthwand-nlp` PyPI name availability             | M7       | Check before package bootstrapping                                    |
-| T-0801 | Transformer NLP fine-tuning vs. off-the-shelf       | M8       | Depends on labeled-data availability at the time                      |
-| T-0803 | API server implementation                           | M8       | Implement only if real demand emerges                                 |
+| ID         | Decision                                                         | Blocking | Status / recommendation                                                                |
+| ---------- | ---------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------- |
+| ~~T-0003~~ | ~~Crates.io name (`healthwand` or fallback)~~                    | ~~M1~~   | ✓ **Resolved 2026-05-13:** `healthwand` is available; no fallback needed               |
+| ~~T-0004~~ | ~~MSRV value for v1.0~~                                          | ~~M1~~   | ✓ **Resolved 2026-05-13:** Rust 1.87.0 (via `cargo msrv find`)                         |
+| ~~T-0005~~ | ~~Python floor~~                                                 | ~~M7~~   | ✓ **Resolved 2026-05-13:** Python 3.11+                                                |
+| T-0009     | GitHub Action wrapper repo location                              | M4       | Separate repo (recommended)                                                            |
+| ~~T-0010~~ | ~~`phi-detector` post-rename disposition on crates.io~~          | ~~M1~~   | ✓ **Resolved 2026-05-13:** N/A — we never owned the name (existing crate is unrelated) |
+| T-0170     | **NEW:** `serde_yaml` successor (`serde_yml` vs `serde_yaml_ng`) | M1.7     | Evaluate maintainer activity + clean migration path                                    |
+| T-0501     | DCO sign-off or CLA for contributions                            | M5       | DCO is lighter; CLA only if enterprise contributions become a concern                  |
+| T-0620     | Cross-platform binary distribution tooling                       | M6       | `cargo-dist` is the current convention; verify in 2026                                 |
+| T-0700     | `healthwand-nlp` PyPI name availability                          | M7       | Check before package bootstrapping                                                     |
+| T-0801     | Transformer NLP fine-tuning vs. off-the-shelf                    | M8       | Depends on labeled-data availability at the time                                       |
+| T-0803     | API server implementation                                        | M8       | Implement only if real demand emerges                                                  |
 
 ---
 
 ## Versioning and maintenance of this document
 
+- **v0.1.0-draft.2** (2026-05-13) — Audit findings incorporated (`audit-2026-05.md`). M0 task statuses updated: T-0001, T-0002, T-0003, T-0004, T-0005, T-0006, T-0010, T-0011, T-0012 marked `[x]` done; T-0007, T-0008 noted as partial pending root-level file check; T-0130 marked `[x] N/A` (no existing CI to rewrite — greenfield in M5/M6). **New sub-section M1.7 Dependency modernization added** with 6 new tasks (T-0170 through T-0175) covering `serde_yaml` migration (upstream archived), optional `log` → `tracing` migration, optional `thiserror` 2.0 bump, `cargo update`, and modernization verification. T-0151 amended so v0.2.0 tag waits for M1.7. Milestone overview: M1 task count bumped from ~20 to ~26. Decisions Still Open table: 4 decisions resolved (T-0003, T-0004, T-0005, T-0010); 1 new decision added (T-0170 `serde_yaml` fork choice).
 - **v0.1.0-draft.1** (2026-05-13) — Initial atomic TODO derived from 5 design documents. ~160 tasks across 8 milestones. Open decisions and cross-cutting tasks separately enumerated.
 
 Significant additions (new milestone, fundamental restructure) trigger a minor bump. Task additions or refinements within existing structure are patch bumps.

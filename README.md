@@ -2,8 +2,8 @@
 
 # HealthWand
 
-![Rust](https://img.shields.io/badge/Rust-1.65%2B-orange?logo=rust)
-![Python](https://img.shields.io/badge/Python-3.9%2B-brightgreen?logo=python)
+![Rust](https://img.shields.io/badge/Rust-1.87%2B-orange?logo=rust)
+![Python](https://img.shields.io/badge/Python-3.11%2B-brightgreen?logo=python)
 ![Status](https://img.shields.io/badge/status-revival-yellow)
 
 ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/MedAIFort/healthwand?utm_source=oss&utm_medium=github&utm_campaign=MedAIFort%2Fhealthwand&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
@@ -16,7 +16,7 @@
 
 HealthWand is an open-source developer-tooling layer for detecting and redacting Indonesian Protected Health Information (PHI) — including data classified as _"specific personal data"_ (data spesifik) under **UU PDP** (Law No. 27 of 2022) Article 4(1). It runs as a Rust CLI, a GitHub Action, and (planned) a Bahasa-aware Python NLP validator, helping engineering teams catch sensitive patient data before it ships into code, logs, exports, or AI training artifacts.
 
-> **Repository status (May 2026).** HealthWand is in active revival after a development pause. The framing, audience, and scope are defined in [`POSITIONING.md`](./POSITIONING.md) (v0.1.0-draft.1). This README reflects that positioning. The Rust CLI `phi-detector` is the only built component; the Python NLP validator and API server are planned. MSRV and Python floor on the badges above are pre-revival values and will be re-verified during the modernization audit.
+> **Repository status (May 2026).** HealthWand is in active revival after a development pause. The framing, audience, and scope are defined in [`POSITIONING.md`](./POSITIONING.md) (v0.1.0-draft.1); the technical architecture lives in [`ARCHITECTURE.md`](./ARCHITECTURE.md) (v0.1.0-draft.2). The Rust CLI `phi-detector` is the only built component (28 tests passing, clippy clean as of 2026-05-13); it will be renamed to `healthwand` during the migration milestone. Python NLP validator is planned (rule-based v1.x, transformer v2.0+ opt-in); API server is deferred to v2.0+. Verified during the 2026-05-13 audit: MSRV is Rust 1.87, Python floor is 3.11+, `healthwand` is available on crates.io.
 
 ---
 
@@ -70,9 +70,9 @@ These are explicit anti-goals (see [`POSITIONING.md`](./POSITIONING.md) §3):
 
 ### Prerequisites
 
-- Rust stable toolchain with Cargo (current MSRV badge is 1.65+ pre-revival; final MSRV will be set during the modernization audit).
+- Rust stable toolchain with Cargo (MSRV: **1.87**, verified 2026-05-13 via `cargo msrv find`).
 - Git.
-- Python 3.9+ (optional, for the planned NLP validator).
+- Python **3.11+** (optional, for the planned NLP validator; decided 2026-05-13 — 3.9 is EOL).
 
 ### Install the Rust CLI
 
@@ -250,7 +250,7 @@ healthwand/
 │   ├── regulatory-mapping.md   # (forthcoming) detector → UU PDP article table
 │   └── phi-taxonomy-id.md      # (forthcoming) full Indonesian PHI catalogue
 ├── scripts/             # Project scripts
-└── .taskmaster/         # Task Master configuration and tasks
+└── .github/             # CI workflows (forthcoming) and instructions/ directory
 ```
 
 ---
@@ -344,3 +344,7 @@ HealthWand is positioned as complementary to (not a replacement for) Microsoft P
 ---
 
 _HealthWand: Indonesian PHI detection, grounded in regulation, built for engineering teams._
+
+---
+
+<sub>README version `v0.2.0-draft.2` · last updated 2026-05-13 · audit-aligned with `ARCHITECTURE.md` v0.1.0-draft.2 and `TODO.md` v0.1.0-draft.2.</sub>
