@@ -82,9 +82,12 @@ These tasks unblock everything downstream. None of them produce code; all produc
 - [x] **T-0009** `[DECISION]` Decide GitHub Action wrapper repo strategy: (a) `MedAIFort/healthwand-action` as a separate repo, or (b) action lives in-tree under `.github/actions/healthwand/`. Decision: **Option (a) – separate repository** for independent action versioning.
   - Rationale: Allows independent versioning, clearer CI, and reuse across projects.
   - Next steps: Create `MedAIFort/healthwand-action` repo and publish the wrapper.
-- [ ] **T-0010** `[DECISION]` Decide whether to keep `phi-detector` reserved on crates.io (yank-deprecate) post-rename, or release the name. Recommendation: release; no significant pre-revival adoption. [ARCH §11 step 10]
-- [ ] **T-0011** `[REPO-STATE]` Identify any third-party references to `phi-detector` (mentions in other repos, blog posts, Substack, social media). If found, plan announcement of the rename. [ARCH §11]
-- [ ] **T-0012** Commit `audit-2026-05.md` to the scratch branch as the M0 deliverable. All M1+ work proceeds against this audit.
+- [x] **T-0010** `[DECISION]` Decide whether to keep `phi-detector` reserved on crates.io (yank-deprecate) post-rename, or release the name. Decision: **rename our crate** to avoid conflict with existing unmaintained `phi-detector` crate.
+  - Rationale: Prevent confusion and ensure unique crate identity.
+- [x] **T-0011** `[REPO-STATE]` Identify any third-party references to `phi-detector` (mentions in other repos, blog posts, Substack, social media). If found, plan announcement of the rename. [ARCH §11]
+  - Verified: No external mentions found.
+- [x] **T-0012** Commit `audit-2026-05.md` to the scratch branch as the M0 deliverable. All M1+ work proceeds against this audit.
+  - Completed on scratch-M0 branch.
 
 ---
 
