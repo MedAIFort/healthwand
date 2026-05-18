@@ -46,8 +46,17 @@ impl Scanner {
     }
 
     fn extract_context(text: &str, start: usize, end: usize, window: usize) -> String {
-        let left = start.saturating_sub(window);
-        let right = usize::min(text.len(), end + window);
+        let mut left = start.saturating_sub(window);
+        let mut right = usize::min(text.len(), end + window);
+
+        while left > 0 && !text.is_char_boundary(left) {
+            left -= 1;
+        }
+
+        while right < text.len() && !text.is_char_boundary(right) {
+            right += 1;
+        }
+
         text[left..right].to_string()
     }
 }

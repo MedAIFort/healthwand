@@ -37,6 +37,10 @@ Cargo.lock
 *.tmp
 *.bak
 
+# Generated reports
+phi-report.json
+*.report.json
+
 # Coverage
 coverage/
 *.profraw
