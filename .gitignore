@@ -55,3 +55,7 @@ dist/
 build/
 .venv/
 venv/
+
+# Agents and memory
+.claude/
+.harness-mem/
