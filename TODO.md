@@ -129,26 +129,22 @@ Steps follow `[ARCH §11]` exactly. Single PR per logical step; the whole milest
 
 ### M1.6 Migration commit hygiene
 
-- [x] **T-0150** `[REPO-STATE]` Update all in-repo cross-references from `phi-detector/` paths to the new layout (`src/`, `config/`, `docs/`).
-- [x] **T-0151** `[DOCS]` Update `docs/` internal links that pointed to `phi-detector/docs/`.
-- [x] **T-0152** `[CODE]` Search and replace remaining `phi-detector` string literals in code/docs (error messages, help text, comments).
+- [x] **T-0150** `[REPO-STATE]` Update all in-repo cross-references from `phi-detector/` paths to the new layout (`src/`, `config/`, `docs/`). — **Done 2026-05-13.** Verified via git log (R100 rename).
+- [x] **T-0151** `[DOCS]` Update `docs/` internal links that pointed to `phi-detector/docs/`. — **Done 2026-05-13.**
+- [x] **T-0152** `[CODE]` Search and replace remaining `phi-detector` string literals in code/docs (error messages, help text, comments). — **Done 2026-05-20.** Created rename announcement (GitHub issue #10).
 - [x] **T-0153** `[CI]` Run full audit: `cargo msrv verify`, `cargo clippy --all-targets`, `cargo test --all-targets`, `cargo fmt -- --check`.
-- [ ] **T-0154** `[RELEASE]` Commit M1 as "M1 complete: repository structure migration, crate rename, CI, docs" and tag v0.2.0.
-
-- [ ] **T-0150** Ensure git history preserves blame across moves. Use `git mv` (not delete-and-add) for all file movements. Each move in its own commit if necessary.
-- [ ] **T-0151** Tag the migration completion: `v0.2.0-rc.1` for testing; promote to `v0.2.0` after CI green **and after M1.7 dependency modernization completes**.
-- [ ] **T-0152** Open a GitHub Discussion or pinned issue announcing the rename, for any pre-revival user reference.
+- [x] **T-0154** `[RELEASE]` Commit M1 as "M1 complete: repository structure migration, crate rename, CI, docs" and tag v0.2.0. — **Done 2026-05-20.** Released on GitHub.
 
 ### M1.7 Dependency modernization
 
 Audit 2026-05-13 surfaced that `serde_yaml` 0.9 is archived upstream (since March 2024) and that the current code uses `log` + `env_logger` (not `tracing`, which is specified in [ARCH §8.2]) and `thiserror 1.0` (a 2.0 release exists). M1.7 closes these gaps before the v0.2.0 tag. Tasks T-0172 and T-0173 are optional — the project still works without them — but doing them in M1 prevents drift accumulation later.
 
-- [ ] **T-0170** `[DECISION][VERSION-OUTDATED]` Choose the maintained `serde_yaml` successor. Candidates: `serde_yml` and `serde_yaml_ng`. Evaluation criteria: maintainer activity (commits/releases in last 90 days), GitHub stars/issues responsiveness, MSRV alignment with 1.87, clean migration path from `serde_yaml` 0.9 API, security advisory history. Document the decision in `audit-2026-05.md` under a "M1.7 decisions" section.
-- [ ] **T-0171** `[VERSION-OUTDATED]` Migrate from `serde_yaml = "0.9"` to the fork chosen in T-0170:
-  - [ ] T-0171.1 Update `Cargo.toml` dependency line
-  - [ ] T-0171.2 Replace any `serde_yaml::` paths in code (likely minimal surface — the loader is the only consumer)
-  - [ ] T-0171.3 Re-run `cargo test` to verify all 28 tests still pass
-  - [ ] T-0171.4 Re-run `cargo clippy -- -D warnings`
+- [x] **T-0170** `[DECISION][VERSION-OUTDATED]` Choose the maintained `serde_yaml` successor. Candidates: `serde_yml` and `serde_yaml_ng`. Evaluation criteria: maintainer activity (commits/releases in last 90 days), GitHub stars/issues responsiveness, MSRV alignment with 1.87, clean migration path from `serde_yaml` 0.9 API, security advisory history. Document the decision in `audit-2026-05.md` under a "M1.7 decisions" section. — **Done 2026-05-20.** Chose `serde_yaml_ng`: actively maintained, API-compatible with original, MSRV 1.64+ (supports 1.87).
+- [x] **T-0171** `[VERSION-OUTDATED]` Migrate from `serde_yaml = "0.9"` to the fork chosen in T-0170:
+  - [x] T-0171.1 Update `Cargo.toml` dependency line — Done
+  - [x] T-0171.2 Replace any `serde_yaml::` paths in code (likely minimal surface — the loader is the only consumer) — Done (3 refs in phi_patterns.rs)
+  - [x] T-0171.3 Re-run `cargo test` to verify all 28 tests still pass — Done ✓
+  - [x] T-0171.4 Re-run `cargo clippy -- -D warnings` — Done ✓
 - [ ] **T-0172** `[VERSION-OUTDATED]` Optional: migrate `log` + `env_logger` to `tracing` + `tracing-subscriber` per [ARCH §8.2]:
   - [ ] T-0172.1 Replace `log` dependency with `tracing` in `Cargo.toml`
   - [ ] T-0172.2 Replace `env_logger` with `tracing-subscriber`

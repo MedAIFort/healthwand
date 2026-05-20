@@ -4,8 +4,9 @@ use healthwand::phi_patterns;
 use healthwand::redactor::*;
 use healthwand::results::{DetectionResult, OutputBundle, ResultsSummary};
 use healthwand::scanner;
-use log::{error, info};
 use thiserror::Error;
+use tracing::{error, info};
+use tracing_subscriber::filter::LevelFilter;
 
 /// Supported output formats
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum, Debug)]
@@ -49,19 +50,19 @@ pub enum AppError {
 }
 
 fn main() {
-    // Set log level based on verbosity flag
-    let env = env_logger::Env::default();
-    let mut builder = env_logger::Builder::from_env(env);
-    match Cli::parse().verbose {
-        0 => builder.filter_level(log::LevelFilter::Warn),
-        1 => builder.filter_level(log::LevelFilter::Info),
-        2 => builder.filter_level(log::LevelFilter::Debug),
-        _ => builder.filter_level(log::LevelFilter::Trace),
-    };
-    builder.init();
-    println!("Parsed CLI args: {:?}", Cli::parse());
-    info!("Starting PHI detection pipeline");
+    // Initialize tracing with verbosity from CLI flags
     let cli = Cli::parse();
+    let level_filter = match cli.verbose {
+        0 => LevelFilter::WARN,
+        1 => LevelFilter::INFO,
+        2 => LevelFilter::DEBUG,
+        _ => LevelFilter::TRACE,
+    };
+    tracing_subscriber::fmt()
+        .with_max_level(level_filter)
+        .init();
+    println!("Parsed CLI args: {:?}", cli);
+    info!("Starting PHI detection pipeline");
     let mut summary = ResultsSummary::default();
     let mut all_results = Vec::new();
     let mut errors = Vec::new();
