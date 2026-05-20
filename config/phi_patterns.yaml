@@ -1,4 +1,6 @@
 # Example PHI patterns YAML configuration for healthwand phi-detector
+schema_version: "1.0"
+
 patterns:
   - id: "ssn"
     name: "Social Security Number"
@@ -36,6 +38,21 @@ patterns:
       examples:
         - "MRN: 123456789"
         - "Medical record number 987654"
+  - id: "mrn-generic"
+    name: "Medical Record Number (Generic Digits)"
+    description: "Detects generic MRNs as bare digits (8-12 digits)"
+    regex: "\\b\\d{8,12}\\b"
+    context: []
+    confidence: 0.85
+    redaction:
+      template: "[REDACTED-MRN]"
+      strategy: "full"
+    metadata:
+      category: "medical"
+      severity: "medium"
+      examples:
+        - "12345678"
+        - "123456789012"
   - id: "icd10"
     name: "ICD-10 Code"
     description: "Detects ICD-10 medical codes"
