@@ -145,19 +145,19 @@ Audit 2026-05-13 surfaced that `serde_yaml` 0.9 is archived upstream (since Marc
   - [x] T-0171.2 Replace any `serde_yaml::` paths in code (likely minimal surface — the loader is the only consumer) — Done (3 refs in phi_patterns.rs)
   - [x] T-0171.3 Re-run `cargo test` to verify all 28 tests still pass — Done ✓
   - [x] T-0171.4 Re-run `cargo clippy -- -D warnings` — Done ✓
-- [ ] **T-0172** `[VERSION-OUTDATED]` Optional: migrate `log` + `env_logger` to `tracing` + `tracing-subscriber` per [ARCH §8.2]:
-  - [ ] T-0172.1 Replace `log` dependency with `tracing` in `Cargo.toml`
-  - [ ] T-0172.2 Replace `env_logger` with `tracing-subscriber`
-  - [ ] T-0172.3 Replace `log::info!`, `log::warn!`, `log::error!` calls with `tracing::` equivalents (mechanical)
-  - [ ] T-0172.4 Update binary entry point to initialize `tracing-subscriber` instead of `env_logger`
-  - [ ] T-0172.5 Verify `-v`/`-vv`/`-vvv` CLI flags map to `INFO`/`DEBUG`/`TRACE` correctly
-  - [ ] T-0172.6 _Note: this task can slip to M2 if M1 gets crowded — but doing it in M1 means M2's new modules use `tracing` from day one rather than retrofitting._
-- [ ] **T-0173** `[VERSION-OUTDATED]` Optional: bump `thiserror = "1.0"` to `"2.0"`:
-  - [ ] T-0173.1 Update `Cargo.toml`
-  - [ ] T-0173.2 thiserror 2.0 has minor breaking changes — verify error-derive sites still compile cleanly
-  - [ ] T-0173.3 Re-run tests
-- [ ] **T-0174** Run `cargo update` to refresh `Cargo.lock` after all modernization PRs land. Commit the updated lockfile.
-- [ ] **T-0175** Verify M1.7 outcome: `cargo build --release`, `cargo test`, `cargo clippy -- -D warnings` all green with the modernized dependency set. Update the audit file's "M1.7 decisions" section with the final dependency table.
+- [x] **T-0172** `[VERSION-OUTDATED]` Optional: migrate `log` + `env_logger` to `tracing` + `tracing-subscriber` per [ARCH §8.2]: — **Done 2026-05-20.**
+  - [x] T-0172.1 Replace `log` dependency with `tracing` in `Cargo.toml`
+  - [x] T-0172.2 Replace `env_logger` with `tracing-subscriber`
+  - [x] T-0172.3 Replace `log::info!`, `log::warn!`, `log::error!` calls with `tracing::` equivalents (mechanical)
+  - [x] T-0172.4 Update binary entry point to initialize `tracing-subscriber` instead of `env_logger`
+  - [x] T-0172.5 Verify `-v`/`-vv`/`-vvv` CLI flags map to `INFO`/`DEBUG`/`TRACE` correctly ✓
+  - [x] T-0172.6 _Note: this task can slip to M2 if M1 gets crowded — but doing it in M1 means M2's new modules use `tracing` from day one rather than retrofitting._
+- [x] **T-0173** `[VERSION-OUTDATED]` Optional: bump `thiserror = "1.0"` to `"2.0"`: — **Done 2026-05-20.**
+  - [x] T-0173.1 Update `Cargo.toml`
+  - [x] T-0173.2 thiserror 2.0 has minor breaking changes — verify error-derive sites still compile cleanly ✓
+  - [x] T-0173.3 Re-run tests ✓
+- [x] **T-0174** Run `cargo update` to refresh `Cargo.lock` after all modernization PRs land. Commit the updated lockfile. — **Done 2026-05-20.** (Cargo.lock ignored per library convention.)
+- [x] **T-0175** Verify M1.7 outcome: `cargo build --release`, `cargo test`, `cargo clippy -- -D warnings` all green with the modernized dependency set. Update the audit file's "M1.7 decisions" section with the final dependency table. — **Done 2026-05-20.** Build: ✓ (27 crates, 14.46s). Tests: ✓ (28 passed). Clippy: ✓. MSRV: ✓ (1.87.0).
 
 ---
 
