@@ -165,121 +165,240 @@ Audit 2026-05-13 surfaced that `serde_yaml` 0.9 is archived upstream (since Marc
 
 Reorganize source per `[ARCH §2.8]`. The domain layer becomes I/O-free; adapters move to their own modules. No new features in this milestone — pure reorganization.
 
+**Implementation Strategy:** 11 phases, incremental. Current codebase: 881 LOC, 6 flat modules, 28 tests. Target layout: 8 modules in hexagonal structure. **ANCHOR: This TODO is the source of truth for progress.**
+
+### Key Design Decisions (Locked In)
+- **`PHIType` → `PatternId(String)`**: Update 2 integration tests (imports change, logic preserved)
+- **`Detection` → `Finding`**: Rename; thread `redaction_template/strategy` through `Finding` so `Redactor` no longer switches on type
+- **MRN regex divergence**: Add `mrn-generic` pattern to YAML with `\b\d{8,12}\b` regex; keep `mrn` as context-gated
+- **Redactor home**: Move into `scanner/redact.rs` as `pub(crate)` (redaction is part of scan pipeline, not top-level concern)
+- **SARIF formatter**: Minimal valid stub only in M2 (full impl M4/M5)
+- **YAML schema_version**: Add `schema_version: '1.0'` to `config/phi_patterns.yaml` in Phase 0
+
+### New Cargo.toml Dependencies (Phase 0)
+```
+aho-corasick = "1.1"
+rayon = "1.10"
+ignore = "0.4"
+colored = "2.1"
+anyhow = "1.0"
+```
+
+### Phase Breakdown
+
+---
+
+## M2 PHASE 0 — Dependencies & YAML Prep
+
+- [ ] **T-0160** Add 5 new crates to `Cargo.toml` `[dependencies]`: `aho-corasick`, `rayon`, `ignore`, `colored`, `anyhow`. Run `cargo check` to verify.
+- [ ] **T-0161** Update `config/phi-patterns.yaml`: add `schema_version: '1.0'` at root level (after `patterns:` line, add before `patterns:` for clarity).
+- [ ] **T-0162** Add `mrn-generic` pattern to `config/phi_patterns.yaml`: id=`mrn-generic`, regex=`\b\d{8,12}\b`, no context required, same metadata as `mrn`.
+- [ ] **T-0163** Verify Phase 0: `cargo check` passes, YAML loads without error in tests.
+
+---
+
+## M2 PHASE 1 — Error Foundation
+
+- [ ] **T-0200** `[PHASE 2]` Create `src/domain/` directory with `mod.rs`. [ARCH §2.3, §2.8]
+- [ ] **T-0201** `[PHASE 2]` Implement `src/domain/severity.rs`:
+  - [ ] T-0201.1 `Severity` enum: `Informational`, `Medium`, `High`, `Critical` (ordered, `#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]`)
+  - [ ] T-0201.2 `impl Display` (lowercase strings: "informational", "medium", etc.)
+  - [ ] T-0201.3 `impl FromStr` (parses "informational"/"medium"/"high"/"critical" case-insensitive, returns error on unknown)
+- [ ] **T-0202** `[PHASE 2]` Implement `src/domain/score.rs`:
+  - [ ] T-0202.1 `Score(f32)` newtype with `#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize)]`
+  - [ ] T-0202.2 `Score::new(f32) -> Result<Self>` validates `value >= 0.0 && value <= 1.0`
+  - [ ] T-0202.3 `Score::value(self) -> f32` getter
+- [ ] **T-0203** `[PHASE 2]` Implement `src/domain/span.rs`:
+  - [ ] T-0203.1 `MatchSpan { start: usize, end: usize, line: u32, column: u32 }` — 1-based line/column
+  - [ ] T-0203.2 `MatchSpan::from_offsets(text: &str, start: usize, end: usize) -> Self` — computes line/column by counting `\n` bytes
+  - [ ] T-0203.3 For M2, placeholder: `line = 1, column = start as u32`. Real implementation later.
+- [ ] **T-0204** `[PHASE 2]` Implement `src/domain/pattern.rs`:
+  - [ ] T-0204.1 `PatternId(String)` newtype with validation: no whitespace, no quotes, `#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]`
+  - [ ] T-0204.2 `Pattern` struct: `id, name, detector_type, category, default_severity, score, regex: Option<Regex>, context_words: Vec<String>, context_window, redaction_template, redaction_strategy`
+  - [ ] T-0204.3 `DetectorType` enum: `Regex`, `RegexWithContext`, `Dictionary`, `Combinatorial`, `Nlp`
+- [ ] **T-0205** `[PHASE 2]` Implement `src/domain/finding.rs` — **CRITICAL: Central rename from `Detection`**:
+  - [ ] T-0205.1 `Finding` struct: `pattern_id, span, matched_text, severity, score, context, context_matched, uu_pdp_article, redaction_template, redaction_strategy`
+  - [ ] T-0205.2 `UuPdpArticle` enum (stub for M2): `Article1` (placeholder; all findings get `None` in M2)
+  - [ ] T-0205.3 TRICKY: `redaction_template` and `redaction_strategy` are on `Finding` so `Redactor` doesn't need to switch on `PatternId`
+- [ ] **T-0206** `[PHASE 2]` Implement `src/domain/category.rs`:
+  - [ ] T-0206.1 `Category` enum: `Identifier`, `Medical`, `Personal`, `Insurance`, `Other(String)` (covers current YAML values + forward compat)
+  - [ ] T-0206.2 M2 scope: do NOT implement full UU PDP split (`GeneralPersonalData` / `SpecificPersonalData`) — that is M3 work
+- [ ] **T-0207** `[PHASE 2]` Create `src/domain/mod.rs`:
+  - [ ] T-0207.1 `pub mod` declarations for all 6 sub-modules
+  - [ ] T-0207.2 `pub use` re-exports: `Category`, `Finding`, `UuPdpArticle`, `DetectorType`, `Pattern`, `PatternId`, `Score`, `Severity`, `MatchSpan`
+  - [ ] T-0207.3 Document invariant: domain layer has **zero** imports from `io`, `format`, `config`, `scanner`, `detect` modules
+- [ ] **T-0164** Verify Phase 2: `cargo check --lib` passes. No tests yet (domain has no dependencies to test independently).
+
+- [ ] **T-0210** `[PHASE 1]` Implement `src/error.rs`:
+  - [ ] T-0210.1 `HealthwandError` enum with `thiserror::Error` derive
+  - [ ] T-0210.2 Variants: `ConfigError(String)`, `IoError(#[from] io::Error)`, `RegexError(#[from] regex::Error)`, `YamlError(String)`, `UnsupportedDetector(String)`
+  - [ ] T-0210.3 `pub type Result<T> = std::result::Result<T, HealthwandError>;` at bottom of error.rs
+- [ ] **T-0211** `[PHASE 1]` Audit: no `.unwrap()` or `.expect()` in new code. Replace with `?` and proper error variants. [ARCH §8.1]
+- [ ] **T-0163** Verify Phase 1: `cargo check --lib` passes. No tests yet.
+
+---
+
+## M2 PHASE 2 — Domain Layer (Zero I/O-Forest Imports)
+
 ### M2.1 Domain module
 
-- [ ] **T-0200** `[EXISTS-PARTIAL]` Create `src/domain/` directory with `mod.rs`. [ARCH §2.3, §2.8]
-- [ ] **T-0201** Implement `src/domain/severity.rs`:
-  - [ ] T-0201.1 `Severity` enum: `Informational`, `Medium`, `High`, `Critical` (ordered)
-  - [ ] T-0201.2 `impl Ord, PartialOrd` so that severity comparisons work
-  - [ ] T-0201.3 `impl Display, FromStr` for serde and CLI flags
-- [ ] **T-0202** Implement `src/domain/score.rs`:
-  - [ ] T-0202.1 `Score(f32)` newtype with `Score::new(f32) -> Result<Self>` validating `0.0..=1.0`
-  - [ ] T-0202.2 Parse-don't-validate: only construct via `new`; no public `Score(0.95)` literal
-- [ ] **T-0203** Implement `src/domain/span.rs`:
-  - [ ] T-0203.1 `MatchSpan { start: usize, end: usize, line: u32, column: u32 }`
-  - [ ] T-0203.2 Helper: compute line/column from byte offsets given source text
-- [ ] **T-0204** Implement `src/domain/pattern.rs`:
-  - [ ] T-0204.1 `PatternId(String)` newtype with construction validation (no whitespace, no quotes — see system constraints in your guidebook)
-  - [ ] T-0204.2 `Pattern` struct per [ARCH §2.3]
-  - [ ] T-0204.3 `DetectorType` enum exhaustive
-- [ ] **T-0205** Implement `src/domain/finding.rs`:
-  - [ ] T-0205.1 `Finding` struct per [ARCH §2.3]
-  - [ ] T-0205.2 `UuPdpArticle` enum for the optional regulatory cross-reference [REG §1.2]
-- [ ] **T-0206** Implement `src/domain/category.rs`:
-  - [ ] T-0206.1 `Category` enum matching UU PDP Article 4 split: `GeneralPersonalData`, `SpecificPersonalData(SpecificCategory)`
-  - [ ] T-0206.2 `SpecificCategory` enum: `Health`, `Biometric`, `Genetic`, `Children`, `CriminalRecord`, `Financial` [REG §1.1]
-- [ ] **T-0207** Verify: `src/domain/` has no imports from `src/io`, `src/format`, `src/config`. Add a `#![forbid(...)]` lint at module level if Rust supports per-module dep-restriction (or document the invariant).
+---
 
-### M2.2 Error type
+## M2 PHASE 3 — YAML Configuration (Parse-Don't-Validate Boundary)
 
-- [ ] **T-0210** Implement `src/error.rs`:
-  - [ ] T-0210.1 `HealthwandError` enum with `thiserror::Error` derive
-  - [ ] T-0210.2 Variants: `ConfigError`, `IoError`, `RegexError`, `YamlError`, `UnsupportedDetector`, etc.
-  - [ ] T-0210.3 `pub type Result<T> = std::result::Result<T, HealthwandError>;` in `lib.rs`
-- [ ] **T-0211** Audit: no `.unwrap()` or `.expect()` in non-test, non-binary code. Replace with `?` and proper error variants. [ARCH §8.1]
+- [ ] **T-0240** `[PHASE 3]` Implement `src/config/yaml_schema.rs`:
+  - [ ] T-0240.1 Internal DTOs: `PatternYamlDto`, `CatalogueYamlDto`, `ContextYamlDto`, `RedactionYamlDto`, `MetadataYamlDto` (all `pub(super)`)
+  - [ ] T-0240.2 Derives: `serde::Deserialize` on all DTOs
+  - [ ] T-0240.3 `CatalogueYamlDto.schema_version: Option<String>` (optional for backward compat with existing YAML)
+- [ ] **T-0241** `[PHASE 3]` Implement `src/config/parse.rs`:
+  - [ ] T-0241.1 `parse_catalogue(yaml_bytes: &[u8]) -> Result<PatternCatalogue>` — deserialize DTO, convert to domain types
+  - [ ] T-0241.2 DTO → `Pattern` conversion: map `confidence → Score`, `metadata.severity → Severity`, `metadata.category → Category`, compile regex string to `Regex`
+  - [ ] T-0241.3 Warn if `schema_version` missing; error on unknown `DetectorType`
+  - [ ] T-0241.4 **CRITICAL MRN LOGIC**: Prefer `mrn-generic` pattern (bare digits) in tests; existing tests using hardcoded regex update to use `mrn-generic` ID
+- [ ] **T-0242** `[PHASE 3]` Implement `src/config/mod.rs`:
+  - [ ] T-0242.1 `pub struct PatternCatalogue { patterns: Vec<Pattern> }` with `pub fn patterns(&self) -> &[Pattern]`
+  - [ ] T-0242.2 `pub fn load_yaml(bytes: &[u8]) -> Result<PatternCatalogue>` delegates to `parse::parse_catalogue`
+  - [ ] T-0242.3 `pub fn load_default() -> Result<PatternCatalogue>` via `include_bytes!("../../config/phi_patterns.yaml")`
+- [ ] **T-0165** Verify Phase 3: `cargo test --lib config::` passes (6 unit tests from old `phi_patterns` migrate here).
 
-### M2.3 Detector trait & implementations
+---
 
-- [ ] **T-0220** Implement `src/detect/mod.rs`:
-  - [ ] T-0220.1 `Detector` trait per [ARCH §2.4]
-  - [ ] T-0220.2 Trait is `Send + Sync` for parallelism
-- [ ] **T-0221** `[EXISTS-PARTIAL]` Implement `src/detect/regex_detector.rs`:
-  - [ ] T-0221.1 `RegexDetector` struct holding a compiled `regex::Regex` per pattern
-  - [ ] T-0221.2 Handles both `DetectorType::Regex` and `DetectorType::RegexWithContext`
-  - [ ] T-0221.3 Context window check uses sliding-window byte offsets
-- [ ] **T-0222** Implement `src/detect/dictionary.rs`:
-  - [ ] T-0222.1 `DictionaryDetector` struct with term set loaded from external file
-  - [ ] T-0222.2 Aho-Corasick or similar multi-pattern matcher (the `aho-corasick` crate is conventional)
-- [ ] **T-0223** Implement `src/detect/nlp_stub.rs`:
-  - [ ] T-0223.1 `NlpStubDetector` that emits a warning when a `DetectorType::Nlp` pattern is encountered but NLP is not enabled
-  - [ ] T-0223.2 Returns empty findings vector (does not falsely report) [ARCH §2.4]
-- [ ] **T-0224** Deferred to M7: `src/detect/combinatorial.rs` (combinatorial engine). [ARCH §12]
+## M2 PHASE 4 — Detector Trait & Implementations
 
-### M2.4 Scanner orchestrator
+- [ ] **T-0220** `[PHASE 4]` Implement `src/detect/mod.rs`:
+  - [ ] T-0220.1 `pub trait Detector: Send + Sync { fn detector_type(&self) -> DetectorType; fn scan(&self, text: &str, pattern: &Pattern) -> Vec<Finding>; fn handles(&self, pattern: &Pattern) -> bool; }`
+  - [ ] T-0220.2 Re-exports: `pub use regex_detector::RegexDetector`, etc.
+- [ ] **T-0221** `[PHASE 4]` Implement `src/detect/regex_detector.rs`:
+  - [ ] T-0221.1 `pub struct RegexDetector`
+  - [ ] T-0221.2 `impl Detector` — iterates pattern's regex via `find_iter()`, constructs `Finding`s, handles `Regex` and `RegexWithContext`
+  - [ ] T-0221.3 `extract_context(text, start, end, window) -> String` helper migrated from old `scanner.rs`
+- [ ] **T-0222** `[PHASE 4]` Implement `src/detect/dictionary.rs`:
+  - [ ] T-0222.1 `pub struct DictionaryDetector { automaton: aho_corasick::AhoCorasick, terms: Vec<String> }` with `pub fn new(terms: Vec<String>)`
+  - [ ] T-0222.2 `impl Detector` — stub implementation using `automaton.find_iter()`
+  - [ ] T-0222.3 No Dictionary patterns in current YAML; this compiles but is unused in M2
+- [ ] **T-0223** `[PHASE 4]` Implement `src/detect/nlp_stub.rs`:
+  - [ ] T-0223.1 `pub struct NlpStubDetector`
+  - [ ] T-0223.2 `impl Detector` — `scan()` emits `tracing::warn!` and returns empty `Vec<Finding>`
+- [ ] **T-0166** Verify Phase 4: `cargo check --lib` passes.
 
-- [ ] **T-0230** Implement `src/scanner/mod.rs`:
-  - [ ] T-0230.1 `Scanner` struct holding catalogue + registered detectors + config
-  - [ ] T-0230.2 `ScannerBuilder` per [ARCH §2.5]
-  - [ ] T-0230.3 `scan_text(&str) -> ScanReport`
-  - [ ] T-0230.4 `scan_path(&Path) -> Result<ScanReport>` with `rayon` parallelism
-- [ ] **T-0231** Implement `src/scanner/report.rs`:
-  - [ ] T-0231.1 `ScanReport` struct
-  - [ ] T-0231.2 Aggregation: total findings, by severity, by pattern, by file
-  - [ ] T-0231.3 Filter helpers: `findings_at_or_above(severity)` for CI gates
+---
 
-### M2.5 YAML configuration loader
+## M2 PHASE 5 — Scanner Orchestrator (Hub of Refactor)
 
-- [ ] **T-0240** Implement `src/config/yaml_schema.rs`:
-  - [ ] T-0240.1 `PatternYamlDto` struct mirroring the YAML schema [ARCH §5, TAX §0.3]
-  - [ ] T-0240.2 `serde` derives for deserialization
-  - [ ] T-0240.3 `schema_version` field on the root catalogue
-- [ ] **T-0241** Implement `src/config/parse.rs`:
-  - [ ] T-0241.1 Boundary parse: `parse_catalogue(yaml_bytes) -> Result<PatternCatalogue>` [ARCH §2.6]
-  - [ ] T-0241.2 Each `PatternYamlDto` → `Pattern` (compiles regex, validates score, etc.)
-  - [ ] T-0241.3 Errors include yaml-line precise locations
-- [ ] **T-0242** Implement `src/config/mod.rs`:
-  - [ ] T-0242.1 `PatternCatalogue` type (Vec<Pattern> wrapped with helpers)
-  - [ ] T-0242.2 `load_yaml(path: &Path) -> Result<PatternCatalogue>` reads + parses
-  - [ ] T-0242.3 `load_default() -> PatternCatalogue` loads built-in patterns
+- [ ] **T-0231** `[PHASE 5]` Implement `src/scanner/report.rs`:
+  - [ ] T-0231.1 `pub struct ScanReport { findings: Vec<Finding>, files_scanned: usize, errors: Vec<String> }`
+  - [ ] T-0231.2 `pub fn findings_at_or_above(&self, min: Severity) -> impl Iterator<Item = &Finding>`
+- [ ] **T-0230** `[PHASE 5]` Implement `src/scanner/mod.rs` — **HUB of the refactor, wires everything**:
+  - [ ] T-0230.1 `pub struct ScanConfig { context_window: usize, min_severity: Option<Severity> }`
+  - [ ] T-0230.2 `pub struct Scanner { catalogue, detectors, config }` with `pub fn builder() -> ScannerBuilder`
+  - [ ] T-0230.3 `pub fn scan_text(&self, text: &str) -> ScanReport` — iterate catalogue, route to appropriate detector, accumulate findings
+  - [ ] T-0230.4 `pub fn scan_path(&self, path: &Path) -> Result<ScanReport>` — read file, call `scan_text`, return report
+  - [ ] T-0230.5 `pub struct ScannerBuilder` with fluent API: `.with_catalogue()`, `.with_default_catalogue()`, `.with_detector()`, `.with_min_severity()`, `.with_context_window()`, `.build() -> Result<Scanner>`
+- [ ] **T-0232** `[PHASE 5]` Implement `src/scanner/redact.rs` — Redactor moves here:
+  - [ ] T-0232.1 Migrate `Redactor` + `RedactionStrategy` from old `redactor.rs`
+  - [ ] T-0232.2 **KEY CHANGE**: `Redactor::redact(text: &str, findings: &[Finding]) -> String` uses `finding.redaction_template` instead of matching on `PHIType`
+  - [ ] T-0232.3 All 10 redactor tests pass (update assertions for `PatternId` strings instead of enum names)
+- [ ] **T-0167** Verify Phase 5: `cargo test --lib scanner::` passes (2 old scanner tests + 10 redactor tests now in scanner/redact.rs).
 
-### M2.6 I/O adapters
+---
 
-- [ ] **T-0250** Implement `src/io/walker.rs`:
-  - [ ] T-0250.1 Use `ignore` crate (BurntSushi); honors `.gitignore` by default
-  - [ ] T-0250.2 Configurable include/exclude globs
-  - [ ] T-0250.3 Default extensions: `.txt`, `.md`, `.csv`, `.json`, `.yaml`, `.yml`, source files of common languages (configurable)
-- [ ] **T-0251** Implement `src/io/reader.rs`:
-  - [ ] T-0251.1 UTF-8 validation at read time
-  - [ ] T-0251.2 `--max-file-size` enforcement; skip files over limit with warning
-  - [ ] T-0251.3 v1.x will add streaming; v1.0 reads fully into memory
+## M2 PHASE 6 — I/O Adapters
 
-### M2.7 Output formatters
+- [ ] **T-0250** `[PHASE 6]` Implement `src/io/walker.rs`:
+  - [ ] T-0250.1 `pub struct WalkConfig { root: PathBuf, allowed_extensions: Vec<String>, max_file_size_bytes: u64 }`
+  - [ ] T-0250.2 `pub fn walk(config: &WalkConfig) -> impl Iterator<Item = PathBuf>` using `ignore` crate
+  - [ ] T-0250.3 Default extensions: `txt`, `md`, `csv`, `json`, `yaml`, `yml`
+  - [ ] T-0250.4 All 3 file_source walker tests pass
+- [ ] **T-0251** `[PHASE 6]` Implement `src/io/reader.rs`:
+  - [ ] T-0251.1 `pub fn read_to_string(path: &Path) -> Result<String>` with UTF-8 validation
+  - [ ] T-0251.2 Max file size check (default 50MB); warn and skip if exceeded
+  - [ ] T-0251.3 All 3 file_source reader tests pass
+- [ ] **T-0252** `[PHASE 6]` Implement `src/io/mod.rs`:
+  - [ ] T-0252.1 `pub mod walker`, `pub mod reader`
+- [ ] **T-0168** Verify Phase 6: `cargo test --lib io::` passes (6 old file_source tests distributed to walker + reader).
 
-- [ ] **T-0260** Implement `src/format/mod.rs`:
-  - [ ] T-0260.1 `Formatter` trait per [ARCH §2.7]
-  - [ ] T-0260.2 `Format` enum: `Json`, `Sarif`, `Text`
-- [ ] **T-0261** Implement `src/format/json.rs`:
-  - [ ] T-0261.1 Structured `JsonFinding` with all fields from `Finding`
-  - [ ] T-0261.2 Output schema documented in `phi-detector/docs/output_format.md` (rename to `docs/output_format.md`)
-- [ ] **T-0262** Implement `src/format/sarif.rs`:
-  - [ ] T-0262.1 SARIF 2.1.0 compliant output
-  - [ ] T-0262.2 Each `Finding` becomes a SARIF `result` with `ruleId`, `level`, `locations`
-  - [ ] T-0262.3 Severity mapping: `Critical/High → error`, `Medium → warning`, `Informational → note`
-- [ ] **T-0263** Implement `src/format/text.rs`:
-  - [ ] T-0263.1 Human-readable output with colored severity indicators (use `colored` or `anstream` crate)
-  - [ ] T-0263.2 Respect `NO_COLOR` env var
+---
 
-### M2.8 Public API surface
+## M2 PHASE 7 — Output Formatters
 
-- [ ] **T-0270** Write `src/lib.rs` with all `pub use` statements per [ARCH §2.1].
-- [ ] **T-0271** Add `#![deny(missing_docs)]` to `lib.rs` and document every public item.
-- [ ] **T-0272** Run `cargo public-api` (or `cargo semver-checks`) and verify the public surface matches what's documented.
+- [ ] **T-0260** `[PHASE 7]` Implement `src/format/mod.rs`:
+  - [ ] T-0260.1 `pub trait Formatter { fn format(&self, report: &ScanReport, writer: &mut dyn Write) -> Result<()>; }`
+  - [ ] T-0260.2 `pub enum Format { Json, Text, Sarif }`
+  - [ ] T-0260.3 Re-exports: `pub use json_formatter::JsonFormatter`, etc.
+- [ ] **T-0261** `[PHASE 7]` Implement `src/format/json.rs`:
+  - [ ] T-0261.1 `pub struct JsonFormatter`
+  - [ ] T-0261.2 `impl Formatter` — serialize `report.findings` as JSON array of `Finding`s
+- [ ] **T-0262** `[PHASE 7]` Implement `src/format/sarif.rs` (minimal stub for M2):
+  - [ ] T-0262.1 `pub struct SarifFormatter`
+  - [ ] T-0262.2 `impl Formatter` — outputs minimal valid SARIF 2.1.0 envelope with empty results array
+  - [ ] T-0262.3 Full implementation deferred to M4/M5
+- [ ] **T-0263** `[PHASE 7]` Implement `src/format/text.rs`:
+  - [ ] T-0263.1 `pub struct TextFormatter`
+  - [ ] T-0263.2 `impl Formatter` — human-readable output, uses `colored` crate for severity colors
+  - [ ] T-0263.3 Respect `NO_COLOR` env var
+- [ ] **T-0169** Verify Phase 7: `cargo check --lib format::` passes.
 
-### M2.9 Refactor verification
+---
 
-- [ ] **T-0280** All existing tests must pass against the reorganized code. Tests may need import-path updates but not logic changes.
-- [ ] **T-0281** `cargo clippy --all-targets -- -D warnings` must pass.
-- [ ] **T-0282** Tag `v0.3.0` after CI green.
+## M2 PHASE 8 — Public API Surface
+
+- [ ] **T-0270** `[PHASE 8]` Rewrite `src/lib.rs`:
+  - [ ] T-0270.1 Module declarations: `pub mod domain`, `pub mod detect`, `pub mod scanner`, `pub mod config`, `pub mod io`, `pub mod format`, `pub mod error`
+  - [ ] T-0270.2 Re-exports per ARCH §2.1: `pub use domain::{...}`, `pub use scanner::{Scanner, ScanConfig, ScanReport}`, etc.
+  - [ ] T-0270.3 Remove old module declarations: `file_source`, `phi_patterns`, `redactor`, `results` (redactor is now in scanner/, results becomes ScanReport)
+- [ ] **T-0271** `[PHASE 8]` Document public API:
+  - [ ] T-0271.1 Add `#![deny(missing_docs)]` to lib.rs
+  - [ ] T-0271.2 Document every public type, struct, enum, function with `///` doc comments
+- [ ] **T-0272** `[PHASE 8]` Verify public API:
+  - [ ] T-0272.1 Run `cargo check --lib` — no missing docs warnings
+  - [ ] T-0272.2 (Optional) Run `cargo public-api` to snapshot the stable API
+- [ ] **T-0170** Verify Phase 8: `cargo check --lib` passes with no missing_docs warnings.
+
+---
+
+## M2 PHASE 9 — Update Binary Entry Point
+
+- [ ] **T-0273** `[PHASE 9]` Rewrite `src/bin/healthwand.rs`:
+  - [ ] T-0273.1 Replace imports: `use healthwand::{scanner, config, format, io, error}` (remove old paths)
+  - [ ] T-0273.2 Replace `AppError` (thiserror) with `anyhow::Result<()>` per ARCH §8.1
+  - [ ] T-0273.3 Rewrite `main()` pipeline: CLI parse → `config::load_default()` → `ScannerBuilder` → `io::walker::walk()` → loop files → `scanner.scan_path()` → `JsonFormatter`/`TextFormatter`
+  - [ ] T-0273.4 Hardcoded `--redact` flag wired into `ScannerBuilder` config or post-process via `Redactor` from `scanner/redact.rs`
+  - [ ] T-0273.5 CLI test still passes (`test_cli_parsing`)
+- [ ] **T-0171** Verify Phase 9: `cargo build --bin healthwand` succeeds; binary compiles.
+
+---
+
+## M2 PHASE 10 — Update Integration Tests
+
+- [ ] **T-0280** `[PHASE 10]` Update `tests/integration_pipeline.rs` — **CRITICAL: Path A migration (update imports, logic preserved)**:
+  - [ ] T-0280.1 Replace `use healthwand::phi_patterns::PHIType` with `use healthwand::domain::PatternId`
+  - [ ] T-0280.2 Rewrite `test_full_pipeline_json_output`: use `Scanner::builder().with_default_catalogue().build().unwrap()`, call `scanner.scan_text()`, assert JSON contains pattern IDs (`"ssn"` not `"SSN"`)
+  - [ ] T-0280.3 Rewrite `test_pipeline_summary`: use `ScanReport`, assert `findings.iter().filter(|f| f.pattern_id.as_str() == "ssn").count() == 2`
+  - [ ] T-0280.4 **CRITICAL**: All 28 tests pass: `cargo test` ≥28 passing
+- [ ] **T-0281** `[PHASE 10]` Final code quality gates:
+  - [ ] T-0281.1 `cargo clippy --all-targets -- -D warnings` — zero warnings
+  - [ ] T-0281.2 `cargo fmt -- --check` — all code formatted
+  - [ ] T-0281.3 `cargo msrv verify` — confirms MSRV still 1.87.0
+- [ ] **T-0172** Verify Phase 10: `cargo test` ≥28 passing, clippy clean, fmt clean.
+
+---
+
+## M2 PHASE 11 — Cleanup & Finalization
+
+- [ ] **T-0282** `[PHASE 11]` Delete old modules (now redundant):
+  - [ ] T-0282.1 Delete `src/phi_patterns.rs` (all code migrated to domain/ + config/)
+  - [ ] T-0282.2 Delete old `src/scanner.rs` (replaced by scanner/mod.rs)
+  - [ ] T-0282.3 Delete old `src/redactor.rs` (moved to scanner/redact.rs)
+  - [ ] T-0282.4 Delete old `src/results.rs` (replaced by ScanReport in scanner/report.rs)
+  - [ ] T-0282.5 Delete old `src/file_source.rs` (replaced by io/walker.rs + io/reader.rs)
+- [ ] **T-0283** `[PHASE 11]` Final verification:
+  - [ ] T-0283.1 `cargo test` — all tests still pass after cleanup
+  - [ ] T-0283.2 `cargo build --release` — clean release build
+  - [ ] T-0283.3 `cargo clippy`, `cargo fmt` — all green
+- [ ] **T-0284** `[PHASE 11]` Commit & tag:
+  - [ ] T-0284.1 Create single squash commit: "M2 complete: hexagonal refactor to v0.3.0"
+  - [ ] T-0284.2 Tag `v0.3.0` on that commit
+- [ ] **T-0173** Verify Phase 11: `cargo test` ≥28 passing, tag v0.3.0 created, all old modules deleted.
 
 ---
 
