@@ -51,7 +51,7 @@ impl PHIPatternConfig {
     ) -> Result<PHIPatternsFile, Box<dyn std::error::Error>> {
         let file = std::fs::File::open(path)?;
         let reader = BufReader::new(file);
-        let patterns_file: PHIPatternsFile = serde_yaml::from_reader(reader)?;
+        let patterns_file: PHIPatternsFile = serde_yaml_ng::from_reader(reader)?;
         Ok(patterns_file)
     }
 }
@@ -59,8 +59,8 @@ impl PHIPatternConfig {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PHIPatternsFile {
     pub patterns: Vec<PHIPatternConfig>,
-    pub defaults: Option<serde_yaml::Value>,
-    pub overrides: Option<serde_yaml::Value>,
+    pub defaults: Option<serde_yaml_ng::Value>,
+    pub overrides: Option<serde_yaml_ng::Value>,
 }
 
 #[derive(Debug, Clone)]
