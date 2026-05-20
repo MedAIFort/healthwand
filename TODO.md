@@ -190,10 +190,10 @@ anyhow = "1.0"
 
 ## M2 PHASE 0 — Dependencies & YAML Prep
 
-- [ ] **T-0160** Add 5 new crates to `Cargo.toml` `[dependencies]`: `aho-corasick`, `rayon`, `ignore`, `colored`, `anyhow`. Run `cargo check` to verify.
-- [ ] **T-0161** Update `config/phi-patterns.yaml`: add `schema_version: '1.0'` at root level (after `patterns:` line, add before `patterns:` for clarity).
-- [ ] **T-0162** Add `mrn-generic` pattern to `config/phi_patterns.yaml`: id=`mrn-generic`, regex=`\b\d{8,12}\b`, no context required, same metadata as `mrn`.
-- [ ] **T-0163** Verify Phase 0: `cargo check` passes, YAML loads without error in tests.
+- [x] **T-0160** Add 5 new crates to `Cargo.toml` `[dependencies]`: `aho-corasick`, `rayon`, `ignore`, `colored`, `anyhow`. Run `cargo check` to verify. — **Done 2026-05-20.**
+- [x] **T-0161** Update `config/phi-patterns.yaml`: add `schema_version: '1.0'` at root level (after `patterns:` line, add before `patterns:` for clarity). — **Done 2026-05-20.**
+- [x] **T-0162** Add `mrn-generic` pattern to `config/phi_patterns.yaml`: id=`mrn-generic`, regex=`\b\d{8,12}\b`, no context required, same metadata as `mrn`. — **Done 2026-05-20.**
+- [x] **T-0163** Verify Phase 0: `cargo check` passes, YAML loads without error in tests. — **Done 2026-05-20.** ✓ cargo check: pass. ✓ cargo test config: 2/2 pass.
 
 ---
 
