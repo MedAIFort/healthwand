@@ -199,42 +199,45 @@ anyhow = "1.0"
 
 ## M2 PHASE 1 — Error Foundation
 
-- [ ] **T-0200** `[PHASE 2]` Create `src/domain/` directory with `mod.rs`. [ARCH §2.3, §2.8]
-- [ ] **T-0201** `[PHASE 2]` Implement `src/domain/severity.rs`:
-  - [ ] T-0201.1 `Severity` enum: `Informational`, `Medium`, `High`, `Critical` (ordered, `#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]`)
-  - [ ] T-0201.2 `impl Display` (lowercase strings: "informational", "medium", etc.)
-  - [ ] T-0201.3 `impl FromStr` (parses "informational"/"medium"/"high"/"critical" case-insensitive, returns error on unknown)
-- [ ] **T-0202** `[PHASE 2]` Implement `src/domain/score.rs`:
-  - [ ] T-0202.1 `Score(f32)` newtype with `#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize)]`
-  - [ ] T-0202.2 `Score::new(f32) -> Result<Self>` validates `value >= 0.0 && value <= 1.0`
-  - [ ] T-0202.3 `Score::value(self) -> f32` getter
-- [ ] **T-0203** `[PHASE 2]` Implement `src/domain/span.rs`:
-  - [ ] T-0203.1 `MatchSpan { start: usize, end: usize, line: u32, column: u32 }` — 1-based line/column
-  - [ ] T-0203.2 `MatchSpan::from_offsets(text: &str, start: usize, end: usize) -> Self` — computes line/column by counting `\n` bytes
-  - [ ] T-0203.3 For M2, placeholder: `line = 1, column = start as u32`. Real implementation later.
-- [ ] **T-0204** `[PHASE 2]` Implement `src/domain/pattern.rs`:
-  - [ ] T-0204.1 `PatternId(String)` newtype with validation: no whitespace, no quotes, `#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]`
-  - [ ] T-0204.2 `Pattern` struct: `id, name, detector_type, category, default_severity, score, regex: Option<Regex>, context_words: Vec<String>, context_window, redaction_template, redaction_strategy`
-  - [ ] T-0204.3 `DetectorType` enum: `Regex`, `RegexWithContext`, `Dictionary`, `Combinatorial`, `Nlp`
-- [ ] **T-0205** `[PHASE 2]` Implement `src/domain/finding.rs` — **CRITICAL: Central rename from `Detection`**:
-  - [ ] T-0205.1 `Finding` struct: `pattern_id, span, matched_text, severity, score, context, context_matched, uu_pdp_article, redaction_template, redaction_strategy`
-  - [ ] T-0205.2 `UuPdpArticle` enum (stub for M2): `Article1` (placeholder; all findings get `None` in M2)
-  - [ ] T-0205.3 TRICKY: `redaction_template` and `redaction_strategy` are on `Finding` so `Redactor` doesn't need to switch on `PatternId`
-- [ ] **T-0206** `[PHASE 2]` Implement `src/domain/category.rs`:
-  - [ ] T-0206.1 `Category` enum: `Identifier`, `Medical`, `Personal`, `Insurance`, `Other(String)` (covers current YAML values + forward compat)
-  - [ ] T-0206.2 M2 scope: do NOT implement full UU PDP split (`GeneralPersonalData` / `SpecificPersonalData`) — that is M3 work
-- [ ] **T-0207** `[PHASE 2]` Create `src/domain/mod.rs`:
-  - [ ] T-0207.1 `pub mod` declarations for all 6 sub-modules
-  - [ ] T-0207.2 `pub use` re-exports: `Category`, `Finding`, `UuPdpArticle`, `DetectorType`, `Pattern`, `PatternId`, `Score`, `Severity`, `MatchSpan`
-  - [ ] T-0207.3 Document invariant: domain layer has **zero** imports from `io`, `format`, `config`, `scanner`, `detect` modules
-- [ ] **T-0164** Verify Phase 2: `cargo check --lib` passes. No tests yet (domain has no dependencies to test independently).
+- [x] **T-0200** `[PHASE 2]` Create `src/domain/` directory with `mod.rs`. [ARCH §2.3, §2.8] — **Done 2026-05-23.**
+  - [x] T-0200.1 Directory created at `src/domain/`
+  - [x] T-0200.2 `src/domain/mod.rs` with module declarations
+  - [x] T-0200.3 Added to `src/lib.rs` module tree
+- [x] **T-0201** `[PHASE 2]` Implement `src/domain/severity.rs`: — **Done 2026-05-23.**
+  - [x] T-0201.1 `Severity` enum: `Informational`, `Medium`, `High`, `Critical` (ordered, `#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]`)
+  - [x] T-0201.2 `impl Display` (lowercase strings: "informational", "medium", etc.)
+  - [x] T-0201.3 `impl FromStr` (parses "informational"/"medium"/"high"/"critical" case-insensitive, returns error on unknown)
+- [x] **T-0202** `[PHASE 2]` Implement `src/domain/score.rs`: — **Done 2026-05-23.**
+  - [x] T-0202.1 `Score(f32)` newtype with `#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize)]`
+  - [x] T-0202.2 `Score::new(f32) -> Result<Self>` validates `(0.0..=1.0).contains(&value)`
+  - [x] T-0202.3 `Score::value(self) -> f32` getter
+- [x] **T-0203** `[PHASE 2]` Implement `src/domain/span.rs`: — **Done 2026-05-23.**
+  - [x] T-0203.1 `MatchSpan { start: usize, end: usize, line: u32, column: u32 }` — 1-based line/column
+  - [x] T-0203.2 `MatchSpan::from_offsets(text: &str, start: usize, end: usize) -> Self` — placeholder (full impl M3)
+  - [x] T-0203.3 For M2, placeholder: `line = 1, column = start as u32`. Real implementation later.
+- [x] **T-0204** `[PHASE 2]` Implement `src/domain/pattern.rs`: — **Done 2026-05-23.**
+  - [x] T-0204.1 `PatternId(String)` newtype with validation: no whitespace, no quotes, `#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]`
+  - [x] T-0204.2 `Pattern` struct: `id, name, detector_type, category, default_severity, score, regex: Option<Regex>, context_words: Vec<String>, context_window, redaction_template, redaction_strategy`
+  - [x] T-0204.3 `DetectorType` enum: `Regex`, `RegexWithContext`, `Dictionary`, `Combinatorial`, `Nlp`
+- [x] **T-0205** `[PHASE 2]` Implement `src/domain/finding.rs` — **CRITICAL: Central rename from `Detection`** — **Done 2026-05-23:**
+  - [x] T-0205.1 `Finding` struct: `pattern_id, span, matched_text, severity, score, context, context_matched, uu_pdp_article, redaction_template, redaction_strategy`
+  - [x] T-0205.2 `UuPdpArticle` enum (stub for M2): `Article1` (placeholder; all findings get `None` in M2)
+  - [x] T-0205.3 TRICKY: `redaction_template` and `redaction_strategy` are on `Finding` so `Redactor` doesn't need to switch on `PatternId`
+- [x] **T-0206** `[PHASE 2]` Implement `src/domain/category.rs`: — **Done 2026-05-23.**
+  - [x] T-0206.1 `Category` enum: `Identifier`, `Medical`, `Personal`, `Insurance`, `Other(String)` (covers current YAML values + forward compat)
+  - [x] T-0206.2 M2 scope: do NOT implement full UU PDP split (`GeneralPersonalData` / `SpecificPersonalData`) — that is M3 work
+- [x] **T-0207** `[PHASE 2]` Create `src/domain/mod.rs`: — **Done 2026-05-23.**
+  - [x] T-0207.1 `pub mod` declarations for all 6 sub-modules (category, finding, pattern, score, severity, span)
+  - [x] T-0207.2 `pub use` re-exports: `Category`, `Finding`, `UuPdpArticle`, `DetectorType`, `Pattern`, `PatternId`, `Score`, `Severity`, `MatchSpan`
+  - [x] T-0207.3 Document invariant: domain layer has **zero** imports from `io`, `format`, `config`, `scanner`, `detect` modules ✓
+- [x] **T-0164** Verify Phase 2: `cargo check --lib` passes. No tests yet (domain has no dependencies to test independently). — **Done 2026-05-23.** ✓
 
-- [ ] **T-0210** `[PHASE 1]` Implement `src/error.rs`:
-  - [ ] T-0210.1 `HealthwandError` enum with `thiserror::Error` derive
-  - [ ] T-0210.2 Variants: `ConfigError(String)`, `IoError(#[from] io::Error)`, `RegexError(#[from] regex::Error)`, `YamlError(String)`, `UnsupportedDetector(String)`
-  - [ ] T-0210.3 `pub type Result<T> = std::result::Result<T, HealthwandError>;` at bottom of error.rs
-- [ ] **T-0211** `[PHASE 1]` Audit: no `.unwrap()` or `.expect()` in new code. Replace with `?` and proper error variants. [ARCH §8.1]
-- [ ] **T-0163** Verify Phase 1: `cargo check --lib` passes. No tests yet.
+- [x] **T-0210** `[PHASE 1]` Implement `src/error.rs`: — **Done 2026-05-23.**
+  - [x] T-0210.1 `HealthwandError` enum with `thiserror::Error` derive ✓
+  - [x] T-0210.2 Variants: `ConfigError(String)`, `IoError(#[from] io::Error)`, `RegexError(#[from] regex::Error)`, `YamlError(String)`, `UnsupportedDetector(String)` ✓
+  - [x] T-0210.3 `pub type Result<T> = std::result::Result<T, HealthwandError>;` at bottom of error.rs ✓
+- [x] **T-0211** `[PHASE 1]` Audit: no `.unwrap()` or `.expect()` in new code. Replace with `?` and proper error variants. [ARCH §8.1] — **Done 2026-05-23.** ✓ No unwrap/expect found in domain/* or error.rs
+- [x] **T-0163** Verify Phase 1: `cargo check --lib` passes, `cargo fmt`, `cargo clippy -- -D warnings` clean. — **Done 2026-05-23.** ✓ All checks pass, 28 tests pass, 0 warnings.
 
 ---
 
@@ -765,6 +768,7 @@ These are decisions identified but not yet made. Listed here for visibility; eac
 
 ## Versioning and maintenance of this document
 
+- **v0.1.0-draft.3** (2026-05-23) — M2 PHASE 1 execution complete. All tasks T-0200 through T-0211 and T-0163/T-0164 marked `[x]` done (2026-05-23). Domain layer (6 modules: severity, score, span, pattern, finding, category) + error foundation (HealthwandError enum + Result<T> alias) delivered. Key architectural change: Finding now carries redaction_template/redaction_strategy (decouples from PatternId lookup). Commit: d570a9d. Verification: cargo check ✓, cargo fmt ✓, cargo clippy ✓, 28 tests passing.
 - **v0.1.0-draft.2** (2026-05-13) — Audit findings incorporated (`audit-2026-05.md`). M0 task statuses updated: T-0001, T-0002, T-0003, T-0004, T-0005, T-0006, T-0010, T-0011, T-0012 marked `[x]` done; T-0007, T-0008 noted as partial pending root-level file check; T-0130 marked `[x] N/A` (no existing CI to rewrite — greenfield in M5/M6). **New sub-section M1.7 Dependency modernization added** with 6 new tasks (T-0170 through T-0175) covering `serde_yaml` migration (upstream archived), optional `log` → `tracing` migration, optional `thiserror` 2.0 bump, `cargo update`, and modernization verification. T-0151 amended so v0.2.0 tag waits for M1.7. Milestone overview: M1 task count bumped from ~20 to ~26. Decisions Still Open table: 4 decisions resolved (T-0003, T-0004, T-0005, T-0010); 1 new decision added (T-0170 `serde_yaml` fork choice).
 - **v0.1.0-draft.1** (2026-05-13) — Initial atomic TODO derived from 5 design documents. ~160 tasks across 8 milestones. Open decisions and cross-cutting tasks separately enumerated.
 
