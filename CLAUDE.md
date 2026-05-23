@@ -9,11 +9,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **HealthWand** is a Rust CLI + library for detecting and redacting Indonesian Protected Health Information (PHI) per UU PDP (Law No. 27 of 2022). The codebase is in active revival with a hexagonal/ports-and-adapters architecture. Current phase: **M2 PHASE 1 complete** (error foundation + domain layer, as of 2026-05-23).
 
 **Key links:**
+
 - `POSITIONING.md` — Audience, anti-goals, regulatory claim discipline
 - `ARCHITECTURE.md` — Technical design, component boundaries, public API surface
 - `TODO.md` — Master atomic task list (v0.1.0-draft.3); single source of truth for phases M0–M8
 - `Plans.md` — Current working phase tasks (generated from TODO.md, v2 format with DoD/Depends/Status)
 - `README.md` — Quickstart, features, comparison to other tools
+
+**Do not include `Co-Authored-By:` trailers in commit messages.** This applies to all assistant-generated commits, including those produced by Claude Code or any other AI tool. Commit attribution stays with the human author. Boilerplate trailers add noise to the history without conveying meaningful authorship and have been retroactively stripped from past commits.
 
 ---
 
@@ -53,6 +56,7 @@ cargo-semver-checks check-release  # Public API stability (M6 gate; currently ad
 ### Git hooks
 
 The repository enforces at commit time:
+
 - `cargo fmt` — formats all Rust code
 - `cargo clippy` — rejects warnings in clippy pedantic mode
 - `cargo test` — all tests must pass
@@ -86,19 +90,19 @@ Invariant: Domain layer imports ONLY std + serde. Zero imports from io/, format/
 
 ### Key Files and Their Purpose
 
-| File/Directory | Purpose |
-|---|---|
-| `src/domain/` | Core business logic (zero I/O). Types: `Severity`, `Score`, `MatchSpan`, `PatternId`, `Pattern`, `Finding`, `Category`. All public API is re-exported from domain/mod.rs |
-| `src/error.rs` | `HealthwandError` enum + `Result<T>` type alias. thiserror-derived. No `.unwrap()` in new code. |
-| `src/detect/` | Detector implementations (Regex, Dictionary, stubs for NLP/Combinatorial) |
-| `src/scanner/` | `Scanner` orchestrator, `ScanConfig`, `ScanReport`. Routes patterns to detectors, accumulates findings |
-| `src/config/` | YAML deserialization (config/yaml_schema.rs) and parsing (config/parse.rs). Converts DTO → domain::Pattern |
-| `src/io/` | File walking (via `ignore` crate) and UTF-8 validation |
-| `src/format/` | Formatter trait + JSON/Text/SARIF implementations. No domain logic here. |
-| `src/lib.rs` | Public API surface (stable from v1.0, enforced by semver-checks) |
-| `src/bin/healthwand.rs` | CLI entry point (clap derives). Calls library API. |
-| `config/phi_patterns.yaml` | Embedded YAML pattern catalogue (single source of truth, shared with Python NLP companion planned for v1.x) |
-| `Cargo.toml` | Dependencies: regex, serde, serde_yaml_ng (0.10), thiserror (2.0), clap, tracing, aho-corasick, rayon, ignore, colored, anyhow |
+| File/Directory             | Purpose                                                                                                                                                                  |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `src/domain/`              | Core business logic (zero I/O). Types: `Severity`, `Score`, `MatchSpan`, `PatternId`, `Pattern`, `Finding`, `Category`. All public API is re-exported from domain/mod.rs |
+| `src/error.rs`             | `HealthwandError` enum + `Result<T>` type alias. thiserror-derived. No `.unwrap()` in new code.                                                                          |
+| `src/detect/`              | Detector implementations (Regex, Dictionary, stubs for NLP/Combinatorial)                                                                                                |
+| `src/scanner/`             | `Scanner` orchestrator, `ScanConfig`, `ScanReport`. Routes patterns to detectors, accumulates findings                                                                   |
+| `src/config/`              | YAML deserialization (config/yaml_schema.rs) and parsing (config/parse.rs). Converts DTO → domain::Pattern                                                               |
+| `src/io/`                  | File walking (via `ignore` crate) and UTF-8 validation                                                                                                                   |
+| `src/format/`              | Formatter trait + JSON/Text/SARIF implementations. No domain logic here.                                                                                                 |
+| `src/lib.rs`               | Public API surface (stable from v1.0, enforced by semver-checks)                                                                                                         |
+| `src/bin/healthwand.rs`    | CLI entry point (clap derives). Calls library API.                                                                                                                       |
+| `config/phi_patterns.yaml` | Embedded YAML pattern catalogue (single source of truth, shared with Python NLP companion planned for v1.x)                                                              |
+| `Cargo.toml`               | Dependencies: regex, serde, serde_yaml_ng (0.10), thiserror (2.0), clap, tracing, aho-corasick, rayon, ignore, colored, anyhow                                           |
 
 ### Design Tenets (Non-Negotiable)
 
@@ -120,12 +124,14 @@ Invariant: Domain layer imports ONLY std + serde. Zero imports from io/, format/
 ### Phase M2 PHASE 1 (Complete as of 2026-05-23)
 
 **Deliverables:**
+
 - Domain layer: 6 modules (severity, score, span, pattern, finding, category)
 - Error foundation: HealthwandError enum + Result<T> type alias
 - Zero I/O imports in domain/ verified
 - All 28 tests passing, cargo check/fmt/clippy clean
 
 **Commits:**
+
 ```
 d5cc9c2 Add out/ to .gitignore
 e611b81 Mark Phase 0 & Phase 1 complete in TODO.md
@@ -143,6 +149,7 @@ This repo uses `Plans.md` for task tracking during development. It's generated f
 ```
 
 **Markers:**
+
 - `cc:TODO` — Not started
 - `cc:WIP` — In progress
 - `cc:完了` — Done (includes commit hash if applicable)
@@ -161,6 +168,7 @@ This repo uses `Plans.md` for task tracking during development. It's generated f
 - **M3–M8** (planned): Pattern catalogue, CLI surface, docs, Python NLP, transformer NLP
 
 When starting new work, read the relevant task(s) in TODO.md first to understand:
+
 - What problem is being solved
 - What definition of done is expected
 - What tasks this one depends on
@@ -258,6 +266,7 @@ cargo test test_name -- --nocapture  # Run one test, show output
 ## Dependency Management
 
 **Currently locked dependencies (as of M2 Phase 1):**
+
 - `regex` 1.11 — Pattern matching
 - `serde` / `serde_json` 1.0 — Serialization (JSON output)
 - `serde_yaml_ng` 0.10 — YAML loading (migrated from archived 0.9)
