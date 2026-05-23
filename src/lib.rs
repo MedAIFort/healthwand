@@ -1,5 +1,8 @@
 // Library root for healthwand. Move shared code here for integration testing.
 
+pub mod domain;
+pub mod error;
+
 pub mod file_source;
 pub mod phi_patterns;
 pub mod redactor;

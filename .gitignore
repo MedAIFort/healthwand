@@ -59,3 +59,8 @@ venv/
 # Agents and memory
 .claude/
 .harness-mem/
+.skill/
+.cursor/rules/skill-context.md
+.windsurf/rules/skill-context.md
+.claude/commands/
+Plans.md
