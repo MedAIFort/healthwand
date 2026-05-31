@@ -12,11 +12,12 @@ pub struct MatchSpan {
 }
 
 impl MatchSpan {
-    /// Create a MatchSpan from byte offsets, validating bounds and computing line/column.
+    /// Create a MatchSpan from byte offsets, validating bounds.
+    ///
+    /// **Placeholder implementation**: line is always 1, column is byte offset + 1.
+    /// Real line/column tracking (with newline counting and UTF-8 awareness) is deferred to M3.
     ///
     /// Validates that `start <= end` and both offsets are within text bounds.
-    /// For M2, line/column computation is a placeholder (always line 1, column is byte offset + 1).
-    /// Full line/column tracking will be implemented in a later milestone.
     pub fn from_offsets(text: &str, start: usize, end: usize) -> crate::error::Result<Self> {
         if start > end {
             return Err(crate::error::HealthwandError::ConfigError(format!(
