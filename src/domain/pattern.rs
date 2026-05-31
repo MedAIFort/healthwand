@@ -60,6 +60,7 @@ pub struct Pattern {
 
 impl Pattern {
     /// Validate that regex field matches detector_type.
+    /// Called automatically by `validated()` to enforce invariants.
     pub fn validate(&self) -> Result<(), String> {
         match self.detector_type {
             DetectorType::Regex | DetectorType::RegexWithContext if self.regex.is_none() => {
@@ -71,5 +72,126 @@ impl Pattern {
             _ => {}
         }
         Ok(())
+    }
+
+    /// Validate and return a Pattern, ensuring all invariants hold.
+    /// This is the canonical way to construct Patterns from external data (e.g., YAML).
+    /// The config loader (M2 PHASE 3) must use this method to ensure no invalid patterns reach the scanner.
+    pub fn validated(self) -> crate::error::Result<Self> {
+        self.validate()
+            .map_err(crate::error::HealthwandError::ConfigError)?;
+        Ok(self)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_validate_regex_pattern_without_regex_field_fails() {
+        let pattern = Pattern {
+            id: PatternId::new("test-id".to_string()).unwrap(),
+            name: "Test Pattern".to_string(),
+            detector_type: DetectorType::Regex,
+            category: crate::domain::Category::Medical,
+            default_severity: Severity::High,
+            score: Score::new(0.9).unwrap(),
+            regex: None,
+            context_words: vec![],
+            context_window: 10,
+            redaction_template: None,
+            redaction_strategy: None,
+        };
+
+        let result = pattern.validate();
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("requires a regex field"));
+    }
+
+    #[test]
+    fn test_validate_regex_with_context_pattern_without_regex_field_fails() {
+        let pattern = Pattern {
+            id: PatternId::new("test-id".to_string()).unwrap(),
+            name: "Test Pattern".to_string(),
+            detector_type: DetectorType::RegexWithContext,
+            category: crate::domain::Category::Personal,
+            default_severity: Severity::Medium,
+            score: Score::new(0.7).unwrap(),
+            regex: None,
+            context_words: vec!["context".to_string()],
+            context_window: 20,
+            redaction_template: None,
+            redaction_strategy: None,
+        };
+
+        let result = pattern.validate();
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("requires a regex field"));
+    }
+
+    #[test]
+    fn test_validate_dictionary_pattern_without_regex_succeeds() {
+        let pattern = Pattern {
+            id: PatternId::new("dict-pattern".to_string()).unwrap(),
+            name: "Dictionary Pattern".to_string(),
+            detector_type: DetectorType::Dictionary,
+            category: crate::domain::Category::Medical,
+            default_severity: Severity::High,
+            score: Score::new(0.8).unwrap(),
+            regex: None,
+            context_words: vec![],
+            context_window: 5,
+            redaction_template: None,
+            redaction_strategy: None,
+        };
+
+        assert!(pattern.validate().is_ok());
+    }
+
+    #[test]
+    fn test_validated_method_enforces_invariants() {
+        let pattern = Pattern {
+            id: PatternId::new("invalid".to_string()).unwrap(),
+            name: "Invalid Pattern".to_string(),
+            detector_type: DetectorType::Regex,
+            category: crate::domain::Category::Identifier,
+            default_severity: Severity::Critical,
+            score: Score::new(0.95).unwrap(),
+            regex: None,
+            context_words: vec![],
+            context_window: 10,
+            redaction_template: None,
+            redaction_strategy: None,
+        };
+
+        let result = pattern.validated();
+        assert!(result.is_err());
+        match result.unwrap_err() {
+            crate::error::HealthwandError::ConfigError(msg) => {
+                assert!(msg.contains("requires a regex field"));
+            }
+            _ => panic!("Expected ConfigError"),
+        }
+    }
+
+    #[test]
+    fn test_validated_method_succeeds_with_valid_pattern() {
+        let pattern = Pattern {
+            id: PatternId::new("valid".to_string()).unwrap(),
+            name: "Valid Pattern".to_string(),
+            detector_type: DetectorType::Dictionary,
+            category: crate::domain::Category::Medical,
+            default_severity: Severity::High,
+            score: Score::new(0.85).unwrap(),
+            regex: None,
+            context_words: vec![],
+            context_window: 10,
+            redaction_template: None,
+            redaction_strategy: None,
+        };
+
+        let result = pattern.validated();
+        assert!(result.is_ok());
     }
 }
