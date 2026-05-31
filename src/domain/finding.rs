@@ -5,7 +5,7 @@ use crate::domain::{MatchSpan, PatternId, RedactionStrategy, Score, Severity};
 /// **CRITICAL M2 CHANGE**: Renamed from `Detection` to `Finding`.
 /// The key architectural change is that `redaction_template` and `redaction_strategy`
 /// are now fields on Finding, so the Redactor doesn't need to look them up from PatternId.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct Finding {
     pub pattern_id: PatternId,
     pub span: MatchSpan,
@@ -23,7 +23,7 @@ pub struct Finding {
 ///
 /// Stub for M2: all findings get `None`.
 /// Full implementation in M3 when pattern catalogue is complete.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum UuPdpArticle {
     // TODO: Add actual article variants in M3
     Article1,

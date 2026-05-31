@@ -21,3 +21,8 @@ impl Score {
         self.0
     }
 }
+
+// Manually implement Eq for Score.
+// Score wraps f32 in range [0.0, 1.0] with validation at construction.
+// No NaN can exist, so total equality is safe.
+impl Eq for Score {}
