@@ -1,4 +1,4 @@
-use crate::domain::{MatchSpan, PatternId, Score, Severity};
+use crate::domain::{MatchSpan, PatternId, RedactionStrategy, Score, Severity};
 
 /// A single PHI finding: detected pattern + location + metadata.
 ///
@@ -16,7 +16,7 @@ pub struct Finding {
     pub context_matched: bool,
     pub uu_pdp_article: Option<UuPdpArticle>,
     pub redaction_template: Option<String>,
-    pub redaction_strategy: Option<String>,
+    pub redaction_strategy: Option<RedactionStrategy>,
 }
 
 /// UU PDP article classification (Indonesian regulatory).

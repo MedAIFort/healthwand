@@ -2,6 +2,18 @@ use crate::domain::{Category, Score, Severity};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 
+/// Strategy for how to redact matched PHI in output text.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum RedactionStrategy {
+    /// Replace entire match with repeated mask characters (e.g., XXX-XX-XXXX)
+    FullReplacement,
+    /// Replace part of match, keep suffix visible (e.g., ***-**-1234)
+    PartialMasking,
+    /// Replace with tagged placeholder (e.g., [REDACTED-SSN])
+    PlaceholderSubstitution,
+}
+
 /// Unique identifier for a pattern (e.g., "ssn", "mrn-generic").
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(transparent)]
@@ -61,7 +73,7 @@ pub struct Pattern {
     pub context_words: Vec<String>,
     pub context_window: usize,
     pub redaction_template: Option<String>,
-    pub redaction_strategy: Option<String>,
+    pub redaction_strategy: Option<RedactionStrategy>,
 }
 
 impl Pattern {

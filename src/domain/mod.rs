@@ -16,7 +16,7 @@ pub mod span;
 // Re-exports for convenience at crate::domain::* level
 pub use category::Category;
 pub use finding::{Finding, UuPdpArticle};
-pub use pattern::{DetectorType, Pattern, PatternId};
+pub use pattern::{DetectorType, Pattern, PatternId, RedactionStrategy};
 pub use score::Score;
 pub use severity::Severity;
 pub use span::MatchSpan;
