@@ -20,8 +20,13 @@ pub enum RedactionStrategy {
 pub struct PatternId(String);
 
 impl PatternId {
-    /// Create a new PatternId, validating no whitespace or quotes.
+    /// Create a new PatternId, validating no empty string, whitespace, or quotes.
     pub fn new(s: String) -> crate::error::Result<Self> {
+        if s.is_empty() {
+            return Err(crate::error::HealthwandError::ConfigError(
+                "PatternId cannot be empty".to_string(),
+            ));
+        }
         if s.contains(char::is_whitespace) {
             return Err(crate::error::HealthwandError::ConfigError(format!(
                 "PatternId cannot contain whitespace: {}",
@@ -220,5 +225,17 @@ mod tests {
 
         let result = pattern.validated();
         assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_pattern_id_rejects_empty_string() {
+        let result = PatternId::new(String::new());
+        assert!(result.is_err());
+        match result.unwrap_err() {
+            crate::error::HealthwandError::ConfigError(msg) => {
+                assert_eq!(msg, "PatternId cannot be empty");
+            }
+            _ => panic!("Expected ConfigError"),
+        }
     }
 }
