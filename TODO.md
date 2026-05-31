@@ -241,9 +241,23 @@ anyhow = "1.0"
 
 ---
 
-## M2 PHASE 2 — Domain Layer (Zero I/O-Forest Imports)
+## M2 PHASE 2 — Detector Trait & Implementations
 
-### M2.1 Domain module
+- [ ] **T-0220** `[PHASE 2]` Implement `src/detect/mod.rs`:
+  - [ ] T-0220.1 `pub trait Detector: Send + Sync { fn detector_type(&self) -> DetectorType; fn scan(&self, text: &str, pattern: &Pattern) -> Vec<Finding>; fn handles(&self, pattern: &Pattern) -> bool; }`
+  - [ ] T-0220.2 Re-exports: `pub use regex_detector::RegexDetector`, etc.
+- [ ] **T-0221** `[PHASE 2]` Implement `src/detect/regex_detector.rs`:
+  - [ ] T-0221.1 `pub struct RegexDetector`
+  - [ ] T-0221.2 `impl Detector` — iterates pattern's regex via `find_iter()`, constructs `Finding`s, handles `Regex` and `RegexWithContext`
+  - [ ] T-0221.3 `extract_context(text, start, end, window) -> String` helper migrated from old `scanner.rs`
+- [ ] **T-0222** `[PHASE 2]` Implement `src/detect/dictionary.rs`:
+  - [ ] T-0222.1 `pub struct DictionaryDetector { automaton: aho_corasick::AhoCorasick, terms: Vec<String> }` with `pub fn new(terms: Vec<String>)`
+  - [ ] T-0222.2 `impl Detector` — stub implementation using `automaton.find_iter()`
+  - [ ] T-0222.3 No Dictionary patterns in current YAML; this compiles but is unused in M2
+- [ ] **T-0223** `[PHASE 2]` Implement `src/detect/nlp_stub.rs`:
+  - [ ] T-0223.1 `pub struct NlpStubDetector`
+  - [ ] T-0223.2 `impl Detector` — `scan()` emits `tracing::warn!` and returns empty `Vec<Finding>`
+- [ ] **T-0166** Verify Phase 2: `cargo check --lib` passes.
 
 ---
 
@@ -266,142 +280,122 @@ anyhow = "1.0"
 
 ---
 
-## M2 PHASE 4 — Detector Trait & Implementations
+## M2 PHASE 4 — Scanner Orchestrator (Hub of Refactor)
 
-- [ ] **T-0220** `[PHASE 4]` Implement `src/detect/mod.rs`:
-  - [ ] T-0220.1 `pub trait Detector: Send + Sync { fn detector_type(&self) -> DetectorType; fn scan(&self, text: &str, pattern: &Pattern) -> Vec<Finding>; fn handles(&self, pattern: &Pattern) -> bool; }`
-  - [ ] T-0220.2 Re-exports: `pub use regex_detector::RegexDetector`, etc.
-- [ ] **T-0221** `[PHASE 4]` Implement `src/detect/regex_detector.rs`:
-  - [ ] T-0221.1 `pub struct RegexDetector`
-  - [ ] T-0221.2 `impl Detector` — iterates pattern's regex via `find_iter()`, constructs `Finding`s, handles `Regex` and `RegexWithContext`
-  - [ ] T-0221.3 `extract_context(text, start, end, window) -> String` helper migrated from old `scanner.rs`
-- [ ] **T-0222** `[PHASE 4]` Implement `src/detect/dictionary.rs`:
-  - [ ] T-0222.1 `pub struct DictionaryDetector { automaton: aho_corasick::AhoCorasick, terms: Vec<String> }` with `pub fn new(terms: Vec<String>)`
-  - [ ] T-0222.2 `impl Detector` — stub implementation using `automaton.find_iter()`
-  - [ ] T-0222.3 No Dictionary patterns in current YAML; this compiles but is unused in M2
-- [ ] **T-0223** `[PHASE 4]` Implement `src/detect/nlp_stub.rs`:
-  - [ ] T-0223.1 `pub struct NlpStubDetector`
-  - [ ] T-0223.2 `impl Detector` — `scan()` emits `tracing::warn!` and returns empty `Vec<Finding>`
-- [ ] **T-0166** Verify Phase 4: `cargo check --lib` passes.
-
----
-
-## M2 PHASE 5 — Scanner Orchestrator (Hub of Refactor)
-
-- [ ] **T-0231** `[PHASE 5]` Implement `src/scanner/report.rs`:
+- [ ] **T-0231** `[PHASE 4]` Implement `src/scanner/report.rs`:
   - [ ] T-0231.1 `pub struct ScanReport { findings: Vec<Finding>, files_scanned: usize, errors: Vec<String> }`
   - [ ] T-0231.2 `pub fn findings_at_or_above(&self, min: Severity) -> impl Iterator<Item = &Finding>`
-- [ ] **T-0230** `[PHASE 5]` Implement `src/scanner/mod.rs` — **HUB of the refactor, wires everything**:
+- [ ] **T-0230** `[PHASE 4]` Implement `src/scanner/mod.rs` — **HUB of the refactor, wires everything**:
   - [ ] T-0230.1 `pub struct ScanConfig { context_window: usize, min_severity: Option<Severity> }`
   - [ ] T-0230.2 `pub struct Scanner { catalogue, detectors, config }` with `pub fn builder() -> ScannerBuilder`
   - [ ] T-0230.3 `pub fn scan_text(&self, text: &str) -> ScanReport` — iterate catalogue, route to appropriate detector, accumulate findings
   - [ ] T-0230.4 `pub fn scan_path(&self, path: &Path) -> Result<ScanReport>` — read file, call `scan_text`, return report
   - [ ] T-0230.5 `pub struct ScannerBuilder` with fluent API: `.with_catalogue()`, `.with_default_catalogue()`, `.with_detector()`, `.with_min_severity()`, `.with_context_window()`, `.build() -> Result<Scanner>`
-- [ ] **T-0232** `[PHASE 5]` Implement `src/scanner/redact.rs` — Redactor moves here:
+- [ ] **T-0232** `[PHASE 4]` Implement `src/scanner/redact.rs` — Redactor moves here:
   - [ ] T-0232.1 Migrate `Redactor` + `RedactionStrategy` from old `redactor.rs`
   - [ ] T-0232.2 **KEY CHANGE**: `Redactor::redact(text: &str, findings: &[Finding]) -> String` uses `finding.redaction_template` instead of matching on `PHIType`
   - [ ] T-0232.3 All 10 redactor tests pass (update assertions for `PatternId` strings instead of enum names)
-- [ ] **T-0167** Verify Phase 5: `cargo test --lib scanner::` passes (2 old scanner tests + 10 redactor tests now in scanner/redact.rs).
+- [ ] **T-0167** Verify Phase 4: `cargo test --lib scanner::` passes (2 old scanner tests + 10 redactor tests now in scanner/redact.rs).
 
 ---
 
-## M2 PHASE 6 — I/O Adapters
+## M2 PHASE 5 — I/O Adapters
 
-- [ ] **T-0250** `[PHASE 6]` Implement `src/io/walker.rs`:
+- [ ] **T-0250** `[PHASE 5]` Implement `src/io/walker.rs`:
   - [ ] T-0250.1 `pub struct WalkConfig { root: PathBuf, allowed_extensions: Vec<String>, max_file_size_bytes: u64 }`
   - [ ] T-0250.2 `pub fn walk(config: &WalkConfig) -> impl Iterator<Item = PathBuf>` using `ignore` crate
   - [ ] T-0250.3 Default extensions: `txt`, `md`, `csv`, `json`, `yaml`, `yml`
   - [ ] T-0250.4 All 3 file_source walker tests pass
-- [ ] **T-0251** `[PHASE 6]` Implement `src/io/reader.rs`:
+- [ ] **T-0251** `[PHASE 5]` Implement `src/io/reader.rs`:
   - [ ] T-0251.1 `pub fn read_to_string(path: &Path) -> Result<String>` with UTF-8 validation
   - [ ] T-0251.2 Max file size check (default 50MB); warn and skip if exceeded
   - [ ] T-0251.3 All 3 file_source reader tests pass
-- [ ] **T-0252** `[PHASE 6]` Implement `src/io/mod.rs`:
+- [ ] **T-0252** `[PHASE 5]` Implement `src/io/mod.rs`:
   - [ ] T-0252.1 `pub mod walker`, `pub mod reader`
-- [ ] **T-0168** Verify Phase 6: `cargo test --lib io::` passes (6 old file_source tests distributed to walker + reader).
+- [ ] **T-0168** Verify Phase 5: `cargo test --lib io::` passes (6 old file_source tests distributed to walker + reader).
 
 ---
 
-## M2 PHASE 7 — Output Formatters
+## M2 PHASE 6 — Output Formatters
 
-- [ ] **T-0260** `[PHASE 7]` Implement `src/format/mod.rs`:
+- [ ] **T-0260** `[PHASE 6]` Implement `src/format/mod.rs`:
   - [ ] T-0260.1 `pub trait Formatter { fn format(&self, report: &ScanReport, writer: &mut dyn Write) -> Result<()>; }`
   - [ ] T-0260.2 `pub enum Format { Json, Text, Sarif }`
   - [ ] T-0260.3 Re-exports: `pub use json_formatter::JsonFormatter`, etc.
-- [ ] **T-0261** `[PHASE 7]` Implement `src/format/json.rs`:
+- [ ] **T-0261** `[PHASE 6]` Implement `src/format/json.rs`:
   - [ ] T-0261.1 `pub struct JsonFormatter`
   - [ ] T-0261.2 `impl Formatter` — serialize `report.findings` as JSON array of `Finding`s
-- [ ] **T-0262** `[PHASE 7]` Implement `src/format/sarif.rs` (minimal stub for M2):
+- [ ] **T-0262** `[PHASE 6]` Implement `src/format/sarif.rs` (minimal stub for M2):
   - [ ] T-0262.1 `pub struct SarifFormatter`
   - [ ] T-0262.2 `impl Formatter` — outputs minimal valid SARIF 2.1.0 envelope with empty results array
   - [ ] T-0262.3 Full implementation deferred to M4/M5
-- [ ] **T-0263** `[PHASE 7]` Implement `src/format/text.rs`:
+- [ ] **T-0263** `[PHASE 6]` Implement `src/format/text.rs`:
   - [ ] T-0263.1 `pub struct TextFormatter`
   - [ ] T-0263.2 `impl Formatter` — human-readable output, uses `colored` crate for severity colors
   - [ ] T-0263.3 Respect `NO_COLOR` env var
-- [ ] **T-0169** Verify Phase 7: `cargo check --lib format::` passes.
+- [ ] **T-0169** Verify Phase 6: `cargo check --lib format::` passes.
 
 ---
 
-## M2 PHASE 8 — Public API Surface
+## M2 PHASE 7 — Public API Surface
 
-- [ ] **T-0270** `[PHASE 8]` Rewrite `src/lib.rs`:
+- [ ] **T-0270** `[PHASE 7]` Rewrite `src/lib.rs`:
   - [ ] T-0270.1 Module declarations: `pub mod domain`, `pub mod detect`, `pub mod scanner`, `pub mod config`, `pub mod io`, `pub mod format`, `pub mod error`
   - [ ] T-0270.2 Re-exports per ARCH §2.1: `pub use domain::{...}`, `pub use scanner::{Scanner, ScanConfig, ScanReport}`, etc.
   - [ ] T-0270.3 Remove old module declarations: `file_source`, `phi_patterns`, `redactor`, `results` (redactor is now in scanner/, results becomes ScanReport)
-- [ ] **T-0271** `[PHASE 8]` Document public API:
+- [ ] **T-0271** `[PHASE 7]` Document public API:
   - [ ] T-0271.1 Add `#![deny(missing_docs)]` to lib.rs
   - [ ] T-0271.2 Document every public type, struct, enum, function with `///` doc comments
-- [ ] **T-0272** `[PHASE 8]` Verify public API:
+- [ ] **T-0272** `[PHASE 7]` Verify public API:
   - [ ] T-0272.1 Run `cargo check --lib` — no missing docs warnings
   - [ ] T-0272.2 (Optional) Run `cargo public-api` to snapshot the stable API
-- [ ] **T-0170** Verify Phase 8: `cargo check --lib` passes with no missing_docs warnings.
+- [ ] **T-0170** Verify Phase 7: `cargo check --lib` passes with no missing_docs warnings.
 
 ---
 
-## M2 PHASE 9 — Update Binary Entry Point
+## M2 PHASE 8 — Update Binary Entry Point
 
-- [ ] **T-0273** `[PHASE 9]` Rewrite `src/bin/healthwand.rs`:
+- [ ] **T-0273** `[PHASE 8]` Rewrite `src/bin/healthwand.rs`:
   - [ ] T-0273.1 Replace imports: `use healthwand::{scanner, config, format, io, error}` (remove old paths)
   - [ ] T-0273.2 Replace `AppError` (thiserror) with `anyhow::Result<()>` per ARCH §8.1
   - [ ] T-0273.3 Rewrite `main()` pipeline: CLI parse → `config::load_default()` → `ScannerBuilder` → `io::walker::walk()` → loop files → `scanner.scan_path()` → `JsonFormatter`/`TextFormatter`
   - [ ] T-0273.4 Hardcoded `--redact` flag wired into `ScannerBuilder` config or post-process via `Redactor` from `scanner/redact.rs`
   - [ ] T-0273.5 CLI test still passes (`test_cli_parsing`)
-- [ ] **T-0171** Verify Phase 9: `cargo build --bin healthwand` succeeds; binary compiles.
+- [ ] **T-0171** Verify Phase 8: `cargo build --bin healthwand` succeeds; binary compiles.
 
 ---
 
-## M2 PHASE 10 — Update Integration Tests
+## M2 PHASE 9 — Update Integration Tests
 
-- [ ] **T-0280** `[PHASE 10]` Update `tests/integration_pipeline.rs` — **CRITICAL: Path A migration (update imports, logic preserved)**:
+- [ ] **T-0280** `[PHASE 9]` Update `tests/integration_pipeline.rs` — **CRITICAL: Path A migration (update imports, logic preserved)**:
   - [ ] T-0280.1 Replace `use healthwand::phi_patterns::PHIType` with `use healthwand::domain::PatternId`
   - [ ] T-0280.2 Rewrite `test_full_pipeline_json_output`: use `Scanner::builder().with_default_catalogue().build().unwrap()`, call `scanner.scan_text()`, assert JSON contains pattern IDs (`"ssn"` not `"SSN"`)
   - [ ] T-0280.3 Rewrite `test_pipeline_summary`: use `ScanReport`, assert `findings.iter().filter(|f| f.pattern_id.as_str() == "ssn").count() == 2`
   - [ ] T-0280.4 **CRITICAL**: All 28 tests pass: `cargo test` ≥28 passing
-- [ ] **T-0281** `[PHASE 10]` Final code quality gates:
+- [ ] **T-0281** `[PHASE 9]` Final code quality gates:
   - [ ] T-0281.1 `cargo clippy --all-targets -- -D warnings` — zero warnings
   - [ ] T-0281.2 `cargo fmt -- --check` — all code formatted
   - [ ] T-0281.3 `cargo msrv verify` — confirms MSRV still 1.87.0
-- [ ] **T-0172** Verify Phase 10: `cargo test` ≥28 passing, clippy clean, fmt clean.
+- [ ] **T-0172** Verify Phase 9: `cargo test` ≥28 passing, clippy clean, fmt clean.
 
 ---
 
-## M2 PHASE 11 — Cleanup & Finalization
+## M2 PHASE 10 — Cleanup & Finalization
 
-- [ ] **T-0282** `[PHASE 11]` Delete old modules (now redundant):
+- [ ] **T-0282** `[PHASE 10]` Delete old modules (now redundant):
   - [ ] T-0282.1 Delete `src/phi_patterns.rs` (all code migrated to domain/ + config/)
   - [ ] T-0282.2 Delete old `src/scanner.rs` (replaced by scanner/mod.rs)
   - [ ] T-0282.3 Delete old `src/redactor.rs` (moved to scanner/redact.rs)
   - [ ] T-0282.4 Delete old `src/results.rs` (replaced by ScanReport in scanner/report.rs)
   - [ ] T-0282.5 Delete old `src/file_source.rs` (replaced by io/walker.rs + io/reader.rs)
-- [ ] **T-0283** `[PHASE 11]` Final verification:
+- [ ] **T-0283** `[PHASE 10]` Final verification:
   - [ ] T-0283.1 `cargo test` — all tests still pass after cleanup
   - [ ] T-0283.2 `cargo build --release` — clean release build
   - [ ] T-0283.3 `cargo clippy`, `cargo fmt` — all green
-- [ ] **T-0284** `[PHASE 11]` Commit & tag:
+- [ ] **T-0284** `[PHASE 10]` Commit & tag:
   - [ ] T-0284.1 Create single squash commit: "M2 complete: hexagonal refactor to v0.3.0"
   - [ ] T-0284.2 Tag `v0.3.0` on that commit
-- [ ] **T-0173** Verify Phase 11: `cargo test` ≥28 passing, tag v0.3.0 created, all old modules deleted.
+- [ ] **T-0173** Verify Phase 10: `cargo test` ≥28 passing, tag v0.3.0 created, all old modules deleted.
 
 ---
 
