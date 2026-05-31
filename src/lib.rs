@@ -9,9 +9,11 @@ pub mod redactor;
 pub mod results;
 pub mod scanner;
 
+pub use domain::{
+    Category, DetectorType, Finding, MatchSpan, Pattern, PatternId, RedactionStrategy, Score,
+    Severity, UuPdpArticle,
+};
+pub use error::{HealthwandError, Result};
 pub use file_source::{FileSource, LocalFileSource};
 pub use redactor::*;
 pub use results::{DetectionResult, OutputBundle, ResultsSummary};
-
-// Re-export main logic if needed (move from main.rs if used by tests)
-// pub use crate::main_logic;
