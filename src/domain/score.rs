@@ -5,11 +5,14 @@ pub struct Score(f32);
 
 impl Score {
     /// Create a new Score, validating that the value is in [0.0, 1.0].
-    pub fn new(value: f32) -> Result<Self, String> {
+    pub fn new(value: f32) -> crate::error::Result<Self> {
         if (0.0..=1.0).contains(&value) {
             Ok(Score(value))
         } else {
-            Err(format!("Score must be in [0.0, 1.0], got {}", value))
+            Err(crate::error::HealthwandError::ConfigError(format!(
+                "Score must be in [0.0, 1.0], got {}",
+                value
+            )))
         }
     }
 

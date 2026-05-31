@@ -9,12 +9,18 @@ pub struct PatternId(String);
 
 impl PatternId {
     /// Create a new PatternId, validating no whitespace or quotes.
-    pub fn new(s: String) -> Result<Self, String> {
+    pub fn new(s: String) -> crate::error::Result<Self> {
         if s.contains(char::is_whitespace) {
-            return Err(format!("PatternId cannot contain whitespace: {}", s));
+            return Err(crate::error::HealthwandError::ConfigError(format!(
+                "PatternId cannot contain whitespace: {}",
+                s
+            )));
         }
         if s.contains('"') || s.contains('\'') {
-            return Err(format!("PatternId cannot contain quotes: {}", s));
+            return Err(crate::error::HealthwandError::ConfigError(format!(
+                "PatternId cannot contain quotes: {}",
+                s
+            )));
         }
         Ok(PatternId(s))
     }
@@ -61,13 +67,13 @@ pub struct Pattern {
 impl Pattern {
     /// Validate that regex field matches detector_type.
     /// Called automatically by `validated()` to enforce invariants.
-    pub fn validate(&self) -> Result<(), String> {
+    pub fn validate(&self) -> crate::error::Result<()> {
         match self.detector_type {
             DetectorType::Regex | DetectorType::RegexWithContext if self.regex.is_none() => {
-                return Err(format!(
+                return Err(crate::error::HealthwandError::ConfigError(format!(
                     "Pattern {} ({:?}) requires a regex field",
                     self.id, self.detector_type
-                ));
+                )));
             }
             _ => {}
         }
@@ -78,8 +84,7 @@ impl Pattern {
     /// This is the canonical way to construct Patterns from external data (e.g., YAML).
     /// The config loader (M2 PHASE 3) must use this method to ensure no invalid patterns reach the scanner.
     pub fn validated(self) -> crate::error::Result<Self> {
-        self.validate()
-            .map_err(crate::error::HealthwandError::ConfigError)?;
+        self.validate()?;
         Ok(self)
     }
 }
@@ -106,7 +111,12 @@ mod tests {
 
         let result = pattern.validate();
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("requires a regex field"));
+        match result.unwrap_err() {
+            crate::error::HealthwandError::ConfigError(msg) => {
+                assert!(msg.contains("requires a regex field"));
+            }
+            _ => panic!("Expected ConfigError"),
+        }
     }
 
     #[test]
@@ -127,7 +137,12 @@ mod tests {
 
         let result = pattern.validate();
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("requires a regex field"));
+        match result.unwrap_err() {
+            crate::error::HealthwandError::ConfigError(msg) => {
+                assert!(msg.contains("requires a regex field"));
+            }
+            _ => panic!("Expected ConfigError"),
+        }
     }
 
     #[test]
